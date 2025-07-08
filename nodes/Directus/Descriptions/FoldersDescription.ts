@@ -2,11 +2,12 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export const foldersOperations = [
+export const foldersOperations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
 		type: 'options',
+		noDataExpression: true,
 		displayOptions: {
 			show: {
 				resource: [
@@ -18,50 +19,57 @@ export const foldersOperations = [
 			{
 				name: 'Create',
 				value: 'create',
-				description: 'Create a new folder.',
+				description: 'Create a new folder',
+				action: 'Create a folders',
 			},
 			{
 				name: 'Create Multiple',
 				value: 'createMultiple',
 				description: 'Create Multiple Folders',
+				action: 'Create Multiple a folders',
 			},
 			{
 				name: 'Delete',
 				value: 'delete',
 				description: 'Delete an existing folder',
+				action: 'Delete a folders',
 			},
 			{
 				name: 'Delete Multiple',
 				value: 'deleteMultiple',
 				description: 'Delete Multiple Folders',
+				action: 'Delete Multiple a folders',
 			},
 			{
 				name: 'Get',
 				value: 'get',
-				description: 'Retrieve a single folder by unique identifier.',
+				description: 'Retrieve a single folder by unique identifier',
+				action: 'Get a folders',
 			},
 			{
 				name: 'List',
 				value: 'list',
-				description: 'List the folders.',
+				description: 'List the folders',
+				action: 'List a folders',
 			},
 			{
 				name: 'Update',
 				value: 'update',
 				description: 'Update an existing folder',
+				action: 'Update a folders',
 			},
 			{
 				name: 'Update Multiple',
 				value: 'updateMultiple',
 				description: 'Update Multiple Folders',
+				action: 'Update Multiple a folders',
 			},
 		],
 		default: 'list',
-		description: 'The operation to perform.',
 	},
-] as INodeProperties[];
+];
 
-export const foldersFields = [
+export const foldersFields: INodeProperties[] = [
 	{
 		displayName: 'Name',
 		name: 'name',
@@ -82,8 +90,8 @@ export const foldersFields = [
 			},
 		},
 		placeholder: 'Nature',
-		default: null,
-		description: 'Name of the folder.\n',
+		default: '',
+		description: 'Name of the folder.',
 		required: true,
 	},
 	{
@@ -102,7 +110,7 @@ export const foldersFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
 		required: true,
 	},
 	{
@@ -127,7 +135,7 @@ export const foldersFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Body parameters as JSON or RAW.',
+		description: 'Body parameters as JSON or RAW',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -156,9 +164,8 @@ export const foldersFields = [
 				name: 'parent',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Unique identifier of the parent folder. This allows for nested folders.\n',
-				required: false,
+				default: '',
+				description: 'Unique identifier of the parent folder. This allows for nested folders.',
 			},
 		],
 	},
@@ -177,8 +184,8 @@ export const foldersFields = [
 			},
 		},
 		placeholder: '0fca80c4-d61c-4404-9fd7-6ba86b64154d',
-		default: null,
-		description: 'Unique ID of the file object.\n',
+		default: '',
+		description: 'Unique ID of the file object.',
 		required: true,
 	},
 	{
@@ -197,7 +204,7 @@ export const foldersFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
 		required: true,
 	},
 	{
@@ -222,7 +229,7 @@ export const foldersFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Body parameters as JSON or RAW.',
+		description: 'Body parameters as JSON or RAW',
 	},
 	{
 		displayName: 'Update Fields',
@@ -251,18 +258,16 @@ export const foldersFields = [
 				name: 'name',
 				type: 'string',
 				placeholder: 'Cities',
-				default: null,
-				description: 'Name of the folder. Can\'t be null or empty.\n',
-				required: false,
+				default: '',
+				description: 'Name of the folder. Can\'t be null or empty.',
 			},
 			{
 				displayName: 'Parent',
 				name: 'parent',
 				type: 'string',
 				placeholder: 'd97c2e0e-293d-4eb5-9e1c-27d3460ad29d',
-				default: null,
-				description: 'Unique identifier of the parent folder. This allows for nested folders.\n',
-				required: false,
+				default: '',
+				description: 'Unique identifier of the parent folder. This allows for nested folders.',
 			},
 		],
 	},
@@ -286,7 +291,7 @@ export const foldersFields = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit.',
+		description: 'If all results should be returned or only up to a given limit',
 		required: true,
 	},
 	{
@@ -313,11 +318,10 @@ export const foldersFields = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.\n',
+		description: 'A limit on the number of objects that are returned.',
 		required: true,
 		typeOptions: {
 			minValue: 1,
-			maxValue: 100,
 		},
 	},
 	{
@@ -325,7 +329,7 @@ export const foldersFields = [
 		name: 'splitIntoItems',
 		type: 'boolean',
 		default: false,
-		description: 'Outputs each element of an array as own item.',
+		description: 'Outputs each element of an array as own item',
 		required: true,
 		displayOptions: {
 			show: {
@@ -354,7 +358,7 @@ export const foldersFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
 		required: true,
 	},
 	{
@@ -379,7 +383,7 @@ export const foldersFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Query parameters as JSON (flat object).',
+		description: 'Query parameters as JSON (flat object)',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -408,9 +412,8 @@ export const foldersFields = [
 				name: 'aggregate',
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
-				default: '',
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.\n',
-				required: false,
+				default: {},
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -469,11 +472,11 @@ export const foldersFields = [
 								description: 'Aggregation Function',
 							},
 							{
-								displayName: 'Field',
+								displayName: 'Field Name or ID',
 								name: 'value',
 								type: 'options',
 								default: '',
-								description: 'Field to apply aggregation on',
+								description: 'Field to apply aggregation on. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 								typeOptions: {
 									loadOptionsMethod: 'getFieldsInCollection',
 								},
@@ -487,7 +490,7 @@ export const foldersFields = [
 				name: 'binaryPropertyName',
 				type: 'string',
 				default: 'data',
-				description: 'Name of the binary property to download the data to.',
+				description: 'Name of the binary property to download the data to',
 			},
 			{
 				displayName: 'Deep (JSON)',
@@ -495,8 +498,7 @@ export const foldersFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.\n',
-				required: false,
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -507,23 +509,20 @@ export const foldersFields = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of json, csv, xml.\n',
-				required: false,
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
+',
 				options: [
 					{
 						name: 'CSV',
 						value: 'csv',
-						description: 'CSV',
 					},
 					{
 						name: 'JSON',
 						value: 'json',
-						description: 'JSON',
 					},
 					{
 						name: 'XML',
 						value: 'xml',
-						description: 'XML',
 					},
 				],
 			},
@@ -532,9 +531,8 @@ export const foldersFields = [
 				name: 'fields',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Control what fields are being returned in the object.\n',
-				required: false,
+				default: '',
+				description: 'Control what fields are being returned in the object.',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -549,8 +547,7 @@ export const foldersFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.\n',
-				required: false,
+				description: 'Select items in collection by given conditions.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -560,18 +557,16 @@ export const foldersFields = [
 				name: 'groupBy',
 				type: 'string',
 				placeholder: 'author,year(publish_date)',
-				default: null,
-				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".\n',
-				required: false,
+				default: '',
+				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".',
 			},
 			{
 				displayName: 'Meta',
 				name: 'meta',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'What metadata to return in the response.\n',
-				required: false,
+				default: '',
+				description: 'What metadata to return in the response.',
 			},
 			{
 				displayName: 'Offset',
@@ -579,26 +574,23 @@ export const foldersFields = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.\n',
-				required: false,
+				description: 'How many items to skip when fetching data.',
 			},
 			{
 				displayName: 'Search',
 				name: 'search',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Filter by items that contain the given search query in one of their fields.\n',
-				required: false,
+				default: '',
+				description: 'Filter by items that contain the given search query in one of their fields.',
 			},
 			{
 				displayName: 'Sort',
 				name: 'sort',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'How to sort the returned items. \`sort\` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (\` - \`) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a \` ? \` to sort randomly.\n',
-				required: false,
+				default: '',
+				description: 'How to sort the returned items. `sort` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (` - `) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a ` ? ` to sort randomly.',
 			},
 		],
 	},
@@ -617,8 +609,8 @@ export const foldersFields = [
 			},
 		},
 		placeholder: '0fca80c4-d61c-4404-9fd7-6ba86b64154d',
-		default: null,
-		description: 'Unique ID of the file object.\n',
+		default: '',
+		description: 'Unique ID of the file object.',
 		required: true,
 	},
 	{
@@ -637,7 +629,7 @@ export const foldersFields = [
 		},
 		placeholder: '["d97c2e0e-293d-4eb5-9e1c-27d3460ad29d", "fc02d733-95b8-4e27-bd4b-08a32cbe4e66"]',
 		default: null,
-		description: 'An array of folder primary keys.\n',
+		description: 'An array of folder primary keys.',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -659,7 +651,7 @@ export const foldersFields = [
 		},
 		placeholder: '{\n	"keys": ["fac21847-d5ce-4e4b-a288-9abafbdfbc87", "a5bdb793-dd85-4ac9-882a-b42862092983"],\n	"data": {\n		"parent": "d97c2e0e-293d-4eb5-9e1c-27d3460ad29d"\n	}\n}',
 		default: null,
-		description: 'Any of [the folder object](https://docs.directus.io/reference/api/system/folders/#the-folder-object)\'s properties.\n',
+		description: 'Any of [the folder object](https://docs.directus.io/reference/api/system/folders/#the-folder-object)\'s properties.',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -680,8 +672,8 @@ export const foldersFields = [
 			},
 		},
 		placeholder: '0fca80c4-d61c-4404-9fd7-6ba86b64154d',
-		default: null,
-		description: 'Unique ID of the file object.\n',
+		default: '',
+		description: 'Unique ID of the file object.',
 		required: true,
 	},
 	{
@@ -700,11 +692,11 @@ export const foldersFields = [
 		},
 		placeholder: '[\n	{\n		"name": "Nature",\n                 "parent":"0fca80c4-d61c-4404-9fd7-6ba86b64154d"\n	},\n	{\n		"name": "Cities"\n	}\n]',
 		default: null,
-		description: 'An array of partial [folder objects](https://docs.directus.io/reference/api/system/folders/#the-folder-object). `name` is required.\n',
+		description: 'An array of partial [folder objects](https://docs.directus.io/reference/api/system/folders/#the-folder-object). `name` is required.',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
 		},
 	},
-] as INodeProperties[];
+];
 

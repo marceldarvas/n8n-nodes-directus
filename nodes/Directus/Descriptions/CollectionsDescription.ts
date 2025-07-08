@@ -2,11 +2,12 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export const collectionsOperations = [
+export const collectionsOperations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
 		type: 'options',
+		noDataExpression: true,
 		displayOptions: {
 			show: {
 				resource: [
@@ -18,35 +19,39 @@ export const collectionsOperations = [
 			{
 				name: 'Create',
 				value: 'create',
-				description: 'Create a new collection in Directus.',
+				description: 'Create a new collection in Directus',
+				action: 'Create a collections',
 			},
 			{
 				name: 'Delete',
 				value: 'delete',
 				description: 'Delete an existing collection. Warning: This will delete the whole collection, including the items within. Proceed with caution.',
+				action: 'Delete a collections',
 			},
 			{
 				name: 'Get',
 				value: 'get',
-				description: 'Retrieves the details of a single collection.',
+				description: 'Retrieves the details of a single collection',
+				action: 'Get a collections',
 			},
 			{
 				name: 'List',
 				value: 'list',
-				description: 'Returns a list of the collections available in the project.',
+				description: 'Returns a list of the collections available in the project',
+				action: 'List a collections',
 			},
 			{
 				name: 'Update',
 				value: 'update',
-				description: 'Update an existing collection.',
+				description: 'Update an existing collection',
+				action: 'Update a collections',
 			},
 		],
 		default: 'list',
-		description: 'The operation to perform.',
 	},
-] as INodeProperties[];
+];
 
-export const collectionsFields = [
+export const collectionsFields: INodeProperties[] = [
 	{
 		displayName: 'Collection',
 		name: 'collection',
@@ -67,8 +72,8 @@ export const collectionsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'Unique name of the collection.\n',
+		default: '',
+		description: 'Unique name of the collection',
 		required: true,
 	},
 	{
@@ -87,7 +92,7 @@ export const collectionsFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -112,7 +117,7 @@ export const collectionsFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Body parameters as JSON or RAW.',
+		description: 'Body parameters as JSON or RAW',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -141,36 +146,32 @@ export const collectionsFields = [
 				name: 'achiveField',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'What field holds the archive value.\n',
-				required: false,
+				default: '',
+				description: 'What field holds the archive value',
 			},
 			{
 				displayName: 'Archive App Filter',
 				name: 'archiveAppFilter',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'What value to use for "archived" items.\n',
-				required: false,
+				default: '',
+				description: 'What value to use for "archived" items',
 			},
 			{
 				displayName: 'Archive Value',
 				name: 'archiveValue',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'What value to use to "unarchive" items.\n',
-				required: false,
+				default: '',
+				description: 'What value to use to "unarchive" items',
 			},
 			{
 				displayName: 'Display Template',
 				name: 'displayTemplate',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Text representation of how items from this collection are shown across the system.\n',
-				required: false,
+				default: '',
+				description: 'Text representation of how items from this collection are shown across the system',
 			},
 			{
 				displayName: 'Fields (JSON)',
@@ -178,8 +179,7 @@ export const collectionsFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'You are able to provide an array of `fields` to be created during the creation of the collection. See the [fields object](https://docs.directus.io/reference/api/system/fields/#the-fields-object) for more information on what properties are available in a field.\n',
-				required: false,
+				description: 'You are able to provide an array of `fields` to be created during the creation of the collection. See the [fields object](https://docs.directus.io/reference/api/system/fields/#the-fields-object) for more information on what properties are available in a field.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -190,26 +190,23 @@ export const collectionsFields = [
 				type: 'boolean',
 				placeholder: 'false',
 				default: false,
-				description: 'Whether or not the collection is hidden from the navigation in the admin app.\n',
-				required: false,
+				description: 'Whether or not the collection is hidden from the navigation in the admin app',
 			},
 			{
 				displayName: 'Icon',
 				name: 'icon',
 				type: 'string',
 				placeholder: 'people',
-				default: null,
-				description: 'Name of a Google Material Design Icon that\'s assigned to this collection.\n',
-				required: false,
+				default: '',
+				description: 'Name of a Google Material Design Icon that\'s assigned to this collection',
 			},
 			{
 				displayName: 'Note',
 				name: 'note',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'A note describing the collection.\n',
-				required: false,
+				default: '',
+				description: 'A note describing the collection',
 			},
 			{
 				displayName: 'Singleton',
@@ -217,35 +214,31 @@ export const collectionsFields = [
 				type: 'boolean',
 				placeholder: 'false',
 				default: false,
-				description: 'Whether or not the collection is treated as a single object.\n',
-				required: false,
+				description: 'Whether or not the collection is treated as a single object',
 			},
 			{
 				displayName: 'Sort Field',
 				name: 'sortField',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'The sort field in the collection.\n',
-				required: false,
+				default: '',
+				description: 'The sort field in the collection',
 			},
 			{
 				displayName: 'Translation',
 				name: 'translation',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Key value pairs of how to show this collection\'s name in different languages in the admin app.\n',
-				required: false,
+				default: '',
+				description: 'Key value pairs of how to show this collection\'s name in different languages in the admin app',
 			},
 			{
 				displayName: 'Unarchive Value',
 				name: 'unarchiveValue',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Whether or not to show the "archived" filter.\n',
-				required: false,
+				default: '',
+				description: 'Whether or not to show the "archived" filter',
 			},
 		],
 	},
@@ -254,7 +247,7 @@ export const collectionsFields = [
 		name: 'splitIntoItems',
 		type: 'boolean',
 		default: false,
-		description: 'Outputs each element of an array as own item.',
+		description: 'Outputs each element of an array as own item',
 		required: true,
 		displayOptions: {
 			show: {
@@ -268,7 +261,7 @@ export const collectionsFields = [
 		},
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -282,8 +275,8 @@ export const collectionsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'Unique name of the collection.\n',
+		default: '',
+		description: 'Unique name of the collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
@@ -312,8 +305,7 @@ export const collectionsFields = [
 				type: 'json',
 				placeholder: '{\n	"note": "Short quotes from happy customers."\n}',
 				default: null,
-				description: 'Metadata of the collection.\n',
-				required: false,
+				description: 'Metadata of the collection',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -321,7 +313,7 @@ export const collectionsFields = [
 		],
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -335,15 +327,15 @@ export const collectionsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'Unique name of the collection.\n',
+		default: '',
+		description: 'Unique name of the collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
 		},
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -357,12 +349,12 @@ export const collectionsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'Unique name of the collection.\n',
+		default: '',
+		description: 'Unique name of the collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
 		},
 	},
-] as INodeProperties[];
+];
 

@@ -2,11 +2,12 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export const settingsOperations = [
+export const settingsOperations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
 		type: 'options',
+		noDataExpression: true,
 		displayOptions: {
 			show: {
 				resource: [
@@ -19,19 +20,20 @@ export const settingsOperations = [
 				name: 'Get',
 				value: 'get',
 				description: 'Retrieve Settings',
+				action: 'Get a settings',
 			},
 			{
 				name: 'Update',
 				value: 'update',
 				description: 'Update the settings',
+				action: 'Update a settings',
 			},
 		],
 		default: 'get',
-		description: 'The operation to perform.',
 	},
-] as INodeProperties[];
+];
 
-export const settingsFields = [
+export const settingsFields: INodeProperties[] = [
 	{
 		displayName: 'Data (JSON)',
 		name: 'data',
@@ -48,7 +50,7 @@ export const settingsFields = [
 		},
 		placeholder: '{\n	"project_url": "https://example.com/"\n}',
 		default: null,
-		description: 'A partial [settings object](https://docs.directus.io/reference/api/system/settings/#the-settings-object).\n',
+		description: 'A partial [settings object](https://docs.directus.io/reference/api/system/settings/#the-settings-object).',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -70,7 +72,7 @@ export const settingsFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
 		required: true,
 	},
 	{
@@ -95,7 +97,7 @@ export const settingsFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Query parameters as JSON (flat object).',
+		description: 'Query parameters as JSON (flat object)',
 	},
 	{
 		displayName: 'Update Fields',
@@ -124,9 +126,8 @@ export const settingsFields = [
 				name: 'aggregate',
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
-				default: '',
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.\n',
-				required: false,
+				default: {},
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -185,11 +186,11 @@ export const settingsFields = [
 								description: 'Aggregation Function',
 							},
 							{
-								displayName: 'Field',
+								displayName: 'Field Name or ID',
 								name: 'value',
 								type: 'options',
 								default: '',
-								description: 'Field to apply aggregation on',
+								description: 'Field to apply aggregation on. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 								typeOptions: {
 									loadOptionsMethod: 'getFieldsInCollection',
 								},
@@ -203,7 +204,7 @@ export const settingsFields = [
 				name: 'binaryPropertyName',
 				type: 'string',
 				default: 'data',
-				description: 'Name of the binary property to download the data to.',
+				description: 'Name of the binary property to download the data to',
 			},
 			{
 				displayName: 'Deep (JSON)',
@@ -211,8 +212,7 @@ export const settingsFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.\n',
-				required: false,
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -223,23 +223,20 @@ export const settingsFields = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of json, csv, xml.\n',
-				required: false,
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
+',
 				options: [
 					{
 						name: 'CSV',
 						value: 'csv',
-						description: 'CSV',
 					},
 					{
 						name: 'JSON',
 						value: 'json',
-						description: 'JSON',
 					},
 					{
 						name: 'XML',
 						value: 'xml',
-						description: 'XML',
 					},
 				],
 			},
@@ -248,9 +245,8 @@ export const settingsFields = [
 				name: 'fields',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Control what fields are being returned in the object.\n',
-				required: false,
+				default: '',
+				description: 'Control what fields are being returned in the object.',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -265,8 +261,7 @@ export const settingsFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.\n',
-				required: false,
+				description: 'Select items in collection by given conditions.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -276,18 +271,16 @@ export const settingsFields = [
 				name: 'groupBy',
 				type: 'string',
 				placeholder: 'author,year(publish_date)',
-				default: null,
-				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".\n',
-				required: false,
+				default: '',
+				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".',
 			},
 			{
 				displayName: 'Meta',
 				name: 'meta',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'What metadata to return in the response.\n',
-				required: false,
+				default: '',
+				description: 'What metadata to return in the response.',
 			},
 			{
 				displayName: 'Offset',
@@ -295,26 +288,23 @@ export const settingsFields = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.\n',
-				required: false,
+				description: 'How many items to skip when fetching data.',
 			},
 			{
 				displayName: 'Search',
 				name: 'search',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Filter by items that contain the given search query in one of their fields.\n',
-				required: false,
+				default: '',
+				description: 'Filter by items that contain the given search query in one of their fields.',
 			},
 			{
 				displayName: 'Sort',
 				name: 'sort',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'How to sort the returned items. \`sort\` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (\` - \`) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a \` ? \` to sort randomly.\n',
-				required: false,
+				default: '',
+				description: 'How to sort the returned items. `sort` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (` - `) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a ` ? ` to sort randomly.',
 			},
 		],
 	},
@@ -334,7 +324,7 @@ export const settingsFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
 		required: true,
 	},
 	{
@@ -359,7 +349,7 @@ export const settingsFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Query parameters as JSON (flat object).',
+		description: 'Query parameters as JSON (flat object)',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -388,9 +378,8 @@ export const settingsFields = [
 				name: 'aggregate',
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
-				default: '',
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.\n',
-				required: false,
+				default: {},
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -449,11 +438,11 @@ export const settingsFields = [
 								description: 'Aggregation Function',
 							},
 							{
-								displayName: 'Field',
+								displayName: 'Field Name or ID',
 								name: 'value',
 								type: 'options',
 								default: '',
-								description: 'Field to apply aggregation on',
+								description: 'Field to apply aggregation on. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 								typeOptions: {
 									loadOptionsMethod: 'getFieldsInCollection',
 								},
@@ -467,7 +456,7 @@ export const settingsFields = [
 				name: 'binaryPropertyName',
 				type: 'string',
 				default: 'data',
-				description: 'Name of the binary property to download the data to.',
+				description: 'Name of the binary property to download the data to',
 			},
 			{
 				displayName: 'Deep (JSON)',
@@ -475,8 +464,7 @@ export const settingsFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.\n',
-				required: false,
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -487,23 +475,20 @@ export const settingsFields = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of json, csv, xml.\n',
-				required: false,
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
+',
 				options: [
 					{
 						name: 'CSV',
 						value: 'csv',
-						description: 'CSV',
 					},
 					{
 						name: 'JSON',
 						value: 'json',
-						description: 'JSON',
 					},
 					{
 						name: 'XML',
 						value: 'xml',
-						description: 'XML',
 					},
 				],
 			},
@@ -512,9 +497,8 @@ export const settingsFields = [
 				name: 'fields',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Control what fields are being returned in the object.\n',
-				required: false,
+				default: '',
+				description: 'Control what fields are being returned in the object.',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -529,8 +513,7 @@ export const settingsFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.\n',
-				required: false,
+				description: 'Select items in collection by given conditions.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -540,18 +523,16 @@ export const settingsFields = [
 				name: 'groupBy',
 				type: 'string',
 				placeholder: 'author,year(publish_date)',
-				default: null,
-				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".\n',
-				required: false,
+				default: '',
+				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".',
 			},
 			{
 				displayName: 'Meta',
 				name: 'meta',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'What metadata to return in the response.\n',
-				required: false,
+				default: '',
+				description: 'What metadata to return in the response.',
 			},
 			{
 				displayName: 'Offset',
@@ -559,28 +540,25 @@ export const settingsFields = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.\n',
-				required: false,
+				description: 'How many items to skip when fetching data.',
 			},
 			{
 				displayName: 'Search',
 				name: 'search',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Filter by items that contain the given search query in one of their fields.\n',
-				required: false,
+				default: '',
+				description: 'Filter by items that contain the given search query in one of their fields.',
 			},
 			{
 				displayName: 'Sort',
 				name: 'sort',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'How to sort the returned items. \`sort\` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (\` - \`) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a \` ? \` to sort randomly.\n',
-				required: false,
+				default: '',
+				description: 'How to sort the returned items. `sort` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (` - `) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a ` ? ` to sort randomly.',
 			},
 		],
 	},
-] as INodeProperties[];
+];
 

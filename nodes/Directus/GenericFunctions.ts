@@ -1,273 +1,236 @@
-import { OptionsWithUri } from 'request';
-
 import {
-		IExecuteFunctions,
-		IExecuteSingleFunctions,
-		IHookFunctions,
-		ILoadOptionsFunctions,
-		IWebhookFunctions
-} from 'n8n-core';
-
-import {
-		IBinaryData,
-		IBinaryKeyData,
-		IDataObject,
-		IHttpRequestMethods,
-		IHttpRequestOptions,
-		INodeExecutionData,
-		IPollFunctions,
-		LoggerProxy as Logger
+	IBinaryData,
+	IBinaryKeyData,
+	IDataObject,
+	IHttpRequestOptions,
+	INodeExecutionData,
+	IExecuteFunctions,
+	IExecuteSingleFunctions,
+	IHookFunctions,
+	ILoadOptionsFunctions,
+	IWebhookFunctions,
+	IPollFunctions,
+	LoggerProxy as Logger,
 } from 'n8n-workflow';
 
-interface IAttachment {
-		url: string;
-		filename: string;
-		type: string;
+import { Buffer } from 'buffer';
+
+export interface IDirectusCredentials {
+	url: string;
+	authMethod: 'staticToken' | 'credentials';
+	staticToken?: string;
+	email?: string;
+	password?: string;
 }
 
 export async function directusApiRequest(
-		this: IExecuteFunctions | IExecuteSingleFunctions | ILoadOptionsFunctions | IWebhookFunctions,
-		method: IHttpRequestMethods,
-		path: string,
-		body: any = {},
-		qs: IDataObject = {},
-		uri?: string,
-		option: IDataObject = {},
+	this: IExecuteFunctions | IExecuteSingleFunctions | ILoadOptionsFunctions | IWebhookFunctions,
+	method: string,
+	endpoint: string,
+	body: any = {},
+	qs: IDataObject = {},
 ): Promise<any> {
-    
-		const credentials = (await this.getCredentials('directusApi')) as {
-				url: string;
-				accessToken: string;
-		};
+	const credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
+	
+	if (!credentials) {
+		throw new Error('No credentials configured');
+	}
 
-		console.log('2. credentials : ', { credentials });
-		if (credentials === undefined) {
-				throw new Error('No credentials got returned!');
-		}
+	const baseUrl = credentials.url.replace(/\/$/, '');
+	const url = `${baseUrl}/${endpoint.replace(/^\//, '')}`;
+	
+	const options: IHttpRequestOptions = {
+		method: method.toUpperCase() as any,
+		url,
+		body,
+		qs,
+		json: true,
+		headers: {
+			'Content-Type': 'application/json',
+			'User-Agent': 'n8n-nodes-directus',
+		},
+	};
 
-		const params = credentials;
-		const url = params.url!.replace(/\/$/, '') || null;
-		const accessToken = params.accessToken! || null;
-		
-		const options: IHttpRequestOptions = {
-				headers: {
-						'Content-Type': 'application/json',
-						'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0',
-				},
-				method,
-				qs,
-				body,
-				url: `${url}/${path.replace(/^\//, '')}`,
-				json: true,
-		};
+	// Add authentication
+	if (credentials.authMethod === 'staticToken' && credentials.staticToken) {
+		options.headers!['Authorization'] = `Bearer ${credentials.staticToken}`;
+	}
 
-		try {
-				options.headers!['Authorization'] = accessToken ? `Bearer ${accessToken}` : "";
-				console.log('3. options : ', { options });
-				//const res = await this.helpers.request!(options);
-				const res = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', options);
-				//console.log({res});
-				return res;
-		} catch (error) {
-				//throw new NodeApiError(this.getNode(), error);
-				throw new Error(error);
-		}
+	try {
+		const response = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', options);
+		return response;
+	} catch (error: any) {
+		Logger.error('Directus API Error:', error);
+		throw new Error(`Directus API Error: ${error.message || error}`);
+	}
 }
 
 export function validateJSON(json: string | undefined): any {
-		// tslint:disable-line:no-any
-		let result;
-		try {
-				result = JSON.parse(json!);
-		} catch (exception) {
-				result = undefined;
-		}
-		return result;
+	if (!json) return undefined;
+	
+	try {
+		return JSON.parse(json);
+	} catch (exception) {
+		return undefined;
+	}
 }
 
 export async function directusApiAssetRequest(
-		this: IExecuteFunctions | IExecuteSingleFunctions,
-		method: IHttpRequestMethods,
-		path: string,
-		ID: string,
-		dataPropertyName: string,
-		qs: IDataObject = {},
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	method: string,
+	path: string,
+	ID: string,
+	dataPropertyName: string,
+	qs: IDataObject = {},
 ): Promise<any> {
-		// tslint:disable-line:no-any
+	const credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
+	
+	if (!credentials) {
+		throw new Error('No credentials configured');
+	}
 
-		const credentials = (await this.getCredentials('directusApi')) as {
-				url: string;
-				accessToken: string;
+	const baseUrl = credentials.url.replace(/\/$/, '');
+	
+	try {
+		// Get file info first
+		const fileOptions: IHttpRequestOptions = {
+			method: 'GET',
+			url: `${baseUrl}/files/${ID}`,
+			qs,
+			json: true,
+			headers: {
+				'Content-Type': 'application/json',
+				'User-Agent': 'n8n-nodes-directus',
+			},
 		};
 
-		if (credentials === undefined) {
-				throw new Error('No credentials got returned!');
+		if (credentials.authMethod === 'staticToken' && credentials.staticToken) {
+			fileOptions.headers!['Authorization'] = `Bearer ${credentials.staticToken}`;
 		}
 
-		const params = credentials;
-		const url = params.url!.replace(/\/$/, '') || null;
-		const accessToken = params.accessToken! || null;
-
-        //console.log({url,path,ID});
-
-		const optionsFile: IHttpRequestOptions = {
-				headers: {
-						'Content-Type': 'application/json',
-						'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0',
-						Authorization: `Bearer ${accessToken}`,
-				},
-				method,
-				qs,
-				url: `${url}/files/${ID}`,
-				json: true,
+		const fileResponse = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', fileOptions);
+		const file = fileResponse.data || fileResponse;
+		
+		// Get asset binary data
+		const assetOptions: IHttpRequestOptions = {
+			method: 'GET',
+			url: `${baseUrl}/assets/${ID}`,
+			qs,
+			encoding: 'arraybuffer',
+			headers: {
+				'User-Agent': 'n8n-nodes-directus',
+			},
 		};
-		console.log('3. optionsFile : ', { optionsFile });
 
-		const optionsAsset: IHttpRequestOptions = {
-				headers: {
-						'Content-Type': 'application/json',
-						'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0',
-						Authorization: `Bearer ${accessToken}`,
-				},
-				method,
-				qs,
-				url: `${url}/assets/${ID}`,
-				json: true,
-				encoding: "arraybuffer"
-		};
-		console.log('4. optionsAsset : ', { optionsAsset });
-
-		try {
-				//const resFile = await this.helpers.request!(optionsFile);                
-				const resFile = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', optionsFile);
-				const file = resFile.data;
-
-				//const res: any = await this.helpers.request!(optionsAsset);                
-				const res = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', optionsAsset);
-				const binaryData = Buffer.from(res);
-
-				//console.log(file);
-				const binary: IBinaryKeyData = {};
-				binary![dataPropertyName] = await this.helpers.prepareBinaryData(
-						binaryData,
-						file.filename_download,
-						file.type,
-				);
-
-				const json = { file };
-				const result: INodeExecutionData = {
-						json,
-						binary,
-				};
-				return result;
-		} catch (error) {
-				throw new Error(error);
+		if (credentials.authMethod === 'staticToken' && credentials.staticToken) {
+			assetOptions.headers!['Authorization'] = `Bearer ${credentials.staticToken}`;
 		}
+
+		const assetResponse = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', assetOptions);
+		const binaryData = Buffer.from(assetResponse as ArrayBuffer);
+		
+		const binary: IBinaryKeyData = {};
+		binary[dataPropertyName] = await this.helpers.prepareBinaryData(
+			binaryData,
+			file.filename_download || file.filename_disk || 'file',
+			file.type || 'application/octet-stream',
+		);
+
+		const json = { file };
+		const result: INodeExecutionData = {
+			json,
+			binary,
+		};
+		
+		return result;
+	} catch (error: any) {
+		Logger.error('Directus Asset Error:', error);
+		throw new Error(`Directus Asset Error: ${error.message || error}`);
+	}
 }
 
-/// To: 1.) Create a new File (including file content), 2.) Update a file (file content or file object)
 export async function directusApiFileRequest(
-		this: IExecuteFunctions | IExecuteSingleFunctions | IWebhookFunctions,
-		method: IHttpRequestMethods,
-		path: string,
-		formData: any = {},
-		body: any = {},
-		qs: IDataObject = {},
-		uri?: string,
-		option: IDataObject = {},
+	this: IExecuteFunctions | IExecuteSingleFunctions | IWebhookFunctions,
+	method: string,
+	path: string,
+	formData: any = {},
+	body: any = {},
+	qs: IDataObject = {},
 ): Promise<any> {
-		// tslint:disable-line:no-any
-        console.log("Received file for processing");
-        //console.log({method,path,formData,body,qs});
+	const credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
+	
+	if (!credentials) {
+		throw new Error('No credentials configured');
+	}
 
-		const credentials = (await this.getCredentials('directusApi')) as {
-				url: string;
-				accessToken: string;
-		};
-
-		if (credentials === undefined) {
-				throw new Error('No credentials got returned!');
-		}
-
-		const params = credentials;
-		const url = params.url!.replace(/\/$/, '') || null;
-		const accessToken = params.accessToken! || null;
-
-		const optionsFormData: IHttpRequestOptions = {
-				headers: {
-						'Content-Type': 'multipart/form-data',
-						'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0',
-						Authorization: `Bearer ${accessToken}`,
-				},
-				method,
-				qs,
+	const baseUrl = credentials.url.replace(/\/$/, '');
+	
+	try {
+		Logger.info('Processing file request');
+		
+		if (method === 'POST') {
+			// Upload file
+			const options: IHttpRequestOptions = {
+				method: 'POST',
+				url: `${baseUrl}/${path}`,
 				body: formData,
-				url: `${url}/${path}`,
-		};
-        //console.log({optionsFormData});
-		const responseFile = {};
+				qs,
+				headers: {
+					'User-Agent': 'n8n-nodes-directus',
+				},
+			};
 
-		try {
-				if (method == 'POST') {
-						// 1. Create a file with content
+			if (credentials.authMethod === 'staticToken' && credentials.staticToken) {
+				options.headers!['Authorization'] = `Bearer ${credentials.staticToken}`;
+			}
 
-                        console.log("Uploading raw file");
-						const response = await this.helpers.request!(optionsFormData);
-                        //const response = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', optionsFormData);
-						const file = JSON.parse(response).data;
+			const response = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', options);
+			const file = response.data || response;
+			
+			// Update file metadata if body provided
+			if (Object.keys(body).length > 0) {
+				const updateResponse = await directusApiRequest.call(this, 'PATCH', `files/${file.id}`, body);
+				return updateResponse.data || updateResponse;
+			}
+			
+			return file;
+		} else if (method === 'PATCH') {
+			// Update file
+			const hasFormData = Object.keys(formData).length > 0;
+			const hasBody = Object.keys(body).length > 0;
+			
+			let result: any = {};
+			
+			if (hasFormData) {
+				const formOptions: IHttpRequestOptions = {
+					method: 'PATCH',
+					url: `${baseUrl}/${path}`,
+					body: formData,
+					qs,
+					headers: {
+						'User-Agent': 'n8n-nodes-directus',
+					},
+				};
 
-                        console.log("Raw file uploaded");
-
-						// 2. Update the file object with fileObject properties
-						const res = await directusApiRequest.call(
-								this,
-								'PATCH',
-								`files/${file.id}`,
-								body,
-						);
-                        console.log("File data updated");
-                        //console.log({res});
-						Object.assign(responseFile, res);
+				if (credentials.authMethod === 'staticToken' && credentials.staticToken) {
+					formOptions.headers!['Authorization'] = `Bearer ${credentials.staticToken}`;
 				}
-				if (method == 'PATCH') {
-						// 1. Check if formdata and/or body are provided
-						const isForm = ((Object.keys(formData).length > 0) as boolean) ?? false;
-						const isBody = ((Object.keys(body).length > 0) as boolean) ?? false;
 
-						// 2. Sequentially, update them both
-						if (isForm) {
-								const options: IHttpRequestOptions = {
-										headers: {
-												'Content-Type': 'multipart/form-data',
-                                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0',
-												Authorization: `Bearer ${accessToken}`,
-										},
-										method,
-										qs,
-										body: formData,
-										url: `${url}/files`,
-								};
-
-								const response = await this.helpers.request!(optionsFormData);
-                                //const response = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', optionsFormData);
-								const file = JSON.parse(response).data;
-								Object.assign(responseFile, file);
-						}
-						if (isBody) {
-								const res = await directusApiRequest.call(
-										this,
-										'PATCH',
-										'files',
-										body,
-								);
-								Object.assign(responseFile, res);
-						}
-				}
-				// 3. Return the final result
-				return responseFile;
-
-		} catch (error) {
-				//throw new NodeApiError(this.getNode(), error);
-				throw new Error(error);
+				const formResponse = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', formOptions);
+				result = formResponse.data || formResponse;
+			}
+			
+			if (hasBody) {
+				const bodyResponse = await directusApiRequest.call(this, 'PATCH', path, body);
+				result = { ...result, ...(bodyResponse.data || bodyResponse) };
+			}
+			
+			return result;
 		}
+		
+		return {};
+	} catch (error: any) {
+		Logger.error('Directus File Error:', error);
+		throw new Error(`Directus File Error: ${error.message || error}`);
+	}
 }

@@ -2,11 +2,12 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export const authOperations = [
+export const authOperations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
 		type: 'options',
+		noDataExpression: true,
 		displayOptions: {
 			show: {
 				resource: [
@@ -18,49 +19,54 @@ export const authOperations = [
 			{
 				name: 'List',
 				value: 'list',
-				description: 'List configured OAuth providers.',
+				description: 'List configured OAuth providers',
+				action: 'List an auth',
 			},
 			{
 				name: 'Login',
 				value: 'login',
 				description: 'Retrieve a Temporary Access Token',
+				action: 'Login an auth',
 			},
 			{
 				name: 'Log Out',
 				value: 'logout',
-				description: 'Log Out',
 			},
 			{
 				name: 'Refresh Token',
 				value: 'refreshToken',
-				description: 'Refresh a Temporary Access Token.',
+				description: 'Refresh a Temporary Access Token',
+				action: 'Refresh Token an auth',
 			},
 			{
 				name: 'Request Password Reset',
 				value: 'requestReset',
-				description: 'Request a reset password email to be send.',
+				description: 'Request a reset password email to be send',
+				action: 'Request Password Reset an auth',
 			},
 			{
 				name: 'Reset Password',
 				value: 'resetPassword',
-				description: 'The request a password reset endpoint sends an email with a link to the admin app which in turn uses this endpoint to allow the user to reset their password.',
+				description: 'The request a password reset endpoint sends an email with a link to the admin app which in turn uses this endpoint to allow the user to reset their password',
+				action: 'Reset Password an auth',
 			},
 			{
 				name: 'Start OAuth Flow',
 				value: 'startOauthFlow',
 				description: 'Start OAuth flow using the specified provider',
+				action: 'Start OAuth Flow an auth',
 			},
 		],
 		default: 'list',
-		description: 'The operation to perform.',
 	},
-] as INodeProperties[];
+];
 
-export const authFields = [
+export const authFields: INodeProperties[] = [
 	{
 		displayName: 'Password',
 		name: 'password',
 		type: 'string',
+		typeOptions: { password: true },
 		displayOptions: {
 			show: {
 				operation: [
@@ -77,8 +83,8 @@ export const authFields = [
 			},
 		},
 		placeholder: 'password',
-		default: null,
-		description: 'Password of the user.\n',
+		default: '',
+		description: 'Password of the user.',
 		required: true,
 	},
 	{
@@ -101,8 +107,8 @@ export const authFields = [
 			},
 		},
 		placeholder: 'admin@example.com',
-		default: null,
-		description: 'Email address of the user you\'re retrieving the access token for.\n',
+		default: '',
+		description: 'Email address of the user you\'re retrieving the access token for.',
 		required: true,
 	},
 	{
@@ -121,7 +127,6 @@ export const authFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'JSON/RAW Parameters',
 		required: true,
 	},
 	{
@@ -146,7 +151,7 @@ export const authFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Body parameters as JSON or RAW.',
+		description: 'Body parameters as JSON or RAW',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -176,18 +181,15 @@ export const authFields = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'cookie',
-				description: 'Choose between retrieving the token as a string, or setting it as a cookie.\n',
-				required: false,
+				description: 'Choose between retrieving the token as a string, or setting it as a cookie.',
 				options: [
 					{
 						name: 'Cookie',
 						value: 'cookie',
-						description: 'Cookie',
 					},
 					{
 						name: 'JSON',
 						value: 'json',
-						description: 'JSON',
 					},
 				],
 			},
@@ -196,9 +198,8 @@ export const authFields = [
 				name: 'otp',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'If 2FA is enabled, you need to pass the one time password.\n',
-				required: false,
+				default: '',
+				description: 'If 2FA is enabled, you need to pass the one time password.',
 			},
 		],
 	},
@@ -206,6 +207,7 @@ export const authFields = [
 		displayName: 'Refresh Token',
 		name: 'refreshToken',
 		type: 'string',
+		typeOptions: { password: true },
 		displayOptions: {
 			show: {
 				operation: [
@@ -217,14 +219,15 @@ export const authFields = [
 			},
 		},
 		placeholder: 'eyJ0eXAiOiJKV...',
-		default: null,
-		description: 'JWT access token you want to refresh. This token can\'t be expired.\n',
+		default: '',
+		description: 'JWT access token you want to refresh. This token can\'t be expired.',
 		required: true,
 	},
 	{
 		displayName: 'Refresh Token',
 		name: 'refreshToken',
 		type: 'string',
+		typeOptions: { password: true },
 		displayOptions: {
 			show: {
 				operation: [
@@ -236,8 +239,8 @@ export const authFields = [
 			},
 		},
 		placeholder: 'eyJ0eXAiOiJKV...',
-		default: null,
-		description: 'JWT access token you want to logout.\n',
+		default: '',
+		description: 'JWT access token you want to logout.',
 		required: true,
 	},
 	{
@@ -255,8 +258,8 @@ export const authFields = [
 			},
 		},
 		placeholder: 'admin@example.com',
-		default: null,
-		description: 'Email address of the user you\'re requesting a reset for.\n',
+		default: '',
+		description: 'Email address of the user you\'re requesting a reset for.',
 		required: true,
 	},
 	{
@@ -281,9 +284,10 @@ export const authFields = [
 				name: 'resetUrl',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Provide a custom reset url which the link in the email will lead to. The reset token will be passed as a parameter.\nNote: You need to configure the [`PASSWORD_RESET_URL_ALLOW_LIST` environment variable](https://docs.directus.io/reference/environment-variables/#security) to enable this feature.\n',
-				required: false,
+				default: '',
+				description: 'Provide a custom reset URL which the link in the email will lead to. The reset token will be passed as a parameter.
+Note: You need to configure the [`PASSWORD_RESET_URL_ALLOW_LIST` environment variable](https://docs.directus.io/reference/environment-variables/#security) to enable this feature.
+',
 			},
 		],
 	},
@@ -291,6 +295,7 @@ export const authFields = [
 		displayName: 'Token',
 		name: 'token',
 		type: 'string',
+		typeOptions: { password: true },
 		displayOptions: {
 			show: {
 				operation: [
@@ -307,14 +312,15 @@ export const authFields = [
 			},
 		},
 		placeholder: 'eyJ0eXAiOiJKV1Qi...',
-		default: null,
-		description: 'One-time use JWT token that is used to verify the user.\n',
+		default: '',
+		description: 'One-time use JWT token that is used to verify the user.',
 		required: true,
 	},
 	{
 		displayName: 'Password',
 		name: 'password',
 		type: 'string',
+		typeOptions: { password: true },
 		displayOptions: {
 			show: {
 				operation: [
@@ -331,8 +337,8 @@ export const authFields = [
 			},
 		},
 		placeholder: 'password',
-		default: null,
-		description: 'New password for the user.\n',
+		default: '',
+		description: 'New password for the user.',
 		required: true,
 	},
 	{
@@ -351,7 +357,6 @@ export const authFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'JSON/RAW Parameters',
 		required: true,
 	},
 	{
@@ -376,14 +381,14 @@ export const authFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Body parameters as JSON or RAW.',
+		description: 'Body parameters as JSON or RAW',
 	},
 	{
 		displayName: 'Split Into Items',
 		name: 'splitIntoItems',
 		type: 'boolean',
 		default: false,
-		description: 'Outputs each element of an array as own item.',
+		description: 'Outputs each element of an array as own item',
 		required: true,
 		displayOptions: {
 			show: {
@@ -411,8 +416,8 @@ export const authFields = [
 			},
 		},
 		placeholder: '',
-		default: null,
-		description: 'Key of the activated OAuth provider.\n',
+		default: '',
+		description: 'Key of the activated OAuth provider.',
 		required: true,
 	},
 	{
@@ -437,11 +442,11 @@ export const authFields = [
 				name: 'redirect',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Where to redirect on successful login.<br/>If set the authentication details are set inside cookies otherwise a JSON is returned.\n',
-				required: false,
+				default: '',
+				description: 'Where to redirect on successful login.If set the authentication details are set inside cookies otherwise a JSON is returned.
+',
 			},
 		],
 	},
-] as INodeProperties[];
+];
 

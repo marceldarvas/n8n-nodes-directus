@@ -2,11 +2,12 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export const usersOperations = [
+export const usersOperations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
 		type: 'options',
+		noDataExpression: true,
 		displayOptions: {
 			show: {
 				resource: [
@@ -18,85 +19,99 @@ export const usersOperations = [
 			{
 				name: 'Accept User Invite',
 				value: 'acceptUserInvite',
-				description: 'Accepts and enables an invited user using a JWT invitation token.',
+				description: 'Accepts and enables an invited user using a JWT invitation token',
+				action: 'Accept User Invite a users',
 			},
 			{
 				name: 'Create',
 				value: 'create',
-				description: 'Create a new user.',
+				description: 'Create a new user',
+				action: 'Create a users',
 			},
 			{
 				name: 'Create Multiple',
 				value: 'createMultiple',
 				description: 'Create Multiple Users',
+				action: 'Create Multiple a users',
 			},
 			{
 				name: 'Delete',
 				value: 'delete',
 				description: 'Delete an existing user',
+				action: 'Delete a users',
 			},
 			{
 				name: 'Delete Multiple',
 				value: 'deleteMultiple',
 				description: 'Delete Multiple Users',
+				action: 'Delete Multiple a users',
 			},
 			{
 				name: 'Disable 2FA',
 				value: 'disable2FA',
-				description: 'Disables two-factor authentication for the currently authenticated user.',
+				description: 'Disables two-factor authentication for the currently authenticated user',
+				action: 'Disable 2FA a users',
 			},
 			{
 				name: 'Enable 2FA',
 				value: 'enable2FA',
-				description: 'Enables two-factor authentication for the currently authenticated user.',
+				description: 'Enables two-factor authentication for the currently authenticated user',
+				action: 'Enable 2FA a users',
 			},
 			{
 				name: 'Generate 2FA',
 				value: 'generate2FA',
 				description: 'Generate 2FA Secret',
+				action: 'Generate 2FA a users',
 			},
 			{
 				name: 'Get',
 				value: 'get',
-				description: 'Retrieve a single user by unique identifier.',
+				description: 'Retrieve a single user by unique identifier',
+				action: 'Get a users',
 			},
 			{
 				name: 'Get Current',
 				value: 'getCurrent',
-				description: 'Retrieve the currently authenticated user.',
+				description: 'Retrieve the currently authenticated user',
+				action: 'Get Current a users',
 			},
 			{
 				name: 'Invite User',
 				value: 'inviteUser',
 				description: 'Invites one or more users to this project. It creates a user with an invited status, and then sends an email to the user with instructions on how to activate their account.',
+				action: 'Invite User a users',
 			},
 			{
 				name: 'List',
 				value: 'list',
-				description: 'List the users.',
+				description: 'List the users',
+				action: 'List a users',
 			},
 			{
 				name: 'Update',
 				value: 'update',
 				description: 'Update an existing user',
+				action: 'Update a users',
 			},
 			{
 				name: 'Update Me',
 				value: 'updateMe',
-				description: 'Update the currently authenticated user.',
+				description: 'Update the currently authenticated user',
+				action: 'Update Me a users',
 			},
 			{
 				name: 'Update Multiple',
 				value: 'updateMultiple',
 				description: 'Update Multiple Users',
+				action: 'Update Multiple a users',
 			},
 		],
 		default: 'list',
-		description: 'The operation to perform.',
 	},
-] as INodeProperties[];
+];
 
-export const usersFields = [
+export const usersFields: INodeProperties[] = [
 	{
 		displayName: 'Email',
 		name: 'email',
@@ -112,8 +127,8 @@ export const usersFields = [
 			},
 		},
 		placeholder: 'another@example.com',
-		default: null,
-		description: 'User email to invite.\n',
+		default: '',
+		description: 'User email to invite.',
 		required: true,
 	},
 	{
@@ -131,8 +146,8 @@ export const usersFields = [
 			},
 		},
 		placeholder: 'c86c2761-65d3-43c3-897f-6f74ad6a5bd7',
-		default: null,
-		description: 'Role of the new user.\n',
+		default: '',
+		description: 'Role of the new user.',
 		required: true,
 	},
 	{
@@ -157,9 +172,10 @@ export const usersFields = [
 				name: 'inviteUrl',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Provide a custom invite url which the link in the email will lead to. The invite token will be passed as a parameter.\nNote: You need to configure the [`USER_INVITE_URL_ALLOW_LIST` environment variable](https://docs.directus.io/reference/environment-variables/#security) to enable this feature.\n',
-				required: false,
+				default: '',
+				description: 'Provide a custom invite URL which the link in the email will lead to. The invite token will be passed as a parameter.
+Note: You need to configure the [`USER_INVITE_URL_ALLOW_LIST` environment variable](https://docs.directus.io/reference/environment-variables/#security) to enable this feature.
+',
 			},
 		],
 	},
@@ -167,6 +183,7 @@ export const usersFields = [
 		displayName: 'Password',
 		name: 'password',
 		type: 'string',
+		typeOptions: { password: true },
 		displayOptions: {
 			show: {
 				operation: [
@@ -178,14 +195,15 @@ export const usersFields = [
 			},
 		},
 		placeholder: 'd1r3ctu5',
-		default: null,
-		description: 'Password of the user.\n',
+		default: '',
+		description: 'Password of the user.',
 		required: true,
 	},
 	{
 		displayName: 'Token',
 		name: 'token',
 		type: 'string',
+		typeOptions: { password: true },
 		displayOptions: {
 			show: {
 				operation: [
@@ -197,14 +215,15 @@ export const usersFields = [
 			},
 		},
 		placeholder: 'eyJh...KmUk',
-		default: null,
-		description: 'Accept invite token.\n',
+		default: '',
+		description: 'Accept invite token.',
 		required: true,
 	},
 	{
 		displayName: 'Password',
 		name: 'password',
 		type: 'string',
+		typeOptions: { password: true },
 		displayOptions: {
 			show: {
 				operation: [
@@ -216,14 +235,15 @@ export const usersFields = [
 			},
 		},
 		placeholder: 'd1r3ctu5',
-		default: null,
-		description: 'The user\'s password of the currently authenticated user.\n',
+		default: '',
+		description: 'The user\'s password of the currently authenticated user.',
 		required: true,
 	},
 	{
 		displayName: 'Secret',
 		name: 'secret',
 		type: 'string',
+		typeOptions: { password: true },
 		displayOptions: {
 			show: {
 				operation: [
@@ -235,8 +255,8 @@ export const usersFields = [
 			},
 		},
 		placeholder: '123456',
-		default: null,
-		description: 'The TFA secret from tfa/generate.\n',
+		default: '',
+		description: 'The TFA secret from tfa/generate.',
 		required: true,
 	},
 	{
@@ -254,8 +274,8 @@ export const usersFields = [
 			},
 		},
 		placeholder: '3CtiutsNBmY3szHE',
-		default: null,
-		description: 'OTP generated with the secret, to recheck if the user has a correct TFA setup\n',
+		default: '',
+		description: 'OTP generated with the secret, to recheck if the user has a correct TFA setup',
 		required: true,
 	},
 	{
@@ -273,8 +293,8 @@ export const usersFields = [
 			},
 		},
 		placeholder: '859014',
-		default: null,
-		description: 'One-time password generated by the authenticator app.\n',
+		default: '',
+		description: 'One-time password generated by the authenticator app.',
 		required: true,
 	},
 	{
@@ -297,14 +317,15 @@ export const usersFields = [
 			},
 		},
 		placeholder: 'another@example.com',
-		default: null,
-		description: 'A partial [user object](https://docs.directus.io/reference/api/system/users/#the-user-object).\n',
+		default: '',
+		description: 'A partial [user object](https://docs.directus.io/reference/api/system/users/#the-user-object).',
 		required: true,
 	},
 	{
 		displayName: 'Password',
 		name: 'password',
 		type: 'string',
+		typeOptions: { password: true },
 		displayOptions: {
 			show: {
 				operation: [
@@ -321,8 +342,8 @@ export const usersFields = [
 			},
 		},
 		placeholder: 'd1r3ctu5',
-		default: null,
-		description: 'A partial [user object](https://docs.directus.io/reference/api/system/users/#the-user-object).\n',
+		default: '',
+		description: 'A partial [user object](https://docs.directus.io/reference/api/system/users/#the-user-object).',
 		required: true,
 	},
 	{
@@ -341,7 +362,7 @@ export const usersFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
 		required: true,
 	},
 	{
@@ -366,7 +387,7 @@ export const usersFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Body parameters as JSON or RAW.',
+		description: 'Body parameters as JSON or RAW',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -395,63 +416,58 @@ export const usersFields = [
 				name: 'avatar',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Avatar file. Many-to-one to [files](https://docs.directus.io/reference/api/system/files/).\n',
-				required: false,
+				default: '',
+				description: 'Avatar file. Many-to-one to [files](https://docs.directus.io/reference/api/system/files/).',
 			},
 			{
 				displayName: 'Description',
 				name: 'description',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Description of the user.\n',
-				required: false,
+				default: '',
+				description: 'Description of the user.',
 			},
 			{
 				displayName: 'First Name',
 				name: 'first_name',
 				type: 'string',
 				placeholder: 'Admin',
-				default: null,
-				description: 'First name of the user.\n',
-				required: false,
+				default: '',
+				description: 'First name of the user.',
 			},
 			{
 				displayName: 'Language',
 				name: 'language',
 				type: 'string',
 				placeholder: 'en-US',
-				default: null,
-				description: 'Language the Admin App is rendered in. See [our Crowdin page ](https://locales.directus.io/)\n[(opens new window)](https://locales.directus.io/)\nfor all available languages and translations.\n',
-				required: false,
+				default: '',
+				description: 'Language the Admin App is rendered in. See [our Crowdin page ](https://locales.directus.io/)
+[(opens new window)](https://locales.directus.io/)
+for all available languages and translations.',
 			},
 			{
 				displayName: 'Last Name',
 				name: 'last_name',
 				type: 'string',
 				placeholder: 'User',
-				default: null,
-				description: 'Last name of the user.\n',
-				required: false,
+				default: '',
+				description: 'Last name of the user.',
 			},
 			{
 				displayName: 'Location',
 				name: 'location',
 				type: 'string',
 				placeholder: 'New York City',
-				default: null,
-				description: 'Location of the user.\n',
-				required: false,
+				default: '',
+				description: 'Location of the user.',
 			},
 			{
-				displayName: 'Role',
+				displayName: 'Role Name or ID',
 				name: 'role',
 				type: 'options',
 				placeholder: '',
-				default: null,
-				description: 'Role of the User.\n',
-				required: false,
+				default: '',
+				description: 'Role of the User.',
 				typeOptions: {
 					loadOptionsMethod: 'getRoles',
 				},
@@ -461,17 +477,16 @@ export const usersFields = [
 				name: 'tags',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Tags for the user.\n',
-				required: false,
+				default: '',
+				description: 'Tags for the user.',
 			},
 			{
 				displayName: 'TFA Secret',
 				name: 'tfa_secret',
 				type: 'string',
+				typeOptions: { password: true },
 				placeholder: '',
-				default: null,
-				description: 'TFA Secret',
+				default: '',
 				required: false,
 			},
 			{
@@ -480,23 +495,19 @@ export const usersFields = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'auto',
-				description: 'One of auto, light, dark.\n',
-				required: false,
+				description: 'One of auto, light, dark.',
 				options: [
 					{
 						name: 'Auto',
 						value: 'auto',
-						description: '',
 					},
 					{
 						name: 'Dark',
 						value: 'dark',
-						description: '',
 					},
 					{
 						name: 'Light',
 						value: 'light',
-						description: '',
 					},
 				],
 			},
@@ -505,9 +516,8 @@ export const usersFields = [
 				name: 'title',
 				type: 'string',
 				placeholder: 'CTO',
-				default: null,
-				description: 'Title of the user.\n',
-				required: false,
+				default: '',
+				description: 'Title of the user.',
 			},
 		],
 	},
@@ -527,7 +537,7 @@ export const usersFields = [
 		},
 		placeholder: '[\n	{\n		"email": "admin@example.com",\n		"password": "p455w0rd",\n		"role": "c86c2761-65d3-43c3-897f-6f74ad6a5bd7"\n	},\n	{\n		"email": "another@example.com",\n		"password": "d1r3ctu5",\n		"role": "c86c2761-65d3-43c3-897f-6f74ad6a5bd7"\n	}\n]',
 		default: null,
-		description: 'An array of partial [user objects](https://docs.directus.io/reference/api/system/users/#the-user-object).\n',
+		description: 'An array of partial [user objects](https://docs.directus.io/reference/api/system/users/#the-user-object).',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -548,8 +558,8 @@ export const usersFields = [
 			},
 		},
 		placeholder: '72a1ce24-4748-47de-a05f-ce9af3033727',
-		default: null,
-		description: 'Primary key of the user.\n',
+		default: '',
+		description: 'Primary key of the user.',
 		required: true,
 	},
 	{
@@ -572,7 +582,7 @@ export const usersFields = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit.',
+		description: 'If all results should be returned or only up to a given limit',
 		required: true,
 	},
 	{
@@ -594,11 +604,10 @@ export const usersFields = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.\n',
+		description: 'A limit on the number of objects that are returned.',
 		required: true,
 		typeOptions: {
 			minValue: 1,
-			maxValue: 100,
 		},
 	},
 	{
@@ -606,7 +615,7 @@ export const usersFields = [
 		name: 'splitIntoItems',
 		type: 'boolean',
 		default: false,
-		description: 'Outputs each element of an array as own item.',
+		description: 'Outputs each element of an array as own item',
 		required: true,
 		displayOptions: {
 			show: {
@@ -635,7 +644,7 @@ export const usersFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
 		required: true,
 	},
 	{
@@ -660,7 +669,7 @@ export const usersFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Body parameters as JSON or RAW.',
+		description: 'Body parameters as JSON or RAW',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -689,9 +698,8 @@ export const usersFields = [
 				name: 'aggregate',
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
-				default: '',
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.\n',
-				required: false,
+				default: {},
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -750,11 +758,11 @@ export const usersFields = [
 								description: 'Aggregation Function',
 							},
 							{
-								displayName: 'Field',
+								displayName: 'Field Name or ID',
 								name: 'value',
 								type: 'options',
 								default: '',
-								description: 'Field to apply aggregation on',
+								description: 'Field to apply aggregation on. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 								typeOptions: {
 									loadOptionsMethod: 'getFieldsInCollection',
 								},
@@ -768,7 +776,7 @@ export const usersFields = [
 				name: 'binaryPropertyName',
 				type: 'string',
 				default: 'data',
-				description: 'Name of the binary property to download the data to.',
+				description: 'Name of the binary property to download the data to',
 			},
 			{
 				displayName: 'Deep (JSON)',
@@ -776,8 +784,7 @@ export const usersFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.\n',
-				required: false,
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -788,23 +795,20 @@ export const usersFields = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of json, csv, xml.\n',
-				required: false,
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
+',
 				options: [
 					{
 						name: 'CSV',
 						value: 'csv',
-						description: 'CSV',
 					},
 					{
 						name: 'JSON',
 						value: 'json',
-						description: 'JSON',
 					},
 					{
 						name: 'XML',
 						value: 'xml',
-						description: 'XML',
 					},
 				],
 			},
@@ -813,9 +817,8 @@ export const usersFields = [
 				name: 'fields',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Control what fields are being returned in the object.\n',
-				required: false,
+				default: '',
+				description: 'Control what fields are being returned in the object.',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -830,8 +833,7 @@ export const usersFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.\n',
-				required: false,
+				description: 'Select items in collection by given conditions.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -841,18 +843,16 @@ export const usersFields = [
 				name: 'groupBy',
 				type: 'string',
 				placeholder: 'author,year(publish_date)',
-				default: null,
-				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".\n',
-				required: false,
+				default: '',
+				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".',
 			},
 			{
 				displayName: 'Meta',
 				name: 'meta',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'What metadata to return in the response.\n',
-				required: false,
+				default: '',
+				description: 'What metadata to return in the response.',
 			},
 			{
 				displayName: 'Offset',
@@ -860,26 +860,23 @@ export const usersFields = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.\n',
-				required: false,
+				description: 'How many items to skip when fetching data.',
 			},
 			{
 				displayName: 'Search',
 				name: 'search',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Filter by items that contain the given search query in one of their fields.\n',
-				required: false,
+				default: '',
+				description: 'Filter by items that contain the given search query in one of their fields.',
 			},
 			{
 				displayName: 'Sort',
 				name: 'sort',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'How to sort the returned items. \`sort\` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (\` - \`) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a \` ? \` to sort randomly.\n',
-				required: false,
+				default: '',
+				description: 'How to sort the returned items. `sort` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (` - `) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a ` ? ` to sort randomly.',
 			},
 		],
 	},
@@ -898,8 +895,8 @@ export const usersFields = [
 			},
 		},
 		placeholder: '72a1ce24-4748-47de-a05f-ce9af3033727',
-		default: null,
-		description: 'Primary key of the user.\n',
+		default: '',
+		description: 'Primary key of the user.',
 		required: true,
 	},
 	{
@@ -918,7 +915,7 @@ export const usersFields = [
 		},
 		placeholder: '{\n	"title": "CTO"\n}',
 		default: null,
-		description: 'A partial [user object](https://docs.directus.io/reference/api/system/users/#the-user-object).\n',
+		description: 'A partial [user object](https://docs.directus.io/reference/api/system/users/#the-user-object).',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -940,7 +937,9 @@ export const usersFields = [
 		},
 		placeholder: '{\n	"keys": ["72a1ce24-4748-47de-a05f-ce9af3033727", "9c3d75a8-7a5f-41a4-be0a-1488fd974511"],\n	"data": {\n		"title": "CTO"\n	}\n}',
 		default: null,
-		description: 'Required:\n- **`keys`** [Array of primary keys of the users you\'d like to update.]\n- **`data`** [Any of [the user object](https://docs.directus.io/reference/api/system/users/#the-user-object)\'s properties.]\n',
+		description: 'Required:
+- **`keys`** [Array of primary keys of the users you\'d like to update.]
+- **`data`** [Any of [the user object](https://docs.directus.io/reference/api/system/users/#the-user-object)\'s properties.]',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -961,8 +960,8 @@ export const usersFields = [
 			},
 		},
 		placeholder: '72a1ce24-4748-47de-a05f-ce9af3033727',
-		default: null,
-		description: 'Primary key of the user.\n',
+		default: '',
+		description: 'Primary key of the user.',
 		required: true,
 	},
 	{
@@ -981,7 +980,7 @@ export const usersFields = [
 		},
 		placeholder: '["653925a9-970e-487a-bfc0-ab6c96affcdc", "c86c2761-65d3-43c3-897f-6f74ad6a5bd7"]',
 		default: null,
-		description: 'An array of user primary keys\n',
+		description: 'An array of user primary keys',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -1003,11 +1002,11 @@ export const usersFields = [
 		},
 		placeholder: '{\n	"title": "CTO"\n}',
 		default: null,
-		description: 'Update the currently authenticated user.\n',
+		description: 'Update the currently authenticated user.',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
 		},
 	},
-] as INodeProperties[];
+];
 

@@ -1,5 +1,3 @@
-import { BINARY_ENCODING, IExecuteFunctions } from "n8n-core";
-
 import {
 	IBinaryData,
 	IBinaryKeyData,
@@ -10,9 +8,10 @@ import {
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
-	//	NodeApiError,
-	//	NodeOperationError,
+	IExecuteFunctions,
 	LoggerProxy as Logger,
+	NodeApiError,
+	NodeOperationError,
 } from "n8n-workflow";
 
 import FormData from 'form-data';
@@ -23,8 +22,6 @@ import {
 	directusApiRequest,
 	validateJSON,
 } from "./GenericFunctions";
-
-import { OptionsWithUri } from "request";
 
 import {
 	activityFields,
@@ -114,7 +111,6 @@ export class Directus implements INodeType {
 		subtitle: '={{$parameter["operation"] + " : " + $parameter["resource"]}}',
 		defaults: {
 			name: "Directus",
-			color: "#2ECFA8",
 		},
 		inputs: ["main"],
 		outputs: ["main"],
@@ -129,13 +125,14 @@ export class Directus implements INodeType {
 				displayName: "Resource",
 				name: "resource",
 				type: "options",
+				noDataExpression: true,
 				options: [
 					{
 						name: "Activity",
 						value: "activity",
 					},
 					{
-						name: "Assets",
+						name: 'Asset',
 						value: "assets",
 					},
 					{
@@ -143,39 +140,39 @@ export class Directus implements INodeType {
 						value: "auth",
 					},
 					{
-						name: "Collections",
+						name: 'Collection',
 						value: "collections",
 					},
 					{
-						name: "Extensions",
+						name: 'Extension',
 						value: "extensions",
 					},
 					{
-						name: "Fields",
+						name: 'Field',
 						value: "fields",
 					},
 					{
-						name: "Files",
+						name: 'File',
 						value: "files",
 					},
 					{
-						name: "Folders",
+						name: 'Folder',
 						value: "folders",
 					},
 					{
-						name: "Items",
+						name: 'Item',
 						value: "items",
 					},
 					{
-						name: "Permissions",
+						name: 'Permission',
 						value: "permissions",
 					},
 					{
-						name: "Presets",
+						name: 'Preset',
 						value: "presets",
 					},
 					{
-						name: "Relations",
+						name: 'Relation',
 						value: "relations",
 					},
 					{
@@ -209,7 +206,6 @@ export class Directus implements INodeType {
 				],
 				default: "items",
 				required: true,
-				description: "Resource to consume",
 			},
 
 			// ACTIVITY
@@ -316,8 +312,7 @@ export class Directus implements INodeType {
 					}
 					return returnData;
 				} catch (error) {
-					//throw new NodeApiError(this.getNode(), error);
-					throw new Error(error);
+					throw new NodeApiError(this.getNode(), error);
 				}
 			},
 			// Get only user created Collections
@@ -347,8 +342,7 @@ export class Directus implements INodeType {
 					}
 					return returnData;
 				} catch (error) {
-					//throw new NodeApiError(this.getNode(), error);
-					throw new Error(error);
+					throw new NodeApiError(this.getNode(), error);
 				}
 			},
 			// Get Relational fields in a collection
@@ -376,8 +370,7 @@ export class Directus implements INodeType {
 					}
 					return returnData;
 				} catch (error) {
-					//throw new NodeApiError(this.getNode(), error);
-					throw new Error(error);
+					throw new NodeApiError(this.getNode(), error);
 				}
 			},
 			// Get fields in a collection
@@ -407,8 +400,7 @@ export class Directus implements INodeType {
 					}
 					return returnData;
 				} catch (error) {
-					//throw new NodeApiError(this.getNode(), error);
-					throw new Error(error);
+					throw new NodeApiError(this.getNode(), error);
 				}
 			},
 			// Get User Roles
@@ -431,8 +423,7 @@ export class Directus implements INodeType {
 					}
 					return returnData;
 				} catch (error) {
-					//throw new NodeApiError(this.getNode(), error);
-					throw new Error(error);
+					throw new NodeApiError(this.getNode(), error);
 				}
 			},
 		},
@@ -447,7 +438,7 @@ export class Directus implements INodeType {
 		)) as unknown as IDataObject;
 
 		const items = this.getInputData();
-		const length = items.length as unknown as number;
+		const length = items.length;
 
 		const returnItems: INodeExecutionData[] = [];
 		const returnData: any = [];

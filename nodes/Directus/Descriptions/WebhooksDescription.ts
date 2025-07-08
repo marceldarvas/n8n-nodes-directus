@@ -2,11 +2,12 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export const webhooksOperations = [
+export const webhooksOperations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
 		type: 'options',
+		noDataExpression: true,
 		displayOptions: {
 			show: {
 				resource: [
@@ -18,50 +19,57 @@ export const webhooksOperations = [
 			{
 				name: 'Create',
 				value: 'create',
-				description: 'Create a new webhook.',
+				description: 'Create a new webhook',
+				action: 'Create a webhooks',
 			},
 			{
 				name: 'Create Multiple',
 				value: 'createMultiple',
 				description: 'Create Multiple Webhooks',
+				action: 'Create Multiple a webhooks',
 			},
 			{
 				name: 'Delete',
 				value: 'delete',
 				description: 'Delete an existing webhook',
+				action: 'Delete a webhooks',
 			},
 			{
 				name: 'Delete Multiple',
 				value: 'deleteMultiple',
 				description: 'Delete Multiple Webhooks',
+				action: 'Delete Multiple a webhooks',
 			},
 			{
 				name: 'Get',
 				value: 'get',
-				description: 'Retrieve a single webhook by unique identifier.',
+				description: 'Retrieve a single webhook by unique identifier',
+				action: 'Get a webhooks',
 			},
 			{
 				name: 'List',
 				value: 'list',
-				description: 'Get all webhooks.',
+				description: 'Get all webhooks',
+				action: 'List a webhooks',
 			},
 			{
 				name: 'Update',
 				value: 'update',
 				description: 'Update an existing webhook',
+				action: 'Update a webhooks',
 			},
 			{
 				name: 'Update Multiple',
 				value: 'updateMultiple',
 				description: 'Update Multiple Webhooks',
+				action: 'Update Multiple a webhooks',
 			},
 		],
 		default: 'list',
-		description: 'The operation to perform.',
 	},
-] as INodeProperties[];
+];
 
-export const webhooksFields = [
+export const webhooksFields: INodeProperties[] = [
 	{
 		displayName: 'Name',
 		name: 'name',
@@ -82,8 +90,8 @@ export const webhooksFields = [
 			},
 		},
 		placeholder: 'Build Website',
-		default: null,
-		description: 'Name for the webhook. Shown in the Admin App.\n',
+		default: '',
+		description: 'Name for the webhook. Shown in the Admin App.',
 		required: true,
 	},
 	{
@@ -107,28 +115,25 @@ export const webhooksFields = [
 		},
 		placeholder: '["create", "update"]',
 		default: [],
-		description: 'When to fire the webhook. Can contain create, update, delete.\n',
+		description: 'When to fire the webhook. Can contain create, update, delete.',
 		required: true,
 		options: [
 			{
 				name: 'Create',
 				value: 'create',
-				description: 'Create',
 			},
 			{
 				name: 'Delete',
 				value: 'delete',
-				description: 'Delete',
 			},
 			{
 				name: 'Update',
 				value: 'update',
-				description: 'Update',
 			},
 		],
 	},
 	{
-		displayName: 'Collections',
+		displayName: 'Collection Names or IDs',
 		name: 'collections',
 		type: 'multiOptions',
 		displayOptions: {
@@ -148,7 +153,7 @@ export const webhooksFields = [
 		},
 		placeholder: '["articles"]',
 		default: [],
-		description: 'What collections to fire this webhook on.\n',
+		description: 'What collections to fire this webhook on.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -174,8 +179,8 @@ export const webhooksFields = [
 			},
 		},
 		placeholder: 'https://example.com/',
-		default: null,
-		description: 'Where to send the request too.\n',
+		default: '',
+		description: 'Where to send the request too.',
 		required: true,
 	},
 	{
@@ -194,7 +199,7 @@ export const webhooksFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
 		required: true,
 	},
 	{
@@ -219,7 +224,7 @@ export const webhooksFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Body parameters as JSON or RAW.',
+		description: 'Body parameters as JSON or RAW',
 	},
 	{
 		displayName: 'Data (JSON)',
@@ -237,7 +242,9 @@ export const webhooksFields = [
 		},
 		placeholder: '[\n	{\n		"name": "Example",\n		"actions": ["create", "update"],\n		"collections": ["articles"],\n		"url": "https://example.com"\n	},\n	{\n		"name": "Second Example",\n		"actions": ["delete"],\n		"collections": ["articles"],\n		"url": "https://example.com/on-delete"\n	}\n]',
 		default: null,
-		description: 'An array of partial [webhook object](https://docs.directus.io/reference/api/system/webhooks/#the-webhook-object).\n`name`, `actions`, `collections`, and `url` are required.\n',
+		description: 'An array of partial [webhook object](https://docs.directus.io/reference/api/system/webhooks/#the-webhook-object).
+`name`, `actions`, `collections`, and `URL` are required.
+',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -258,8 +265,8 @@ export const webhooksFields = [
 			},
 		},
 		placeholder: '15',
-		default: null,
-		description: 'Primary key of the webhook.\n',
+		default: '',
+		description: 'Primary key of the webhook.',
 		required: true,
 	},
 	{
@@ -282,7 +289,7 @@ export const webhooksFields = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit.',
+		description: 'If all results should be returned or only up to a given limit',
 		required: true,
 	},
 	{
@@ -304,11 +311,10 @@ export const webhooksFields = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.\n',
+		description: 'A limit on the number of objects that are returned.',
 		required: true,
 		typeOptions: {
 			minValue: 1,
-			maxValue: 100,
 		},
 	},
 	{
@@ -316,7 +322,7 @@ export const webhooksFields = [
 		name: 'splitIntoItems',
 		type: 'boolean',
 		default: false,
-		description: 'Outputs each element of an array as own item.',
+		description: 'Outputs each element of an array as own item',
 		required: true,
 		displayOptions: {
 			show: {
@@ -345,7 +351,7 @@ export const webhooksFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
 		required: true,
 	},
 	{
@@ -370,7 +376,7 @@ export const webhooksFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Body parameters as JSON or RAW.',
+		description: 'Body parameters as JSON or RAW',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -399,9 +405,8 @@ export const webhooksFields = [
 				name: 'aggregate',
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
-				default: '',
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.\n',
-				required: false,
+				default: {},
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -460,11 +465,11 @@ export const webhooksFields = [
 								description: 'Aggregation Function',
 							},
 							{
-								displayName: 'Field',
+								displayName: 'Field Name or ID',
 								name: 'value',
 								type: 'options',
 								default: '',
-								description: 'Field to apply aggregation on',
+								description: 'Field to apply aggregation on. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 								typeOptions: {
 									loadOptionsMethod: 'getFieldsInCollection',
 								},
@@ -478,7 +483,7 @@ export const webhooksFields = [
 				name: 'binaryPropertyName',
 				type: 'string',
 				default: 'data',
-				description: 'Name of the binary property to download the data to.',
+				description: 'Name of the binary property to download the data to',
 			},
 			{
 				displayName: 'Deep (JSON)',
@@ -486,8 +491,7 @@ export const webhooksFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.\n',
-				required: false,
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -498,23 +502,20 @@ export const webhooksFields = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of json, csv, xml.\n',
-				required: false,
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
+',
 				options: [
 					{
 						name: 'CSV',
 						value: 'csv',
-						description: 'CSV',
 					},
 					{
 						name: 'JSON',
 						value: 'json',
-						description: 'JSON',
 					},
 					{
 						name: 'XML',
 						value: 'xml',
-						description: 'XML',
 					},
 				],
 			},
@@ -523,9 +524,8 @@ export const webhooksFields = [
 				name: 'fields',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Control what fields are being returned in the object.\n',
-				required: false,
+				default: '',
+				description: 'Control what fields are being returned in the object.',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -540,8 +540,7 @@ export const webhooksFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.\n',
-				required: false,
+				description: 'Select items in collection by given conditions.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -551,18 +550,16 @@ export const webhooksFields = [
 				name: 'groupBy',
 				type: 'string',
 				placeholder: 'author,year(publish_date)',
-				default: null,
-				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".\n',
-				required: false,
+				default: '',
+				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".',
 			},
 			{
 				displayName: 'Meta',
 				name: 'meta',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'What metadata to return in the response.\n',
-				required: false,
+				default: '',
+				description: 'What metadata to return in the response.',
 			},
 			{
 				displayName: 'Offset',
@@ -570,26 +567,23 @@ export const webhooksFields = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.\n',
-				required: false,
+				description: 'How many items to skip when fetching data.',
 			},
 			{
 				displayName: 'Search',
 				name: 'search',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Filter by items that contain the given search query in one of their fields.\n',
-				required: false,
+				default: '',
+				description: 'Filter by items that contain the given search query in one of their fields.',
 			},
 			{
 				displayName: 'Sort',
 				name: 'sort',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'How to sort the returned items. \`sort\` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (\` - \`) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a \` ? \` to sort randomly.\n',
-				required: false,
+				default: '',
+				description: 'How to sort the returned items. `sort` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (` - `) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a ` ? ` to sort randomly.',
 			},
 		],
 	},
@@ -609,7 +603,9 @@ export const webhooksFields = [
 		},
 		placeholder: '{\n	"keys": [15, 41],\n	"data": {\n		"name": "Build Website"\n	}\n}',
 		default: null,
-		description: 'Required:\n- **`keys`** [Array of primary keys of the webhooks you\'d like to update]\n- **`data`** [Any of [the webhook object](https://docs.directus.io/reference/api/system/webhooks/#the-webhook-object)\'s properties]\n',
+		description: 'Required:
+- **`keys`** [Array of primary keys of the webhooks you\'d like to update]
+- **`data`** [Any of [the webhook object](https://docs.directus.io/reference/api/system/webhooks/#the-webhook-object)\'s properties]',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -630,8 +626,8 @@ export const webhooksFields = [
 			},
 		},
 		placeholder: '15',
-		default: null,
-		description: 'Primary key of the webhook.\n',
+		default: '',
+		description: 'Primary key of the webhook.',
 		required: true,
 	},
 	{
@@ -650,7 +646,7 @@ export const webhooksFields = [
 		},
 		placeholder: '{\n	"name": "Build Website"\n}',
 		default: null,
-		description: 'A partial [webhook object](https://docs.directus.io/reference/api/system/webhooks/#the-webhook-object).\n',
+		description: 'A partial [webhook object](https://docs.directus.io/reference/api/system/webhooks/#the-webhook-object).',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -672,7 +668,7 @@ export const webhooksFields = [
 		},
 		placeholder: '[2, 15, 41]',
 		default: null,
-		description: 'An array of webhook primary keys.\n',
+		description: 'An array of webhook primary keys.',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -693,9 +689,9 @@ export const webhooksFields = [
 			},
 		},
 		placeholder: '15',
-		default: null,
-		description: 'Primary key of the webhook.\n',
+		default: '',
+		description: 'Primary key of the webhook.',
 		required: true,
 	},
-] as INodeProperties[];
+];
 

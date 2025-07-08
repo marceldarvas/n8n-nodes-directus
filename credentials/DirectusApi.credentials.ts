@@ -1,4 +1,3 @@
-//import { ICredentialType, NodePropertyTypes } from 'n8n-workflow';
 import {
 	IAuthenticateGeneric,
 	ICredentialDataDecryptedObject,
@@ -6,39 +5,105 @@ import {
 	ICredentialType,
 	IHttpRequestOptions,
 	INodeProperties,
+	Icon,
 } from 'n8n-workflow';
 
 export class DirectusApi implements ICredentialType {
 	name = 'directusApi';
-	displayName = 'Directus Api';
-		documentationUrl = 'directus';
+	displayName = 'Directus API';
+	documentationUrl = 'https://docs.directus.io/reference/introduction/';
+	icon: Icon = 'file:directus.svg';
 
 	properties: INodeProperties[] = [
+		{
+			displayName: 'Directus Instance URL',
+			name: 'url',
+			type: 'string',
+			default: '',
+			placeholder: 'https://your-directus-instance.com',
+			description: 'The complete URL of your Directus instance',
+			required: true,
+		},
+		{
+			displayName: 'Authentication Method',
+			name: 'authMethod',
+			type: 'options',
+			options: [
 				{
-						displayName: 'Directus Instance URL',
-						name: 'url',
-						type: 'string',
-						default: '',
-						placeholder: 'https://my-directus-server or http://directus:8055 (for local docker compose container)',
-						description: 'The complete URL of the host with which your Directus instance can be accessed',
-						required: true,
+					name: 'Static Token',
+					value: 'staticToken',
 				},
 				{
-						displayName: 'Access Token',
-						name: 'accessToken',
-						type: 'string',
-						default: '',
-						placeholder: 'fc529da1-cda4-430f-992c-8b40d145fad0',
-						description: 'The Static Token of the user',
-						required: false,
+					name: 'Email & Password',
+					value: 'credentials',
 				},
-		];
+			],
+			default: 'staticToken',
+			description: 'Method to use for authentication',
+		},
+		{
+			displayName: 'Static Token',
+			name: 'staticToken',
+			type: 'string',
+			typeOptions: {
+				password: true,
+			},
+			default: '',
+			placeholder: 'your-directus-static-token',
+			description: 'Static token for API authentication',
+			displayOptions: {
+				show: {
+					authMethod: ['staticToken'],
+				},
+			},
+			required: true,
+		},
+		{
+			displayName: 'Email',
+			name: 'email',
+			type: 'string',
+			default: '',
+			placeholder: 'admin@example.com',
+			description: 'Email address for authentication',
+			displayOptions: {
+				show: {
+					authMethod: ['credentials'],
+				},
+			},
+			required: true,
+		},
+		{
+			displayName: 'Password',
+			name: 'password',
+			type: 'string',
+			typeOptions: {
+				password: true,
+			},
+			default: '',
+			description: 'Password for authentication',
+			displayOptions: {
+				show: {
+					authMethod: ['credentials'],
+				},
+			},
+			required: true,
+		},
+	];
+
 	authenticate: IAuthenticateGeneric = {
 		type: 'generic',
 		properties: {
 			headers: {
-				'Authorization': '={{"Bearer "+ $credentials.accessToken}}',
+				'Authorization': '={{"Bearer " + $credentials.staticToken}}',
 			},
+		},
+	};
+
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: '={{$credentials.url}}',
+			url: '/server/info',
+			method: 'GET',
 		},
 	};
 }

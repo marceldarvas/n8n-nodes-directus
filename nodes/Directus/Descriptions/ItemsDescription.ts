@@ -2,11 +2,12 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export const itemsOperations = [
+export const itemsOperations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
 		type: 'options',
+		noDataExpression: true,
 		displayOptions: {
 			show: {
 				resource: [
@@ -18,50 +19,57 @@ export const itemsOperations = [
 			{
 				name: 'Create',
 				value: 'create',
-				description: 'Create a new item.',
+				description: 'Create a new item',
+				action: 'Create an items',
 			},
 			{
 				name: 'Create Multiple',
 				value: 'createMultiple',
-				description: 'Create multiple items.',
+				description: 'Create multiple items',
+				action: 'Create Multiple an items',
 			},
 			{
 				name: 'Delete',
 				value: 'delete',
-				description: 'Delete an existing item.',
+				description: 'Delete an existing item',
+				action: 'Delete an items',
 			},
 			{
 				name: 'Delete Multiple',
 				value: 'deleteMultiple',
-				description: 'Delete multiple items.',
+				description: 'Delete multiple items',
+				action: 'Delete Multiple an items',
 			},
 			{
 				name: 'Get',
 				value: 'get',
-				description: 'Retrieve a single item by unique identifier.',
+				description: 'Retrieve a single item by unique identifier',
+				action: 'Get an items',
 			},
 			{
 				name: 'List',
 				value: 'list',
-				description: 'List the items.',
+				description: 'List the items',
+				action: 'List an items',
 			},
 			{
 				name: 'Update',
 				value: 'update',
-				description: 'Update an existing item.',
+				description: 'Update an existing item',
+				action: 'Update an items',
 			},
 			{
 				name: 'Update Multiple',
 				value: 'updateMultiple',
-				description: 'Update multiple items.',
+				description: 'Update multiple items',
+				action: 'Update Multiple an items',
 			},
 		],
 		default: 'list',
-		description: 'The operation to perform.',
 	},
-] as INodeProperties[];
+];
 
-export const itemsFields = [
+export const itemsFields: INodeProperties[] = [
 	{
 		displayName: 'ID',
 		name: 'id',
@@ -77,12 +85,12 @@ export const itemsFields = [
 			},
 		},
 		placeholder: '15',
-		default: null,
-		description: 'Unique ID of the file object.\n',
+		default: '',
+		description: 'Unique ID of the file object.',
 		required: true,
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -96,8 +104,8 @@ export const itemsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'Unique name of the parent collection.\n',
+		default: '',
+		description: 'Unique name of the parent collection.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -123,7 +131,7 @@ export const itemsFields = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit.',
+		description: 'If all results should be returned or only up to a given limit',
 		required: true,
 	},
 	{
@@ -145,11 +153,10 @@ export const itemsFields = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.\n',
+		description: 'A limit on the number of objects that are returned.',
 		required: true,
 		typeOptions: {
 			minValue: 1,
-			maxValue: 100,
 		},
 	},
 	{
@@ -174,9 +181,8 @@ export const itemsFields = [
 				name: 'aggregate',
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
-				default: '',
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.\n',
-				required: false,
+				default: {},
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -235,11 +241,11 @@ export const itemsFields = [
 								description: 'Aggregation Function',
 							},
 							{
-								displayName: 'Field',
+								displayName: 'Field Name or ID',
 								name: 'value',
 								type: 'options',
 								default: '',
-								description: 'Field to apply aggregation on',
+								description: 'Field to apply aggregation on. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 								typeOptions: {
 									loadOptionsMethod: 'getFieldsInCollection',
 								},
@@ -253,7 +259,7 @@ export const itemsFields = [
 				name: 'binaryPropertyName',
 				type: 'string',
 				default: 'data',
-				description: 'Name of the binary property to download the data to.',
+				description: 'Name of the binary property to download the data to',
 			},
 			{
 				displayName: 'Deep (JSON)',
@@ -261,8 +267,7 @@ export const itemsFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.\n',
-				required: false,
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -273,23 +278,20 @@ export const itemsFields = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of json, csv, xml.\n',
-				required: false,
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
+',
 				options: [
 					{
 						name: 'CSV',
 						value: 'csv',
-						description: 'CSV',
 					},
 					{
 						name: 'JSON',
 						value: 'json',
-						description: 'JSON',
 					},
 					{
 						name: 'XML',
 						value: 'xml',
-						description: 'XML',
 					},
 				],
 			},
@@ -298,9 +300,8 @@ export const itemsFields = [
 				name: 'fields',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Control what fields are being returned in the object.\n',
-				required: false,
+				default: '',
+				description: 'Control what fields are being returned in the object.',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -315,8 +316,7 @@ export const itemsFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.\n',
-				required: false,
+				description: 'Select items in collection by given conditions.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -326,18 +326,16 @@ export const itemsFields = [
 				name: 'groupBy',
 				type: 'string',
 				placeholder: 'author,year(publish_date)',
-				default: null,
-				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".\n',
-				required: false,
+				default: '',
+				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".',
 			},
 			{
 				displayName: 'Meta',
 				name: 'meta',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'What metadata to return in the response.\n',
-				required: false,
+				default: '',
+				description: 'What metadata to return in the response.',
 			},
 			{
 				displayName: 'Offset',
@@ -345,31 +343,28 @@ export const itemsFields = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.\n',
-				required: false,
+				description: 'How many items to skip when fetching data.',
 			},
 			{
 				displayName: 'Search',
 				name: 'search',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Filter by items that contain the given search query in one of their fields.\n',
-				required: false,
+				default: '',
+				description: 'Filter by items that contain the given search query in one of their fields.',
 			},
 			{
 				displayName: 'Sort',
 				name: 'sort',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'How to sort the returned items. \`sort\` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (\` - \`) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a \` ? \` to sort randomly.\n',
-				required: false,
+				default: '',
+				description: 'How to sort the returned items. `sort` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (` - `) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a ` ? ` to sort randomly.',
 			},
 		],
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -383,8 +378,8 @@ export const itemsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'Unique name of the parent collection.\n',
+		default: '',
+		description: 'Unique name of the parent collection.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -406,14 +401,14 @@ export const itemsFields = [
 		},
 		placeholder: '{\n	"title": "Hello world!",\n	"body": "This is our first article"\n}',
 		default: null,
-		description: 'The partial [item object](https://docs.directus.io/reference/api/items/#the-item-object).\n',
+		description: 'The partial [item object](https://docs.directus.io/reference/api/items/#the-item-object).',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
 		},
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -427,8 +422,8 @@ export const itemsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'Unique name of the parent collection.\n',
+		default: '',
+		description: 'Unique name of the parent collection.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -450,14 +445,14 @@ export const itemsFields = [
 		},
 		placeholder: '[\n	{\n		"title": "Hello world!",\n		"body": "This is our first article"\n	},\n	{\n		"title": "Hello again, world!",\n		"body": "This is our second article"\n	}\n]',
 		default: null,
-		description: 'An array of partial [item objects](https://docs.directus.io/reference/api/items/#the-item-object).\n',
+		description: 'An array of partial [item objects](https://docs.directus.io/reference/api/items/#the-item-object).',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
 		},
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -471,8 +466,8 @@ export const itemsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'Unique name of the parent collection.\n',
+		default: '',
+		description: 'Unique name of the parent collection.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -498,7 +493,7 @@ export const itemsFields = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit.',
+		description: 'If all results should be returned or only up to a given limit',
 		required: true,
 	},
 	{
@@ -525,11 +520,10 @@ export const itemsFields = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.\n',
+		description: 'A limit on the number of objects that are returned.',
 		required: true,
 		typeOptions: {
 			minValue: 1,
-			maxValue: 100,
 		},
 	},
 	{
@@ -537,7 +531,7 @@ export const itemsFields = [
 		name: 'splitIntoItems',
 		type: 'boolean',
 		default: false,
-		description: 'Outputs each element of an array as own item.',
+		description: 'Outputs each element of an array as own item',
 		required: true,
 		displayOptions: {
 			show: {
@@ -566,7 +560,7 @@ export const itemsFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
 		required: true,
 	},
 	{
@@ -591,7 +585,7 @@ export const itemsFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Query parameters as JSON (flat object).',
+		description: 'Query parameters as JSON (flat object)',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -620,9 +614,8 @@ export const itemsFields = [
 				name: 'aggregate',
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
-				default: '',
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.\n',
-				required: false,
+				default: {},
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -681,11 +674,11 @@ export const itemsFields = [
 								description: 'Aggregation Function',
 							},
 							{
-								displayName: 'Field',
+								displayName: 'Field Name or ID',
 								name: 'value',
 								type: 'options',
 								default: '',
-								description: 'Field to apply aggregation on',
+								description: 'Field to apply aggregation on. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 								typeOptions: {
 									loadOptionsMethod: 'getFieldsInCollection',
 								},
@@ -699,7 +692,7 @@ export const itemsFields = [
 				name: 'binaryPropertyName',
 				type: 'string',
 				default: 'data',
-				description: 'Name of the binary property to download the data to.',
+				description: 'Name of the binary property to download the data to',
 			},
 			{
 				displayName: 'Deep (JSON)',
@@ -707,8 +700,7 @@ export const itemsFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.\n',
-				required: false,
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -719,23 +711,20 @@ export const itemsFields = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of json, csv, xml.\n',
-				required: false,
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
+',
 				options: [
 					{
 						name: 'CSV',
 						value: 'csv',
-						description: 'CSV',
 					},
 					{
 						name: 'JSON',
 						value: 'json',
-						description: 'JSON',
 					},
 					{
 						name: 'XML',
 						value: 'xml',
-						description: 'XML',
 					},
 				],
 			},
@@ -744,9 +733,8 @@ export const itemsFields = [
 				name: 'fields',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Control what fields are being returned in the object.\n',
-				required: false,
+				default: '',
+				description: 'Control what fields are being returned in the object.',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -761,8 +749,7 @@ export const itemsFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.\n',
-				required: false,
+				description: 'Select items in collection by given conditions.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -772,18 +759,16 @@ export const itemsFields = [
 				name: 'groupBy',
 				type: 'string',
 				placeholder: 'author,year(publish_date)',
-				default: null,
-				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".\n',
-				required: false,
+				default: '',
+				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".',
 			},
 			{
 				displayName: 'Meta',
 				name: 'meta',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'What metadata to return in the response.\n',
-				required: false,
+				default: '',
+				description: 'What metadata to return in the response.',
 			},
 			{
 				displayName: 'Offset',
@@ -791,26 +776,23 @@ export const itemsFields = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.\n',
-				required: false,
+				description: 'How many items to skip when fetching data.',
 			},
 			{
 				displayName: 'Search',
 				name: 'search',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Filter by items that contain the given search query in one of their fields.\n',
-				required: false,
+				default: '',
+				description: 'Filter by items that contain the given search query in one of their fields.',
 			},
 			{
 				displayName: 'Sort',
 				name: 'sort',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'How to sort the returned items. \`sort\` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (\` - \`) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a \` ? \` to sort randomly.\n',
-				required: false,
+				default: '',
+				description: 'How to sort the returned items. `sort` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (` - `) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a ` ? ` to sort randomly.',
 			},
 		],
 	},
@@ -829,12 +811,12 @@ export const itemsFields = [
 			},
 		},
 		placeholder: '15',
-		default: null,
-		description: 'Unique ID of the file object.\n',
+		default: '',
+		description: 'Unique ID of the file object.',
 		required: true,
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -848,8 +830,8 @@ export const itemsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'Unique name of the parent collection.\n',
+		default: '',
+		description: 'Unique name of the parent collection.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -871,7 +853,7 @@ export const itemsFields = [
 		},
 		placeholder: '{\n	"title": "Hello world!",\n	"body": "This is our first article"\n}',
 		default: null,
-		description: 'The partial [item object](https://docs.directus.io/reference/api/items/#the-item-object).\n',
+		description: 'The partial [item object](https://docs.directus.io/reference/api/items/#the-item-object).',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -893,14 +875,14 @@ export const itemsFields = [
 		},
 		placeholder: '{\n	"keys": [1, 2],\n	"data": {\n		"status": "published"\n	}\n}',
 		default: null,
-		description: 'An array of partial [item objects](https://docs.directus.io/reference/api/items/#the-item-object).\n',
+		description: 'An array of partial [item objects](https://docs.directus.io/reference/api/items/#the-item-object).',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
 		},
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -914,8 +896,8 @@ export const itemsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'Unique name of the parent collection.\n',
+		default: '',
+		description: 'Unique name of the parent collection.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -936,12 +918,12 @@ export const itemsFields = [
 			},
 		},
 		placeholder: '15',
-		default: null,
-		description: 'Unique ID of the file object.\n',
+		default: '',
+		description: 'Unique ID of the file object.',
 		required: true,
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -955,15 +937,15 @@ export const itemsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'Unique name of the parent collection.\n',
+		default: '',
+		description: 'Unique name of the parent collection.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
 		},
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -977,8 +959,8 @@ export const itemsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'Unique name of the parent collection.\n',
+		default: '',
+		description: 'Unique name of the parent collection.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -1000,11 +982,11 @@ export const itemsFields = [
 		},
 		placeholder: '[15, 16, 21]',
 		default: null,
-		description: 'An array of item primary keys.\n',
+		description: 'An array of item primary keys.',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
 		},
 	},
-] as INodeProperties[];
+];
 

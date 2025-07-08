@@ -2,11 +2,12 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export const extensionsOperations = [
+export const extensionsOperations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
 		type: 'options',
+		noDataExpression: true,
 		displayOptions: {
 			show: {
 				resource: [
@@ -19,14 +20,14 @@ export const extensionsOperations = [
 				name: 'List',
 				value: 'list',
 				description: 'List the available extensions in the project. The types of extensions that you can list are interfaces, displays, layouts, modules.',
+				action: 'List an extensions',
 			},
 		],
 		default: 'list',
-		description: 'The operation to perform.',
 	},
-] as INodeProperties[];
+];
 
-export const extensionsFields = [
+export const extensionsFields: INodeProperties[] = [
 	{
 		displayName: 'Type',
 		name: 'type',
@@ -43,28 +44,23 @@ export const extensionsFields = [
 		},
 		placeholder: 'Select an option',
 		default: 'displays',
-		description: 'Type',
 		required: true,
 		options: [
 			{
 				name: 'Displays',
 				value: 'displays',
-				description: 'Displays',
 			},
 			{
 				name: 'Interfaces',
 				value: 'interfaces',
-				description: 'Interfaces',
 			},
 			{
 				name: 'Layouts',
 				value: 'layouts',
-				description: 'Layouts',
 			},
 			{
 				name: 'Modules',
 				value: 'modules',
-				description: 'Modules',
 			},
 		],
 	},
@@ -73,7 +69,7 @@ export const extensionsFields = [
 		name: 'splitIntoItems',
 		type: 'boolean',
 		default: false,
-		description: 'Outputs each element of an array as own item.',
+		description: 'Outputs each element of an array as own item',
 		required: true,
 		displayOptions: {
 			show: {
@@ -86,5 +82,5 @@ export const extensionsFields = [
 			},
 		},
 	},
-] as INodeProperties[];
+];
 

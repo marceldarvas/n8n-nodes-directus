@@ -2,11 +2,12 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export const assetsOperations = [
+export const assetsOperations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
 		type: 'options',
+		noDataExpression: true,
 		displayOptions: {
 			show: {
 				resource: [
@@ -18,15 +19,15 @@ export const assetsOperations = [
 			{
 				name: 'Get',
 				value: 'get',
-				description: 'Image typed files can be dynamically resized and transformed to fit any need.',
+				description: 'Image typed files can be dynamically resized and transformed to fit any need',
+				action: 'Get an assets',
 			},
 		],
 		default: 'get',
-		description: 'The operation to perform.',
 	},
-] as INodeProperties[];
+];
 
-export const assetsFields = [
+export const assetsFields: INodeProperties[] = [
 	{
 		displayName: 'ID',
 		name: 'id',
@@ -42,8 +43,8 @@ export const assetsFields = [
 			},
 		},
 		placeholder: '',
-		default: null,
-		description: 'The ID of the file.\n',
+		default: '',
+		description: 'The ID of the file',
 		required: true,
 	},
 	{
@@ -62,7 +63,7 @@ export const assetsFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'Enable if corresponding file data should also be included along with the asset.\n',
+		description: 'Enable if corresponding file data should also be included along with the asset',
 		required: true,
 	},
 	{
@@ -81,7 +82,7 @@ export const assetsFields = [
 				],
 			},
 		},
-		description: 'Name of the binary property which contains the data for the file to be uploaded.<br />\n							For Form-Data Multipart, multiple can be provided in the format:<br />\n							"sendKey1:binaryProperty1,sendKey2:binaryProperty2',
+		description: 'Name of the binary property which contains the data for the file to be uploaded. For Form-Data Multipart, multiple can be provided in the format: "sendKey1:binaryProperty1,sendKey2:binaryProperty2.',
 	},
 	{
 		displayName: 'JSON/RAW Parameters',
@@ -99,7 +100,7 @@ export const assetsFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -124,7 +125,7 @@ export const assetsFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Query parameters as JSON (flat object).',
+		description: 'Query parameters as JSON (flat object)',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -154,28 +155,27 @@ export const assetsFields = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'contain',
-				description: 'The fit of the thumbnail while always preserving the aspect ratio.\n',
-				required: false,
+				description: 'The fit of the thumbnail while always preserving the aspect ratio',
 				options: [
 					{
 						name: 'Contain',
 						value: 'contain',
-						description: 'Contain within both width/height using \'letterboxing\' as needed.',
+						description: 'Contain within both width/height using \'letterboxing\' as needed',
 					},
 					{
 						name: 'Cover',
 						value: 'cover',
-						description: 'Covers both width/height by cropping/clipping to fit.',
+						description: 'Covers both width/height by cropping/clipping to fit',
 					},
 					{
 						name: 'Inside',
 						value: 'inside',
-						description: 'Resize to be as large as possible, ensuring dimensions are less than or equal to the requested width and height.',
+						description: 'Resize to be as large as possible, ensuring dimensions are less than or equal to the requested width and height',
 					},
 					{
 						name: 'Outside',
 						value: 'outside',
-						description: 'Resize to be as small as possible, ensuring dimensions are greater than or equal to the requested width and height.',
+						description: 'Resize to be as small as possible, ensuring dimensions are greater than or equal to the requested width and height',
 					},
 				],
 			},
@@ -185,28 +185,23 @@ export const assetsFields = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'jpg',
-				description: 'What file format to return the thumbnail in.\n',
-				required: false,
+				description: 'What file format to return the thumbnail in',
 				options: [
 					{
 						name: 'JPG',
 						value: 'jpg',
-						description: 'JPG',
 					},
 					{
 						name: 'PNG',
 						value: 'png',
-						description: 'PNG',
 					},
 					{
 						name: 'TIFF',
 						value: 'tiff',
-						description: 'TIFF',
 					},
 					{
 						name: 'WEBP',
 						value: 'webp',
-						description: 'WEBP',
 					},
 				],
 			},
@@ -216,8 +211,7 @@ export const assetsFields = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'The height of the thumbnail in pixels.\n',
-				required: false,
+				description: 'The height of the thumbnail in pixels',
 				typeOptions: {
 					minValue: 1,
 				},
@@ -227,9 +221,8 @@ export const assetsFields = [
 				name: 'key',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'The key of the asset size configured in settings.\n',
-				required: false,
+				default: '',
+				description: 'The key of the asset size configured in settings',
 			},
 			{
 				displayName: 'Quality',
@@ -237,8 +230,7 @@ export const assetsFields = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'The quality of the thumbnail (1 to 100).\n',
-				required: false,
+				description: 'The quality of the thumbnail (1 to 100)',
 				typeOptions: {
 					maxValue: 100,
 					minValue: 1,
@@ -250,8 +242,7 @@ export const assetsFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'A JSON array of image transformations\n',
-				required: false,
+				description: 'A JSON array of image transformations',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -262,8 +253,7 @@ export const assetsFields = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'The width of the thumbnail in pixels.\n',
-				required: false,
+				description: 'The width of the thumbnail in pixels',
 				typeOptions: {
 					minValue: 1,
 				},
@@ -274,10 +264,9 @@ export const assetsFields = [
 				type: 'boolean',
 				placeholder: '',
 				default: false,
-				description: 'Disable image up-scaling.\n',
-				required: false,
+				description: 'Disable image up-scaling',
 			},
 		],
 	},
-] as INodeProperties[];
+];
 

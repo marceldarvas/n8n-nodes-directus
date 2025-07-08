@@ -1,13 +1,14 @@
 {
 	"compilerOptions": {
 		"lib": [
-			"es2017",
-			"es2019"
+			"es2020",
+			"dom"
 		],
 		"types": [
-			"node",
+			"node"
 		],
 		"module": "commonjs",
+		"moduleResolution": "node",
 		"noImplicitAny": true,
 		"removeComments": true,
 		"strictNullChecks": true,
@@ -16,15 +17,22 @@
 		"resolveJsonModule": true,
 		"declaration": true,
 		"outDir": "./dist/",
-		"target": "es2019",
+		"target": "es2020",
 		"sourceMap": true,
 		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
 		"useUnknownInCatchVariables": false,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true
 	},
 	"include": [
 		"credentials/**/*",
 		"nodes/**/*",
 		"nodes/**/*.json",
-		"package.json",
+		"package.json"
 	],
+	"exclude": [
+		"node_modules",
+		"dist"
+	]
 }

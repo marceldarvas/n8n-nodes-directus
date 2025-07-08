@@ -2,11 +2,12 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export const fieldsOperations = [
+export const fieldsOperations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
 		type: 'options',
+		noDataExpression: true,
 		displayOptions: {
 			show: {
 				resource: [
@@ -18,37 +19,41 @@ export const fieldsOperations = [
 			{
 				name: 'Delete',
 				value: 'delete',
-				description: 'Delete an existing field.',
+				description: 'Delete an existing field',
+				action: 'Delete a fields',
 			},
 			{
 				name: 'Get',
 				value: 'get',
-				description: 'Retrieves the details of a single field in a given collection.',
+				description: 'Retrieves the details of a single field in a given collection',
+				action: 'Get a fields',
 			},
 			{
 				name: 'List',
 				value: 'list',
-				description: 'Returns a list of the fields available in the given collection.',
+				description: 'Returns a list of the fields available in the given collection',
+				action: 'List a fields',
 			},
 			{
 				name: 'List All',
 				value: 'listAll',
-				description: 'Returns a list of the fields available in the project.',
+				description: 'Returns a list of the fields available in the project',
+				action: 'List all a fields',
 			},
 			{
 				name: 'Update',
 				value: 'update',
-				description: 'Update an existing field.',
+				description: 'Update an existing field',
+				action: 'Update a fields',
 			},
 		],
 		default: 'list',
-		description: 'The operation to perform.',
 	},
-] as INodeProperties[];
+];
 
-export const fieldsFields = [
+export const fieldsFields: INodeProperties[] = [
 	{
-		displayName: 'Field',
+		displayName: 'Field Name or ID',
 		name: 'field',
 		type: 'options',
 		displayOptions: {
@@ -62,15 +67,15 @@ export const fieldsFields = [
 			},
 		},
 		placeholder: '',
-		default: null,
-		description: 'Unique name of the field. Field name is unique within the collection.\n',
+		default: '',
+		description: 'Unique name of the field. Field name is unique within the collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getFieldsInCollection',
 		},
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -84,15 +89,15 @@ export const fieldsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'The collection name\n',
+		default: '',
+		description: 'The collection name. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
 		},
 	},
 	{
-		displayName: 'Field',
+		displayName: 'Field Name or ID',
 		name: 'field',
 		type: 'options',
 		displayOptions: {
@@ -106,15 +111,15 @@ export const fieldsFields = [
 			},
 		},
 		placeholder: '',
-		default: null,
-		description: 'Unique name of the field. Field name is unique within the collection.\n',
+		default: '',
+		description: 'Unique name of the field. Field name is unique within the collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getFieldsInCollection',
 		},
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -128,8 +133,8 @@ export const fieldsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'The collection name\n',
+		default: '',
+		description: 'The collection name. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
@@ -140,7 +145,7 @@ export const fieldsFields = [
 		name: 'splitIntoItems',
 		type: 'boolean',
 		default: false,
-		description: 'Outputs each element of an array as own item.',
+		description: 'Outputs each element of an array as own item',
 		required: true,
 		displayOptions: {
 			show: {
@@ -154,7 +159,7 @@ export const fieldsFields = [
 		},
 	},
 	{
-		displayName: 'Field',
+		displayName: 'Field Name or ID',
 		name: 'field',
 		type: 'options',
 		displayOptions: {
@@ -167,16 +172,16 @@ export const fieldsFields = [
 				],
 			},
 		},
-		placeholder: 'id',
-		default: null,
-		description: 'Unique name of the field. Field name is unique within the collection.\n',
+		placeholder: 'ID',
+		default: '',
+		description: 'Unique name of the field. Field name is unique within the collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getFieldsInCollection',
 		},
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -190,8 +195,8 @@ export const fieldsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'The collection name\n',
+		default: '',
+		description: 'The collection name. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
@@ -213,7 +218,7 @@ export const fieldsFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -238,7 +243,7 @@ export const fieldsFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Body parameters as JSON or RAW.',
+		description: 'Body parameters as JSON or RAW',
 	},
 	{
 		displayName: 'Update Fields',
@@ -268,8 +273,7 @@ export const fieldsFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'The meta info.\n',
-				required: false,
+				description: 'The meta info',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -280,8 +284,7 @@ export const fieldsFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'The schema info.\n',
-				required: false,
+				description: 'The schema info',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -292,61 +295,59 @@ export const fieldsFields = [
 				type: 'options',
 				placeholder: 'integer',
 				default: 'bigInteger',
-				description: 'Directus specific data type. Used to cast values in the API.\n',
-				required: false,
+				description: 'Directus specific data type. Used to cast values in the API.',
 				options: [
 					{
-						name: 'Big Integer ',
+						name: 'Big Integer',
 						value: 'bigInteger',
 						description: 'A larger number without a decimal point',
 					},
 					{
-						name: 'Boolean ',
+						name: 'Boolean',
 						value: 'boolean',
 						description: 'A True or False value',
 					},
 					{
-						name: 'CSV ',
+						name: 'CSV',
 						value: 'csv',
 						description: 'A comma-separated value, returned as an array of strings',
 					},
 					{
-						name: 'DateTime ',
+						name: 'DateTime',
 						value: 'dateTime',
 						description: 'A date and time saved in the database vendor\'s format',
 					},
 					{
-						name: 'Date ',
+						name: 'Date',
 						value: 'date',
 						description: 'A date saved in the database vendor\'s format',
 					},
 					{
-						name: 'Decimal ',
+						name: 'Decimal',
 						value: 'decimal',
 						description: 'A higher precision, exact decimal number often used in finances',
 					},
 					{
 						name: 'Field Group',
 						value: 'alias',
-						description: 'Field Group',
 					},
 					{
-						name: 'Float ',
+						name: 'Float',
 						value: 'float',
 						description: 'A less exact number with a floating decimal point',
 					},
 					{
-						name: 'Hash ',
+						name: 'Hash',
 						value: 'string',
 						description: 'A string hashed using argon2 cryptographic hash algorithm',
 					},
 					{
-						name: 'Integer ',
+						name: 'Integer',
 						value: 'integer',
 						description: 'A number without a decimal point',
 					},
 					{
-						name: 'JSON ',
+						name: 'JSON',
 						value: 'json',
 						description: 'A value nested in JavaScript Object Notation',
 					},
@@ -361,11 +362,6 @@ export const fieldsFields = [
 						description: 'Many to Many relationship',
 					},
 					{
-						name: 'M2O',
-						value: 'integer',
-						description: 'Many to One relationship',
-					},
-					{
 						name: 'Multiple Files',
 						value: 'files',
 						description: 'Field for Multiple Files',
@@ -376,46 +372,31 @@ export const fieldsFields = [
 						description: 'One to Many relationship',
 					},
 					{
-						name: 'Presentation',
-						value: 'alias',
-						description: 'Presentation',
-					},
-					{
 						name: 'Single File',
 						value: 'uuid',
 						description: 'Field for a Single File',
 					},
 					{
-						name: 'String ',
-						value: 'string',
-						description: 'A shorter set of characters with a configurable max length',
-					},
-					{
-						name: 'Text ',
+						name: 'Text',
 						value: 'text',
 						description: 'A longer set of characters with no real-world max length',
 					},
 					{
-						name: 'Timestamp ',
+						name: 'Timestamp',
 						value: 'timestamp',
 						description: 'A date, time, and timezone saved in ISO 8601 format',
 					},
 					{
-						name: 'Time ',
+						name: 'Time',
 						value: 'time',
 						description: 'A time saved in the database vendor\'s format',
-					},
-					{
-						name: 'UUID ',
-						value: 'uuid',
-						description: 'A universally unique identifier saved in UUIDv4 format',
 					},
 				],
 			},
 		],
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -429,8 +410,8 @@ export const fieldsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'The collection name\n',
+		default: '',
+		description: 'The collection name. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
@@ -441,7 +422,7 @@ export const fieldsFields = [
 		name: 'splitIntoItems',
 		type: 'boolean',
 		default: false,
-		description: 'Outputs each element of an array as own item.',
+		description: 'Outputs each element of an array as own item',
 		required: true,
 		displayOptions: {
 			show: {
@@ -454,5 +435,5 @@ export const fieldsFields = [
 			},
 		},
 	},
-] as INodeProperties[];
+];
 

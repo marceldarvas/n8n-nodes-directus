@@ -2,11 +2,12 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export const utilsOperations = [
+export const utilsOperations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
 		type: 'options',
+		noDataExpression: true,
 		displayOptions: {
 			show: {
 				resource: [
@@ -19,39 +20,44 @@ export const utilsOperations = [
 				name: 'Clear Cache',
 				value: 'clearCache',
 				description: 'Clear the Internal Cache',
+				action: 'Clear cache an utils',
 			},
 			{
 				name: 'Generate Hash',
 				value: 'generateHash',
 				description: 'Generate a Hash',
+				action: 'Generate hash an utils',
 			},
 			{
 				name: 'Get a Random String',
 				value: 'getRandomString',
-				description: 'Returns a random string of given length.',
+				description: 'Returns a random string of given length',
+				action: 'Get a random string an utils',
 			},
 			{
 				name: 'Import File Data',
 				value: 'importFileData',
 				description: 'Import Data from File',
+				action: 'Import file data an utils',
 			},
 			{
 				name: 'Sort Items',
 				value: 'sortItems',
 				description: 'Re-sort items in collection based on start and to value of item',
+				action: 'Sort items an utils',
 			},
 			{
 				name: 'Verifiy Hash',
 				value: 'verfiyHash',
 				description: 'Verify a Hash',
+				action: 'Verifiy hash an utils',
 			},
 		],
 		default: 'clearCache',
-		description: 'The operation to perform.',
 	},
-] as INodeProperties[];
+];
 
-export const utilsFields = [
+export const utilsFields: INodeProperties[] = [
 	{
 		displayName: 'String',
 		name: 'string',
@@ -67,8 +73,8 @@ export const utilsFields = [
 			},
 		},
 		placeholder: 'Hello World!',
-		default: null,
-		description: 'String to hash.\n',
+		default: '',
+		description: 'String to hash',
 		required: true,
 	},
 	{
@@ -86,8 +92,8 @@ export const utilsFields = [
 			},
 		},
 		placeholder: 'Hello World!',
-		default: null,
-		description: 'Source string.\n',
+		default: '',
+		description: 'Source string',
 		required: true,
 	},
 	{
@@ -105,8 +111,8 @@ export const utilsFields = [
 			},
 		},
 		placeholder: '$arg...fEfM',
-		default: null,
-		description: 'Hash you want to verify against.\n',
+		default: '',
+		description: 'Hash you want to verify against',
 		required: true,
 	},
 	{
@@ -125,7 +131,7 @@ export const utilsFields = [
 		},
 		placeholder: '51',
 		default: null,
-		description: 'Primary key of item where to move the current item to\n',
+		description: 'Primary key of item where to move the current item to',
 		required: true,
 	},
 	{
@@ -144,11 +150,11 @@ export const utilsFields = [
 		},
 		placeholder: '16',
 		default: null,
-		description: 'Primary key of item to move\n',
+		description: 'Primary key of item to move',
 		required: true,
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -162,15 +168,15 @@ export const utilsFields = [
 			},
 		},
 		placeholder: 'author',
-		default: null,
-		description: 'Collection identifier\n',
+		default: '',
+		description: 'Collection identifier. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
 		},
 	},
 	{
-		displayName: 'Collection',
+		displayName: 'Collection Name or ID',
 		name: 'collection',
 		type: 'options',
 		displayOptions: {
@@ -184,8 +190,8 @@ export const utilsFields = [
 			},
 		},
 		placeholder: 'articles',
-		default: null,
-		description: 'Unique name of the collection to import the data to.\n',
+		default: '',
+		description: 'Unique name of the collection to import the data to. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
@@ -207,7 +213,7 @@ export const utilsFields = [
 		},
 		placeholder: '',
 		default: '\n',
-		description: 'Name of the Binary Property the file is in.\n',
+		description: 'Name of the Binary Property the file is in',
 		required: true,
 	},
 	{
@@ -233,13 +239,12 @@ export const utilsFields = [
 				type: 'number',
 				placeholder: '20',
 				default: null,
-				description: 'Length of the random string.\n',
-				required: false,
+				description: 'Length of the random string',
 				typeOptions: {
 					minValue: 1,
 				},
 			},
 		],
 	},
-] as INodeProperties[];
+];
 

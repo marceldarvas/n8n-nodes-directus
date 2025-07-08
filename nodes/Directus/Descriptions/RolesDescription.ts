@@ -2,11 +2,12 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export const rolesOperations = [
+export const rolesOperations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
 		type: 'options',
+		noDataExpression: true,
 		displayOptions: {
 			show: {
 				resource: [
@@ -18,50 +19,57 @@ export const rolesOperations = [
 			{
 				name: 'Create',
 				value: 'create',
-				description: 'Create a new role.',
+				description: 'Create a new role',
+				action: 'Create a roles',
 			},
 			{
 				name: 'Create Multiple',
 				value: 'createMultiple',
 				description: 'Create Multiple Roles',
+				action: 'Create Multiple a roles',
 			},
 			{
 				name: 'Delete',
 				value: 'delete',
 				description: 'Delete an existing role',
+				action: 'Delete a roles',
 			},
 			{
 				name: 'Delete Multiple',
 				value: 'deleteMultiple',
 				description: 'Delete Multiple Roles',
+				action: 'Delete Multiple a roles',
 			},
 			{
 				name: 'Get',
 				value: 'get',
-				description: 'Retrieve a single role by unique identifier.',
+				description: 'Retrieve a single role by unique identifier',
+				action: 'Get a roles',
 			},
 			{
 				name: 'List',
 				value: 'list',
-				description: 'List the roles.',
+				description: 'List the roles',
+				action: 'List a roles',
 			},
 			{
 				name: 'Update',
 				value: 'update',
 				description: 'Update an existing role',
+				action: 'Update a roles',
 			},
 			{
 				name: 'Update Multiple',
 				value: 'updateMultiple',
 				description: 'Update Multiple Roles',
+				action: 'Update Multiple a roles',
 			},
 		],
 		default: 'list',
-		description: 'The operation to perform.',
 	},
-] as INodeProperties[];
+];
 
-export const rolesFields = [
+export const rolesFields: INodeProperties[] = [
 	{
 		displayName: 'Return All',
 		name: 'returnAll',
@@ -82,7 +90,7 @@ export const rolesFields = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit.',
+		description: 'If all results should be returned or only up to a given limit',
 		required: true,
 	},
 	{
@@ -109,11 +117,10 @@ export const rolesFields = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.\n',
+		description: 'A limit on the number of objects that are returned.',
 		required: true,
 		typeOptions: {
 			minValue: 1,
-			maxValue: 100,
 		},
 	},
 	{
@@ -121,7 +128,7 @@ export const rolesFields = [
 		name: 'splitIntoItems',
 		type: 'boolean',
 		default: false,
-		description: 'Outputs each element of an array as own item.',
+		description: 'Outputs each element of an array as own item',
 		required: true,
 		displayOptions: {
 			show: {
@@ -150,7 +157,7 @@ export const rolesFields = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.\n',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
 		required: true,
 	},
 	{
@@ -175,7 +182,7 @@ export const rolesFields = [
 			alwaysOpenEditWindow: true,
 		},
 		default: '',
-		description: 'Query parameters as JSON (flat object).',
+		description: 'Query parameters as JSON (flat object)',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -204,9 +211,8 @@ export const rolesFields = [
 				name: 'aggregate',
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
-				default: '',
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.\n',
-				required: false,
+				default: {},
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -265,11 +271,11 @@ export const rolesFields = [
 								description: 'Aggregation Function',
 							},
 							{
-								displayName: 'Field',
+								displayName: 'Field Name or ID',
 								name: 'value',
 								type: 'options',
 								default: '',
-								description: 'Field to apply aggregation on',
+								description: 'Field to apply aggregation on. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 								typeOptions: {
 									loadOptionsMethod: 'getFieldsInCollection',
 								},
@@ -283,7 +289,7 @@ export const rolesFields = [
 				name: 'binaryPropertyName',
 				type: 'string',
 				default: 'data',
-				description: 'Name of the binary property to download the data to.',
+				description: 'Name of the binary property to download the data to',
 			},
 			{
 				displayName: 'Deep (JSON)',
@@ -291,8 +297,7 @@ export const rolesFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.\n',
-				required: false,
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -303,23 +308,20 @@ export const rolesFields = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of json, csv, xml.\n',
-				required: false,
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
+',
 				options: [
 					{
 						name: 'CSV',
 						value: 'csv',
-						description: 'CSV',
 					},
 					{
 						name: 'JSON',
 						value: 'json',
-						description: 'JSON',
 					},
 					{
 						name: 'XML',
 						value: 'xml',
-						description: 'XML',
 					},
 				],
 			},
@@ -328,9 +330,8 @@ export const rolesFields = [
 				name: 'fields',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Control what fields are being returned in the object.\n',
-				required: false,
+				default: '',
+				description: 'Control what fields are being returned in the object.',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -345,8 +346,7 @@ export const rolesFields = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.\n',
-				required: false,
+				description: 'Select items in collection by given conditions.',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -356,18 +356,16 @@ export const rolesFields = [
 				name: 'groupBy',
 				type: 'string',
 				placeholder: 'author,year(publish_date)',
-				default: null,
-				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".\n',
-				required: false,
+				default: '',
+				description: 'Grouping allows for running the aggregation functions based on a shared value. This allows for things like "Average rating per month" or "Total sales of items in the jeans category".',
 			},
 			{
 				displayName: 'Meta',
 				name: 'meta',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'What metadata to return in the response.\n',
-				required: false,
+				default: '',
+				description: 'What metadata to return in the response.',
 			},
 			{
 				displayName: 'Offset',
@@ -375,26 +373,23 @@ export const rolesFields = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.\n',
-				required: false,
+				description: 'How many items to skip when fetching data.',
 			},
 			{
 				displayName: 'Search',
 				name: 'search',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'Filter by items that contain the given search query in one of their fields.\n',
-				required: false,
+				default: '',
+				description: 'Filter by items that contain the given search query in one of their fields.',
 			},
 			{
 				displayName: 'Sort',
 				name: 'sort',
 				type: 'string',
 				placeholder: '',
-				default: null,
-				description: 'How to sort the returned items. \`sort\` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (\` - \`) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a \` ? \` to sort randomly.\n',
-				required: false,
+				default: '',
+				description: 'How to sort the returned items. `sort` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (` - `) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a ` ? ` to sort randomly.',
 			},
 		],
 	},
@@ -414,7 +409,9 @@ export const rolesFields = [
 		},
 		placeholder: '{\n	"keys": ["c86c2761-65d3-43c3-897f-6f74ad6a5bd7", "6fc3d5d3-a37b-4da8-a2f4-ed62ad5abe03"],\n	"data": {\n		"icon": "attractions"\n	}\n}',
 		default: null,
-		description: 'Required:\n- **`keys`** [Array of primary keys of the roles you\'d like to update.]\n- **`data`** [Any of [the role object](https://docs.directus.io/reference/api/system/roles/#the-role-object)\'s properties.]\n',
+		description: 'Required:
+- **`keys`** [Array of primary keys of the roles you\'d like to update.]
+- **`data`** [Any of [the role object](https://docs.directus.io/reference/api/system/roles/#the-role-object)\'s properties.]',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -436,7 +433,7 @@ export const rolesFields = [
 		},
 		placeholder: '{\n	"name": "Interns",\n	"icon": "verified_user",\n	"description": null,\n	"admin_access": false,\n	"app_access": true\n}',
 		default: null,
-		description: 'A partial [role object](https://docs.directus.io/reference/api/system/roles/#the-role-object).\n',
+		description: 'A partial [role object](https://docs.directus.io/reference/api/system/roles/#the-role-object).',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -458,7 +455,7 @@ export const rolesFields = [
 		},
 		placeholder: '["653925a9-970e-487a-bfc0-ab6c96affcdc", "c86c2761-65d3-43c3-897f-6f74ad6a5bd7"]',
 		default: null,
-		description: 'An array of role primary keys\n',
+		description: 'An array of role primary keys',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -480,7 +477,7 @@ export const rolesFields = [
 		},
 		placeholder: '{\n	"icon": "attractions"\n}',
 		default: null,
-		description: 'A partial [role object](https://docs.directus.io/reference/api/system/roles/#the-role-object).\n',
+		description: 'A partial [role object](https://docs.directus.io/reference/api/system/roles/#the-role-object).',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -501,8 +498,8 @@ export const rolesFields = [
 			},
 		},
 		placeholder: 'c86c2761-65d3-43c3-897f-6f74ad6a5bd7',
-		default: null,
-		description: 'Primary key of the role.\n',
+		default: '',
+		description: 'Primary key of the role.',
 		required: true,
 	},
 	{
@@ -520,8 +517,8 @@ export const rolesFields = [
 			},
 		},
 		placeholder: 'c86c2761-65d3-43c3-897f-6f74ad6a5bd7',
-		default: null,
-		description: 'Primary key of the role.\n',
+		default: '',
+		description: 'Primary key of the role.',
 		required: true,
 	},
 	{
@@ -539,8 +536,8 @@ export const rolesFields = [
 			},
 		},
 		placeholder: 'c86c2761-65d3-43c3-897f-6f74ad6a5bd7',
-		default: null,
-		description: 'Primary key of the role.\n',
+		default: '',
+		description: 'Primary key of the role.',
 		required: true,
 	},
 	{
@@ -559,11 +556,11 @@ export const rolesFields = [
 		},
 		placeholder: '[\n	{\n		"name": "Interns",\n		"icon": "verified_user",\n		"description": null,\n		"admin_access": false,\n		"app_access": true\n	},\n	{\n		"name": "Customers",\n		"icon": "person",\n		"description": null,\n		"admin_access": false,\n		"app_access": false\n	}\n]',
 		default: null,
-		description: 'An array of partial [role objects](https://docs.directus.io/reference/api/system/roles/#the-role-object).\n',
+		description: 'An array of partial [role objects](https://docs.directus.io/reference/api/system/roles/#the-role-object).',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
 		},
 	},
-] as INodeProperties[];
+];
 

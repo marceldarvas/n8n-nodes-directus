@@ -30,6 +30,9 @@ import {
 	getFlowExecution,
 	listFlowExecutions,
 	getFlowExecutionLogs,
+	chainFlows,
+	loopFlows,
+	transformFlowData,
 } from "./GenericFunctions";
 
 import {
@@ -2075,6 +2078,87 @@ export class Directus implements INodeType {
 						} else {
 							returnItems.push({ json: logs });
 						}
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "chainFlows") {
+					try {
+						const flowChainJson = this.getNodeParameter("flowChain", i) as string;
+						const initialPayloadJson = this.getNodeParameter("initialPayload", i, "{}") as string;
+						const executionMode = this.getNodeParameter("executionMode", i) as string;
+						const errorHandling = this.getNodeParameter("errorHandling", i) as string;
+						const options = this.getNodeParameter("options", i, {}) as IDataObject;
+
+						// Parse JSON inputs
+						const flowChain = validateJSON(flowChainJson);
+						const initialPayload = validateJSON(initialPayloadJson);
+
+						if (!flowChain || !Array.isArray(flowChain)) {
+							throw new Error("Flow chain must be a valid JSON array");
+						}
+
+						// Build options object
+						const chainOptions: IDataObject = {
+							executionMode,
+							errorHandling,
+							...options,
+						};
+
+						// Execute flow chain
+						const result = await chainFlows.call(
+							this,
+							flowChain,
+							initialPayload,
+							chainOptions,
+						);
+
+						responseData = result;
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "loopFlows") {
+					try {
+						const flowId = this.getNodeParameter("flowId", i) as string;
+						const dataArrayJson = this.getNodeParameter("dataArray", i) as string;
+						const executionMode = this.getNodeParameter("executionMode", i) as string;
+						const options = this.getNodeParameter("options", i, {}) as IDataObject;
+
+						// Parse JSON input
+						const dataArray = validateJSON(dataArrayJson);
+
+						if (!dataArray || !Array.isArray(dataArray)) {
+							throw new Error("Data array must be a valid JSON array");
+						}
+
+						// Build options object
+						const loopOptions: IDataObject = {
+							executionMode,
+							...options,
+						};
+
+						// Execute flow loop
+						const result = await loopFlows.call(
+							this,
+							flowId,
+							dataArray,
+							loopOptions,
+						);
+
+						responseData = result;
+
+						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {
 							returnItems.push({ json: { error: error.message } });

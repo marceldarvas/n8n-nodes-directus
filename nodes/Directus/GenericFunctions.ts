@@ -764,3 +764,332 @@ export async function getFlowExecutionLogs(
 
 	return activities;
 }
+
+/**
+ * Transform data between flows based on pass data strategy
+ */
+export function transformFlowData(
+	previousResult: any,
+	allResults: any[],
+	passDataStrategy: string = 'all',
+	customMapping?: any,
+): any {
+	switch (passDataStrategy) {
+		case 'result':
+			// Pass only the result from the previous flow
+			return previousResult;
+		case 'custom':
+			// Apply custom mapping if provided
+			if (customMapping) {
+				return customMapping;
+			}
+			return previousResult;
+		case 'all':
+		default:
+			// Pass all accumulated results
+			return {
+				previousResult,
+				allResults,
+			};
+	}
+}
+
+/**
+ * Chain multiple flows with data passing
+ */
+export async function chainFlows(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	flowChain: Array<{ flowId: string; passDataStrategy?: string; customMapping?: any }>,
+	initialPayload: any,
+	options: IDataObject = {},
+): Promise<any> {
+	const executionMode = options.executionMode || 'sequential';
+	const errorHandling = options.errorHandling || 'stop';
+	const delayBetweenFlows = (options.delayBetweenFlows as number) || 0;
+	const maxWaitTime = ((options.maxWaitTime as number) || 60) * 1000; // Convert to ms
+	const collectResults = options.collectResults !== false;
+
+	const results: any[] = [];
+	const errors: any[] = [];
+
+	if (executionMode === 'parallel') {
+		// Execute all flows in parallel
+		const promises = flowChain.map(async (flowConfig, index) => {
+			try {
+				// For parallel, each flow gets the initial payload
+				const response = await triggerFlow.call(
+					this,
+					flowConfig.flowId,
+					initialPayload,
+				);
+
+				// Wait for completion if sync-like behavior is needed
+				const executionId = response.executionId || response.data?.executionId;
+				if (executionId) {
+					const pollResult = await pollFlowExecution.call(
+						this,
+						executionId,
+						maxWaitTime,
+					);
+					return { index, result: pollResult, error: null };
+				}
+
+				return { index, result: response, error: null };
+			} catch (error: any) {
+				if (errorHandling === 'stop') {
+					throw error;
+				}
+				return { index, result: null, error: error.message };
+			}
+		});
+
+		const parallelResults = await Promise.all(promises);
+
+		// Sort results by index and collect them
+		parallelResults.sort((a, b) => a.index - b.index);
+		parallelResults.forEach((item) => {
+			if (item.error) {
+				errors.push({ flowIndex: item.index, error: item.error });
+			}
+			if (collectResults) {
+				results.push(item.result);
+			}
+		});
+	} else {
+		// Sequential execution
+		let currentPayload = initialPayload;
+
+		for (let i = 0; i < flowChain.length; i++) {
+			const flowConfig = flowChain[i];
+
+			try {
+				// Apply delay if configured (except for first flow)
+				if (i > 0 && delayBetweenFlows > 0) {
+					await sleep(delayBetweenFlows);
+				}
+
+				// Trigger the flow with current payload
+				const response = await triggerFlow.call(
+					this,
+					flowConfig.flowId,
+					currentPayload,
+				);
+
+				// Wait for completion
+				const executionId = response.executionId || response.data?.executionId;
+				let flowResult = response;
+
+				if (executionId) {
+					const pollResult = await pollFlowExecution.call(
+						this,
+						executionId,
+						maxWaitTime,
+					);
+					flowResult = pollResult;
+				}
+
+				// Collect result if configured
+				if (collectResults) {
+					results.push(flowResult);
+				}
+
+				// Transform data for next flow
+				const passDataStrategy = flowConfig.passDataStrategy || 'all';
+				currentPayload = transformFlowData(
+					flowResult,
+					results,
+					passDataStrategy,
+					flowConfig.customMapping,
+				);
+			} catch (error: any) {
+				const errorInfo = {
+					flowIndex: i,
+					flowId: flowConfig.flowId,
+					error: error.message,
+				};
+				errors.push(errorInfo);
+
+				if (errorHandling === 'stop') {
+					throw new DirectusApiError(
+						`Flow chain failed at step ${i + 1}: ${error.message}`,
+						500,
+						errors,
+						`flows/chain/${flowConfig.flowId}`,
+					);
+				}
+			}
+		}
+	}
+
+	return {
+		success: errors.length === 0,
+		totalFlows: flowChain.length,
+		completedFlows: results.length,
+		failedFlows: errors.length,
+		results: collectResults ? results : undefined,
+		errors: errors.length > 0 ? errors : undefined,
+	};
+}
+
+/**
+ * Loop through data array and trigger flow for each item
+ */
+export async function loopFlows(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	flowId: string,
+	dataArray: any[],
+	options: IDataObject = {},
+): Promise<any> {
+	const executionMode = options.executionMode || 'sequential';
+	const concurrencyLimit = (options.concurrencyLimit as number) || 5;
+	const delayBetweenIterations = (options.delayBetweenIterations as number) || 0;
+	const maxWaitTime = ((options.maxWaitTime as number) || 60) * 1000; // Convert to ms
+	const collectResults = options.collectResults !== false;
+	const stopOnError = options.stopOnError !== false;
+
+	const results: any[] = [];
+	const errors: any[] = [];
+
+	if (executionMode === 'parallel') {
+		// Execute flows in parallel with concurrency limit
+		const executeWithConcurrency = async (items: any[], limit: number) => {
+			const executing: Promise<any>[] = [];
+
+			for (let i = 0; i < items.length; i++) {
+				const item = items[i];
+
+				const promise = (async (index: number, data: any) => {
+					try {
+						// Apply delay if configured (for rate limiting)
+						if (index > 0 && delayBetweenIterations > 0) {
+							await sleep(delayBetweenIterations);
+						}
+
+						// Trigger the flow with current data item
+						const response = await triggerFlow.call(
+							this,
+							flowId,
+							data,
+						);
+
+						// Wait for completion
+						const executionId = response.executionId || response.data?.executionId;
+						let flowResult = response;
+
+						if (executionId) {
+							const pollResult = await pollFlowExecution.call(
+								this,
+								executionId,
+								maxWaitTime,
+							);
+							flowResult = pollResult;
+						}
+
+						return { index, result: flowResult, error: null };
+					} catch (error: any) {
+						if (stopOnError) {
+							throw error;
+						}
+						return { index, result: null, error: error.message };
+					}
+				})(i, item);
+
+				executing.push(promise);
+
+				// If we've reached the concurrency limit, wait for one to complete
+				if (executing.length >= limit) {
+					await Promise.race(executing).then((result) => {
+						// Remove completed promise
+						const idx = executing.indexOf(Promise.resolve(result));
+						if (idx > -1) {
+							executing.splice(idx, 1);
+						}
+
+						// Store result
+						if (result.error) {
+							errors.push({ itemIndex: result.index, error: result.error });
+						}
+						if (collectResults) {
+							results[result.index] = result.result;
+						}
+					});
+				}
+			}
+
+			// Wait for remaining promises
+			const remainingResults = await Promise.all(executing);
+			remainingResults.forEach((result) => {
+				if (result.error) {
+					errors.push({ itemIndex: result.index, error: result.error });
+				}
+				if (collectResults) {
+					results[result.index] = result.result;
+				}
+			});
+		};
+
+		await executeWithConcurrency(dataArray, concurrencyLimit);
+	} else {
+		// Sequential execution
+		for (let i = 0; i < dataArray.length; i++) {
+			const item = dataArray[i];
+
+			try {
+				// Apply delay if configured (except for first item)
+				if (i > 0 && delayBetweenIterations > 0) {
+					await sleep(delayBetweenIterations);
+				}
+
+				// Trigger the flow with current data item
+				const response = await triggerFlow.call(
+					this,
+					flowId,
+					item,
+				);
+
+				// Wait for completion
+				const executionId = response.executionId || response.data?.executionId;
+				let flowResult = response;
+
+				if (executionId) {
+					const pollResult = await pollFlowExecution.call(
+						this,
+						executionId,
+						maxWaitTime,
+					);
+					flowResult = pollResult;
+				}
+
+				// Collect result if configured
+				if (collectResults) {
+					results.push(flowResult);
+				}
+			} catch (error: any) {
+				const errorInfo = {
+					itemIndex: i,
+					item,
+					error: error.message,
+				};
+				errors.push(errorInfo);
+
+				if (stopOnError) {
+					throw new DirectusApiError(
+						`Flow loop failed at item ${i + 1}: ${error.message}`,
+						500,
+						errors,
+						`flows/loop/${flowId}`,
+					);
+				}
+			}
+		}
+	}
+
+	return {
+		success: errors.length === 0,
+		totalItems: dataArray.length,
+		completedItems: results.length,
+		failedItems: errors.length,
+		results: collectResults ? results : undefined,
+		errors: errors.length > 0 ? errors : undefined,
+	};
+}

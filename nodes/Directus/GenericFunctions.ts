@@ -932,6 +932,166 @@ export async function chainFlows(
 }
 
 /**
+ * Get flow activity with specific filters
+ */
+export async function getFlowActivity(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	filters: IDataObject = {},
+): Promise<any> {
+	// Build filter conditions for flow-specific activity
+	const filterConditions: any[] = [];
+
+	// Always filter for directus_flows collection
+	filterConditions.push({ collection: { _eq: 'directus_flows' } });
+
+	// Add flow ID filter if provided
+	if (filters.flowId) {
+		filterConditions.push({ item: { _eq: filters.flowId } });
+	}
+
+	// Add flow execution ID filter if provided
+	if (filters.flowExecutionId) {
+		filterConditions.push({ comment: { _contains: filters.flowExecutionId } });
+	}
+
+	// Add operation type filter if provided
+	if (filters.flowOperationType) {
+		filterConditions.push({ action: { _eq: filters.flowOperationType } });
+	}
+
+	// Build query string
+	const qs: IDataObject = {
+		filter: JSON.stringify({ _and: filterConditions }),
+		sort: filters.sort || '-timestamp',
+	};
+
+	// Add limit
+	if (filters.returnAll) {
+		qs.limit = -1;
+	} else {
+		qs.limit = filters.limit || 100;
+	}
+
+	// Add fields if provided
+	if (filters.fields) {
+		qs.fields = filters.fields;
+	}
+
+	// Query the activity endpoint
+	const response = await directusApiRequest.call(
+		this,
+		'GET',
+		'activity',
+		{},
+		qs,
+	);
+
+	return response.data || response;
+}
+
+/**
+ * Calculate performance metrics for flow activities
+ */
+export function calculateFlowPerformanceMetrics(activities: any[]): any {
+	if (!activities || activities.length === 0) {
+		return {
+			totalExecutions: 0,
+			successCount: 0,
+			failedCount: 0,
+			runningCount: 0,
+			averageExecutionTime: 0,
+			minExecutionTime: 0,
+			maxExecutionTime: 0,
+			successRate: 0,
+			failureRate: 0,
+		};
+	}
+
+	let successCount = 0;
+	let failedCount = 0;
+	let runningCount = 0;
+	const executionTimes: number[] = [];
+
+	// Analyze each activity
+	activities.forEach((activity) => {
+		const comment = activity.comment || '';
+		const action = activity.action || '';
+
+		// Determine status from comment or action
+		if (
+			comment.includes('completed') ||
+			comment.includes('success') ||
+			action === 'completed'
+		) {
+			successCount++;
+		} else if (
+			comment.includes('failed') ||
+			comment.includes('error') ||
+			action === 'failed'
+		) {
+			failedCount++;
+		} else if (
+			comment.includes('running') ||
+			comment.includes('started') ||
+			action === 'run'
+		) {
+			runningCount++;
+		}
+
+		// Extract execution time if available (from revisions or metadata)
+		const revisions = activity.revisions || [];
+		if (revisions.length > 0 && revisions[0].data) {
+			const executionTime = revisions[0].data.executionTime || revisions[0].data.duration;
+			if (executionTime && typeof executionTime === 'number') {
+				executionTimes.push(executionTime);
+			}
+		}
+
+		// Alternative: calculate from timestamp if we have start/end info
+		if (activity.timestamp && activity.metadata?.endTime) {
+			const start = new Date(activity.timestamp).getTime();
+			const end = new Date(activity.metadata.endTime).getTime();
+			const duration = end - start;
+			if (duration > 0) {
+				executionTimes.push(duration);
+			}
+		}
+	});
+
+	// Calculate execution time statistics
+	let averageExecutionTime = 0;
+	let minExecutionTime = 0;
+	let maxExecutionTime = 0;
+
+	if (executionTimes.length > 0) {
+		averageExecutionTime =
+			executionTimes.reduce((sum, time) => sum + time, 0) / executionTimes.length;
+		minExecutionTime = Math.min(...executionTimes);
+		maxExecutionTime = Math.max(...executionTimes);
+	}
+
+	// Calculate rates
+	const totalExecutions = activities.length;
+	const successRate = totalExecutions > 0 ? (successCount / totalExecutions) * 100 : 0;
+	const failureRate = totalExecutions > 0 ? (failedCount / totalExecutions) * 100 : 0;
+
+	return {
+		totalExecutions,
+		successCount,
+		failedCount,
+		runningCount,
+		averageExecutionTime: Math.round(averageExecutionTime),
+		minExecutionTime,
+		maxExecutionTime,
+		successRate: Math.round(successRate * 100) / 100, // Round to 2 decimal places
+		failureRate: Math.round(failureRate * 100) / 100,
+		executionTimeUnit: 'milliseconds',
+		activities: activities.length,
+		hasExecutionTimeData: executionTimes.length > 0,
+	};
+}
+
+/**
  * Loop through data array and trigger flow for each item
  */
 export async function loopFlows(

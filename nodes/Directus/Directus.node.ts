@@ -33,6 +33,8 @@ import {
 	chainFlows,
 	loopFlows,
 	transformFlowData,
+	getFlowActivity,
+	calculateFlowPerformanceMetrics,
 } from "./GenericFunctions";
 
 import {
@@ -540,8 +542,45 @@ export class Directus implements INodeType {
 						requestMethod = "GET";
 						endpoint = `activity`;
 
-						let response;
+					let response;
 
+					// Check for flow-specific filters
+					const flowId = additionalFields.flowId as string;
+					const flowExecutionId = additionalFields.flowExecutionId as string;
+					const flowOperationType = additionalFields.flowOperationType as string;
+					const calculatePerformanceMetrics = additionalFields.calculatePerformanceMetrics as boolean;
+
+					const hasFlowFilters = flowId || flowExecutionId || flowOperationType;
+
+					if (hasFlowFilters) {
+						// Use flow-specific activity filtering
+						const flowFilters: IDataObject = {
+							returnAll,
+							limit: returnAll ? -1 : (this.getNodeParameter("limit", i) as number) || 100,
+						};
+
+						if (flowId) flowFilters.flowId = flowId;
+						if (flowExecutionId) flowFilters.flowExecutionId = flowExecutionId;
+						if (flowOperationType) flowFilters.flowOperationType = flowOperationType;
+
+						// Add other filters from additionalFields
+						if (additionalFields.fields) flowFilters.fields = additionalFields.fields;
+						if (additionalFields.sort) flowFilters.sort = additionalFields.sort;
+
+						response = await getFlowActivity.call(this, flowFilters);
+
+						// Calculate performance metrics if requested
+						if (calculatePerformanceMetrics && Array.isArray(response)) {
+							const metrics = calculateFlowPerformanceMetrics(response);
+							responseData = {
+								activities: response,
+								performanceMetrics: metrics,
+							};
+						} else {
+							responseData = response;
+						}
+					} else {
+						// Standard activity list operation
 						if (!parametersAreJson && returnAll === true) {
 							qs.limit = -1;
 						} else if (!parametersAreJson) {
@@ -572,7 +611,7 @@ export class Directus implements INodeType {
 									} else {
 										qs[key] = JSON.stringify(object);
 									}
-								} else {
+								} else if (!["flowId", "flowExecutionId", "flowOperationType", "calculatePerformanceMetrics"].includes(key)) {
 									qs[key] = additionalFields[key];
 								}
 							}
@@ -591,6 +630,7 @@ export class Directus implements INodeType {
 						} else {
 							responseData = response.data ?? {};
 						}
+					}
 						//////////////////////////////////
 						const exportType = (additionalFields.export as string) ?? null;
 						const binary: IBinaryKeyData = {};

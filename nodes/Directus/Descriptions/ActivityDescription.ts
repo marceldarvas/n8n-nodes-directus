@@ -510,6 +510,59 @@ export const activityFields: INodeProperties[] = [
 				],
 			},
 			{
+				displayName: 'Flow ID',
+				name: 'flowId',
+				type: 'string',
+				placeholder: '',
+				default: '',
+				description: 'Filter activity by specific flow ID. Only returns activity logs related to this flow.',
+			},
+			{
+				displayName: 'Flow Execution ID',
+				name: 'flowExecutionId',
+				type: 'string',
+				placeholder: '',
+				default: '',
+				description: 'Filter activity by specific flow execution ID. Returns logs for a specific flow execution.',
+			},
+			{
+				displayName: 'Flow Operation Type',
+				name: 'flowOperationType',
+				type: 'options',
+				placeholder: 'Select operation type',
+				default: '',
+				description: 'Filter by operation type within flows',
+				options: [
+					{
+						name: 'All',
+						value: '',
+					},
+					{
+						name: 'Run',
+						value: 'run',
+					},
+					{
+						name: 'Create',
+						value: 'create',
+					},
+					{
+						name: 'Update',
+						value: 'update',
+					},
+					{
+						name: 'Delete',
+						value: 'delete',
+					},
+				],
+			},
+			{
+				displayName: 'Calculate Performance Metrics',
+				name: 'calculatePerformanceMetrics',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to calculate and return performance metrics for flow activities (execution time, success/fail counts, etc.)',
+			},
+			{
 				displayName: 'Binary Property for Export Data',
 				name: 'binaryPropertyName',
 				type: 'string',

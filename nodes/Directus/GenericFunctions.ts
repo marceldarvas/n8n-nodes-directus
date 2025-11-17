@@ -424,16 +424,16 @@ export async function directusApiFileRequest(
 	qs: IDataObject = {},
 ): Promise<any> {
 	const credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
-	
+
 	if (!credentials) {
 		throw new Error('No credentials configured');
 	}
 
 	const baseUrl = credentials.url.replace(/\/$/, '');
-	
+
 	try {
 		Logger.info('Processing file request');
-		
+
 		if (method === 'POST') {
 			// Upload file
 			const options: IHttpRequestOptions = {
@@ -452,21 +452,21 @@ export async function directusApiFileRequest(
 
 			const response = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', options);
 			const file = response.data || response;
-			
+
 			// Update file metadata if body provided
 			if (Object.keys(body).length > 0) {
 				const updateResponse = await directusApiRequest.call(this, 'PATCH', `files/${file.id}`, body);
 				return updateResponse.data || updateResponse;
 			}
-			
+
 			return file;
 		} else if (method === 'PATCH') {
 			// Update file
 			const hasFormData = Object.keys(formData).length > 0;
 			const hasBody = Object.keys(body).length > 0;
-			
+
 			let result: any = {};
-			
+
 			if (hasFormData) {
 				const formOptions: IHttpRequestOptions = {
 					method: 'PATCH',
@@ -485,18 +485,90 @@ export async function directusApiFileRequest(
 				const formResponse = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', formOptions);
 				result = formResponse.data || formResponse;
 			}
-			
+
 			if (hasBody) {
 				const bodyResponse = await directusApiRequest.call(this, 'PATCH', path, body);
 				result = { ...result, ...(bodyResponse.data || bodyResponse) };
 			}
-			
+
 			return result;
 		}
-		
+
 		return {};
 	} catch (error: any) {
 		Logger.error('Directus File Error:', error);
 		throw new Error(`Directus File Error: ${error.message || error}`);
 	}
+}
+
+/**
+ * Create a flow with webhook configuration
+ */
+export async function createFlow(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	flowData: IDataObject,
+): Promise<any> {
+	const response = await directusApiRequest.call(
+		this,
+		'POST',
+		'flows',
+		flowData,
+		{},
+	);
+
+	return response.data || response;
+}
+
+/**
+ * Update a flow
+ */
+export async function updateFlow(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	flowId: string,
+	flowData: IDataObject,
+): Promise<any> {
+	const response = await directusApiRequest.call(
+		this,
+		'PATCH',
+		`flows/${flowId}`,
+		flowData,
+		{},
+	);
+
+	return response.data || response;
+}
+
+/**
+ * Delete a flow
+ */
+export async function deleteFlow(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	flowId: string,
+): Promise<any> {
+	const response = await directusApiRequest.call(
+		this,
+		'DELETE',
+		`flows/${flowId}`,
+		{},
+		{},
+	);
+
+	return response;
+}
+
+/**
+ * Generate full webhook URL for a flow
+ */
+export async function getFlowWebhookUrl(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	flowId: string,
+): Promise<string> {
+	const credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
+
+	if (!credentials) {
+		throw new DirectusAuthenticationError('No credentials configured');
+	}
+
+	const baseUrl = credentials.url.replace(/\/$/, '');
+	return `${baseUrl}/flows/trigger/${flowId}`;
 }

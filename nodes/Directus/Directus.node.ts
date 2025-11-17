@@ -23,6 +23,10 @@ import {
 	validateJSON,
 	triggerFlow,
 	pollFlowExecution,
+	createFlow,
+	updateFlow,
+	deleteFlow,
+	getFlowWebhookUrl,
 } from "./GenericFunctions";
 
 import {
@@ -1807,6 +1811,162 @@ export class Directus implements INodeType {
 						} else {
 							returnItems.push({ json: responseData });
 						}
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "create") {
+					try {
+						const name = this.getNodeParameter("name", i) as string;
+						const triggerType = this.getNodeParameter("triggerType", i) as string;
+						const status = this.getNodeParameter("status", i) as string;
+						const additionalFields = this.getNodeParameter("additionalFields", i, {}) as IDataObject;
+
+						// Build flow data object
+						const flowData: IDataObject = {
+							name,
+							status,
+						};
+
+						// Add description if provided
+						if (additionalFields.description) {
+							flowData.description = additionalFields.description as string;
+						}
+
+						// Add icon if provided
+						if (additionalFields.icon) {
+							flowData.icon = additionalFields.icon as string;
+						}
+
+						// Add color if provided
+						if (additionalFields.color) {
+							flowData.color = additionalFields.color as string;
+						}
+
+						// Build trigger configuration based on trigger type
+						if (triggerType === "webhook") {
+							const webhookMethod = this.getNodeParameter("webhookMethod", i, "POST") as string;
+							flowData.trigger = "webhook";
+							flowData.options = {
+								method: webhookMethod,
+								...validateJSON(additionalFields.options as string || "{}"),
+							};
+						} else if (triggerType === "event") {
+							flowData.trigger = "event";
+							flowData.options = validateJSON(additionalFields.options as string || "{}");
+						} else if (triggerType === "schedule") {
+							flowData.trigger = "schedule";
+							flowData.options = validateJSON(additionalFields.options as string || "{}");
+						} else if (triggerType === "manual") {
+							flowData.trigger = "manual";
+							flowData.options = validateJSON(additionalFields.options as string || "{}");
+						}
+
+						// Add operations if provided
+						if (additionalFields.operations) {
+							const operations = validateJSON(additionalFields.operations as string);
+							if (operations) {
+								flowData.operations = operations;
+							}
+						}
+
+						// Create the flow
+						const response = await createFlow.call(this, flowData);
+
+						// Generate webhook URL if it's a webhook trigger
+						let webhookUrl = null;
+						if (triggerType === "webhook" && response.id) {
+							webhookUrl = await getFlowWebhookUrl.call(this, response.id);
+						}
+
+						responseData = {
+							...response,
+							...(webhookUrl ? { webhookUrl } : {}),
+						};
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "update") {
+					try {
+						const flowId = this.getNodeParameter("flowId", i) as string;
+						const updateFields = this.getNodeParameter("updateFields", i, {}) as IDataObject;
+
+						// Build update data object
+						const flowData: IDataObject = {};
+
+						// Add fields to update
+						if (updateFields.name) {
+							flowData.name = updateFields.name as string;
+						}
+
+						if (updateFields.description !== undefined) {
+							flowData.description = updateFields.description as string;
+						}
+
+						if (updateFields.status) {
+							flowData.status = updateFields.status as string;
+						}
+
+						if (updateFields.icon !== undefined) {
+							flowData.icon = updateFields.icon as string;
+						}
+
+						if (updateFields.color !== undefined) {
+							flowData.color = updateFields.color as string;
+						}
+
+						if (updateFields.operations) {
+							const operations = validateJSON(updateFields.operations as string);
+							if (operations) {
+								flowData.operations = operations;
+							}
+						}
+
+						if (updateFields.options) {
+							const options = validateJSON(updateFields.options as string);
+							if (options) {
+								flowData.options = options;
+							}
+						}
+
+						// Update the flow
+						const response = await updateFlow.call(this, flowId, flowData);
+
+						responseData = response;
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "delete") {
+					try {
+						const flowId = this.getNodeParameter("flowId", i) as string;
+
+						// Delete the flow
+						await deleteFlow.call(this, flowId);
+
+						responseData = {
+							success: true,
+							flowId,
+						};
+
+						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {
 							returnItems.push({ json: { error: error.message } });

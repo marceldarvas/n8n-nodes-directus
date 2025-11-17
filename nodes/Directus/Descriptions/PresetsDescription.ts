@@ -26,7 +26,7 @@ export const presetsOperations: INodeProperties[] = [
 				name: 'Create Multiple',
 				value: 'createMultiple',
 				description: 'Create Multiple Presets',
-				action: 'Create Multiple a presets',
+				action: 'Create multiple a presets',
 			},
 			{
 				name: 'Delete',
@@ -38,7 +38,7 @@ export const presetsOperations: INodeProperties[] = [
 				name: 'Delete Multiple',
 				value: 'deleteMultiple',
 				description: 'Delete Multiple Presets',
-				action: 'Delete Multiple a presets',
+				action: 'Delete multiple a presets',
 			},
 			{
 				name: 'Get',
@@ -62,7 +62,7 @@ export const presetsOperations: INodeProperties[] = [
 				name: 'Update Multiple',
 				value: 'updateMultiple',
 				description: 'Update Multiple Presets',
-				action: 'Update Multiple a presets',
+				action: 'Update multiple a presets',
 			},
 		],
 		default: 'list',
@@ -86,7 +86,7 @@ export const presetsFields: INodeProperties[] = [
 		},
 		placeholder: '{\n	"user": "410b5772-e63f-4ae6-9ea2-39c3a31bd6ca",\n	"layout": "cards",\n	"search": "Directus"\n}',
 		default: null,
-		description: 'A partial [preset object](https://docs.directus.io/reference/api/system/presets/#the-preset-object).',
+		description: 'A partial [preset object](https://docs.directus.io/reference/api/system/presets/#the-preset-object)',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -108,7 +108,7 @@ export const presetsFields: INodeProperties[] = [
 		},
 		placeholder: '[\n	{\n		"collection": "directus_files",\n		"user": "410b5772-e63f-4ae6-9ea2-39c3a31bd6ca",\n		"layout": "cards",\n		"search": "Directus"\n	},\n	{\n		"collection": "articles",\n		"user": "410b5772-e63f-4ae6-9ea2-39c3a31bd6ca",\n		"layout": "tabular"\n	}\n]',
 		default: null,
-		description: 'An array of partial [preset objects](https://docs.directus.io/reference/api/system/presets/#the-preset-object).',
+		description: 'An array of partial [preset objects](https://docs.directus.io/reference/api/system/presets/#the-preset-object)',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -130,7 +130,7 @@ export const presetsFields: INodeProperties[] = [
 		},
 		placeholder: '39',
 		default: '',
-		description: 'Primary key of the preset.',
+		description: 'Primary key of the preset',
 		required: true,
 	},
 	{
@@ -149,7 +149,7 @@ export const presetsFields: INodeProperties[] = [
 		},
 		placeholder: '39',
 		default: '',
-		description: 'Primary key of the preset.',
+		description: 'Primary key of the preset',
 		required: true,
 	},
 	{
@@ -194,7 +194,7 @@ export const presetsFields: INodeProperties[] = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit',
+		description: 'Whether to return all results or only up to a given limit',
 		required: true,
 	},
 	{
@@ -221,7 +221,7 @@ export const presetsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.',
+		description: 'Max number of results to return',
 		required: true,
 		typeOptions: {
 			minValue: 1,
@@ -261,7 +261,7 @@ export const presetsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -316,7 +316,7 @@ export const presetsFields: INodeProperties[] = [
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
 				default: {},
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -401,7 +401,7 @@ export const presetsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -434,7 +434,7 @@ export const presetsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Control what fields are being returned in the object.',
+				description: 'Control what fields are being returned in the object',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -449,7 +449,7 @@ export const presetsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.',
+				description: 'Select items in collection by given conditions',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -468,7 +468,7 @@ export const presetsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 			{
 				displayName: 'Offset',
@@ -476,7 +476,7 @@ export const presetsFields: INodeProperties[] = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.',
+				description: 'How many items to skip when fetching data',
 			},
 			{
 				displayName: 'Search',
@@ -484,7 +484,7 @@ export const presetsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Filter by items that contain the given search query in one of their fields.',
+				description: 'Filter by items that contain the given search query in one of their fields',
 			},
 			{
 				displayName: 'Sort',
@@ -534,7 +534,7 @@ export const presetsFields: INodeProperties[] = [
 		},
 		placeholder: '{\n	"layout": "tabular"\n}',
 		default: null,
-		description: 'A partial [preset object](https://docs.directus.io/reference/api/system/presets/#the-preset-object).',
+		description: 'A partial [preset object](https://docs.directus.io/reference/api/system/presets/#the-preset-object)',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -556,7 +556,7 @@ export const presetsFields: INodeProperties[] = [
 		},
 		placeholder: '39',
 		default: '',
-		description: 'Primary key of the preset.',
+		description: 'Primary key of the preset',
 		required: true,
 	},
 ];

@@ -226,7 +226,7 @@ export const flowFields: INodeProperties[] = [
 			{
 				displayName: 'Color',
 				name: 'color',
-				type: 'string',
+				type: 'color',
 				default: '',
 				placeholder: 'e.g., #6644FF',
 				description: 'Color for the flow',
@@ -325,7 +325,7 @@ export const flowFields: INodeProperties[] = [
 			{
 				displayName: 'Color',
 				name: 'color',
-				type: 'string',
+				type: 'color',
 				default: '',
 				description: 'Color for the flow',
 			},
@@ -426,7 +426,7 @@ export const flowFields: INodeProperties[] = [
 		description: 'How to execute the flow',
 	},
 	{
-		displayName: 'Max Wait Time (seconds)',
+		displayName: 'Max Wait Time (Seconds)',
 		name: 'maxWaitTime',
 		type: 'number',
 		displayOptions: {
@@ -505,7 +505,6 @@ export const flowFields: INodeProperties[] = [
 		},
 		typeOptions: {
 			minValue: 1,
-			maxValue: 100,
 		},
 		default: 50,
 		description: 'Max number of results to return',
@@ -585,7 +584,7 @@ export const flowFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'Comma-separated list of fields to return',
-				placeholder: 'e.g., id,action,timestamp,user',
+				placeholder: 'e.g., ID,action,timestamp,user',
 			},
 		],
 	},
@@ -618,9 +617,8 @@ export const flowFields: INodeProperties[] = [
 		},
 		typeOptions: {
 			minValue: 1,
-			maxValue: 500,
 		},
-		default: 100,
+		default: 50,
 		description: 'Max number of results to return',
 	},
 	{
@@ -719,7 +717,7 @@ export const flowFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'Comma-separated list of fields to return',
-				placeholder: 'e.g., id,action,timestamp,user',
+				placeholder: 'e.g., ID,action,timestamp,user',
 			},
 			{
 				displayName: 'Page',
@@ -768,11 +766,10 @@ export const flowFields: INodeProperties[] = [
 				displayName: 'Limit',
 				name: 'limit',
 				type: 'number',
-				default: 100,
-				description: 'Max number of log entries to return',
+				default: 50,
+				description: 'Max number of results to return',
 				typeOptions: {
 					minValue: 1,
-					maxValue: 1000,
 				},
 			},
 			{
@@ -781,7 +778,7 @@ export const flowFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'Comma-separated list of fields to return',
-				placeholder: 'e.g., id,action,timestamp,comment,revisions',
+				placeholder: 'e.g., ID,action,timestamp,comment,revisions',
 			},
 		],
 	},
@@ -882,7 +879,7 @@ export const flowFields: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'Delay Between Flows (ms)',
+				displayName: 'Delay Between Flows (Ms)',
 				name: 'delayBetweenFlows',
 				type: 'number',
 				default: 0,
@@ -892,7 +889,7 @@ export const flowFields: INodeProperties[] = [
 				},
 			},
 			{
-				displayName: 'Max Wait Time (seconds)',
+				displayName: 'Max Wait Time (Seconds)',
 				name: 'maxWaitTime',
 				type: 'number',
 				default: 60,
@@ -995,7 +992,7 @@ export const flowFields: INodeProperties[] = [
 				},
 			},
 			{
-				displayName: 'Delay Between Iterations (ms)',
+				displayName: 'Delay Between Iterations (Ms)',
 				name: 'delayBetweenIterations',
 				type: 'number',
 				default: 0,
@@ -1005,7 +1002,7 @@ export const flowFields: INodeProperties[] = [
 				},
 			},
 			{
-				displayName: 'Max Wait Time (seconds)',
+				displayName: 'Max Wait Time (Seconds)',
 				name: 'maxWaitTime',
 				type: 'number',
 				default: 60,

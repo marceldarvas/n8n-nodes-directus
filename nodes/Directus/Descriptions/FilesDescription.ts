@@ -20,7 +20,7 @@ export const filesOperations: INodeProperties[] = [
 				name: 'Create / Upload',
 				value: 'create',
 				description: 'Create/Upload a new file',
-				action: 'Create / Upload a files',
+				action: 'Create upload a files',
 			},
 			{
 				name: 'Delete',
@@ -32,7 +32,7 @@ export const filesOperations: INodeProperties[] = [
 				name: 'Delete Multiple',
 				value: 'deleteMultiple',
 				description: 'Delete multiple files',
-				action: 'Delete Multiple a files',
+				action: 'Delete multiple a files',
 			},
 			{
 				name: 'Get',
@@ -44,7 +44,7 @@ export const filesOperations: INodeProperties[] = [
 				name: 'Import File',
 				value: 'importFile',
 				description: 'Import a file',
-				action: 'Import File a files',
+				action: 'Import file a files',
 			},
 			{
 				name: 'List',
@@ -62,7 +62,7 @@ export const filesOperations: INodeProperties[] = [
 				name: 'Update Multiple',
 				value: 'updateMultiple',
 				description: 'Update Multiple Files',
-				action: 'Update Multiple a files',
+				action: 'Update multiple a files',
 			},
 		],
 		default: 'list',
@@ -86,7 +86,7 @@ export const filesFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'Upload/create a new file.',
+		description: 'Upload/create a new file',
 		required: true,
 	},
 	{
@@ -108,7 +108,7 @@ export const filesFields: INodeProperties[] = [
 				],
 			},
 		},
-		description: 'Name of the binary property which contains the data for the file to be uploaded.<br /> For multiple files, values can be provided in the format:<br /> "binaryProperty1,binaryProperty2',
+		description: 'Name of the binary property which contains the data for the file to be uploaded. For multiple files, values can be provided in the format: "binaryProperty1,binaryProperty2.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -133,7 +133,7 @@ export const filesFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Other properties of [the file object](https://docs.directus.io/reference/api/system/files/#the-file-object). ',
+				description: 'Other properties of [the file object](https://docs.directus.io/reference/api/system/files/#the-file-object)',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -156,7 +156,7 @@ export const filesFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: '',
-		description: 'The URL to download the file from.',
+		description: 'The URL to download the file from',
 		required: true,
 	},
 	{
@@ -182,7 +182,7 @@ export const filesFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '{\n	"title": "Example"\n}',
 				default: null,
-				description: 'Any of [the file object](https://docs.directus.io/reference/api/system/files/#the-file-object)\'s properties.',
+				description: 'Any of [the file object](https://docs.directus.io/reference/api/system/files/#the-file-object)\'s properties',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -205,7 +205,7 @@ export const filesFields: INodeProperties[] = [
 		},
 		placeholder: '0fca80c4-d61c-4404-9fd7-6ba86b64154d',
 		default: '',
-		description: 'Unique ID of the file object.',
+		description: 'Unique ID of the file object',
 		required: true,
 	},
 	{
@@ -224,7 +224,7 @@ export const filesFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'Upload/create a new file.',
+		description: 'Upload/create a new file',
 		required: true,
 	},
 	{
@@ -243,7 +243,7 @@ export const filesFields: INodeProperties[] = [
 		},
 		placeholder: '0fca80c4-d61c-4404-9fd7-6ba86b64154d',
 		default: '',
-		description: 'Unique ID of the file object.',
+		description: 'Unique ID of the file object',
 		required: true,
 	},
 	{
@@ -265,7 +265,7 @@ export const filesFields: INodeProperties[] = [
 				],
 			},
 		},
-		description: 'Name of the binary property which contains the data for the file to be uploaded.<br /> For multiple files, values can be provided in the format:<br /> "binaryProperty1,binaryProperty2',
+		description: 'Name of the binary property which contains the data for the file to be uploaded. For multiple files, values can be provided in the format: "binaryProperty1,binaryProperty2.',
 	},
 	{
 		displayName: 'Update Fields',
@@ -290,7 +290,7 @@ export const filesFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Other properties of [the file object](https://docs.directus.io/reference/api/system/files/#the-file-object). ',
+				description: 'Other properties of [the file object](https://docs.directus.io/reference/api/system/files/#the-file-object)',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -313,7 +313,7 @@ export const filesFields: INodeProperties[] = [
 		},
 		placeholder: '0fca80c4-d61c-4404-9fd7-6ba86b64154d',
 		default: '',
-		description: 'Unique ID of the file object.',
+		description: 'Unique ID of the file object',
 		required: true,
 	},
 	{
@@ -336,7 +336,7 @@ export const filesFields: INodeProperties[] = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit',
+		description: 'Whether to return all results or only up to a given limit',
 		required: true,
 	},
 	{
@@ -363,7 +363,7 @@ export const filesFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.',
+		description: 'Max number of results to return',
 		required: true,
 		typeOptions: {
 			minValue: 1,
@@ -403,7 +403,7 @@ export const filesFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -458,7 +458,7 @@ export const filesFields: INodeProperties[] = [
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
 				default: {},
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -543,7 +543,7 @@ export const filesFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -576,7 +576,7 @@ export const filesFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Control what fields are being returned in the object.',
+				description: 'Control what fields are being returned in the object',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -591,7 +591,7 @@ export const filesFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.',
+				description: 'Select items in collection by given conditions',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -610,7 +610,7 @@ export const filesFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 			{
 				displayName: 'Offset',
@@ -618,7 +618,7 @@ export const filesFields: INodeProperties[] = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.',
+				description: 'How many items to skip when fetching data',
 			},
 			{
 				displayName: 'Search',
@@ -626,7 +626,7 @@ export const filesFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Filter by items that contain the given search query in one of their fields.',
+				description: 'Filter by items that contain the given search query in one of their fields',
 			},
 			{
 				displayName: 'Sort',
@@ -654,7 +654,7 @@ export const filesFields: INodeProperties[] = [
 		},
 		placeholder: '["b6123925-2fc0-4a30-9d86-863eafc0a6e7", "d17c10aa-0bad-4864-9296-84f522c753e5"]',
 		default: null,
-		description: 'Array of primary keys of the files you\'d like to update.',
+		description: 'Array of primary keys of the files you\'d like to update',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,

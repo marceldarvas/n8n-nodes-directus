@@ -26,7 +26,7 @@ export const webhooksOperations: INodeProperties[] = [
 				name: 'Create Multiple',
 				value: 'createMultiple',
 				description: 'Create Multiple Webhooks',
-				action: 'Create Multiple a webhooks',
+				action: 'Create multiple a webhooks',
 			},
 			{
 				name: 'Delete',
@@ -38,7 +38,7 @@ export const webhooksOperations: INodeProperties[] = [
 				name: 'Delete Multiple',
 				value: 'deleteMultiple',
 				description: 'Delete Multiple Webhooks',
-				action: 'Delete Multiple a webhooks',
+				action: 'Delete multiple a webhooks',
 			},
 			{
 				name: 'Get',
@@ -62,7 +62,7 @@ export const webhooksOperations: INodeProperties[] = [
 				name: 'Update Multiple',
 				value: 'updateMultiple',
 				description: 'Update Multiple Webhooks',
-				action: 'Update Multiple a webhooks',
+				action: 'Update multiple a webhooks',
 			},
 		],
 		default: 'list',
@@ -153,7 +153,7 @@ export const webhooksFields: INodeProperties[] = [
 		},
 		placeholder: '["articles"]',
 		default: [],
-		description: 'What collections to fire this webhook on.',
+		description: 'What collections to fire this webhook on. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -180,7 +180,7 @@ export const webhooksFields: INodeProperties[] = [
 		},
 		placeholder: 'https://example.com/',
 		default: '',
-		description: 'Where to send the request too.',
+		description: 'Where to send the request too',
 		required: true,
 	},
 	{
@@ -199,7 +199,7 @@ export const webhooksFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -264,7 +264,7 @@ export const webhooksFields: INodeProperties[] = [
 		},
 		placeholder: '15',
 		default: '',
-		description: 'Primary key of the webhook.',
+		description: 'Primary key of the webhook',
 		required: true,
 	},
 	{
@@ -287,7 +287,7 @@ export const webhooksFields: INodeProperties[] = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit',
+		description: 'Whether to return all results or only up to a given limit',
 		required: true,
 	},
 	{
@@ -309,7 +309,7 @@ export const webhooksFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.',
+		description: 'Max number of results to return',
 		required: true,
 		typeOptions: {
 			minValue: 1,
@@ -349,7 +349,7 @@ export const webhooksFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -404,7 +404,7 @@ export const webhooksFields: INodeProperties[] = [
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
 				default: {},
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -489,7 +489,7 @@ export const webhooksFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -522,7 +522,7 @@ export const webhooksFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Control what fields are being returned in the object.',
+				description: 'Control what fields are being returned in the object',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -537,7 +537,7 @@ export const webhooksFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.',
+				description: 'Select items in collection by given conditions',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -556,7 +556,7 @@ export const webhooksFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 			{
 				displayName: 'Offset',
@@ -564,7 +564,7 @@ export const webhooksFields: INodeProperties[] = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.',
+				description: 'How many items to skip when fetching data',
 			},
 			{
 				displayName: 'Search',
@@ -572,7 +572,7 @@ export const webhooksFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Filter by items that contain the given search query in one of their fields.',
+				description: 'Filter by items that contain the given search query in one of their fields',
 			},
 			{
 				displayName: 'Sort',
@@ -622,7 +622,7 @@ export const webhooksFields: INodeProperties[] = [
 		},
 		placeholder: '15',
 		default: '',
-		description: 'Primary key of the webhook.',
+		description: 'Primary key of the webhook',
 		required: true,
 	},
 	{
@@ -641,7 +641,7 @@ export const webhooksFields: INodeProperties[] = [
 		},
 		placeholder: '{\n	"name": "Build Website"\n}',
 		default: null,
-		description: 'A partial [webhook object](https://docs.directus.io/reference/api/system/webhooks/#the-webhook-object).',
+		description: 'A partial [webhook object](https://docs.directus.io/reference/api/system/webhooks/#the-webhook-object)',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -663,7 +663,7 @@ export const webhooksFields: INodeProperties[] = [
 		},
 		placeholder: '[2, 15, 41]',
 		default: null,
-		description: 'An array of webhook primary keys.',
+		description: 'An array of webhook primary keys',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -685,7 +685,7 @@ export const webhooksFields: INodeProperties[] = [
 		},
 		placeholder: '15',
 		default: '',
-		description: 'Primary key of the webhook.',
+		description: 'Primary key of the webhook',
 		required: true,
 	},
 ];

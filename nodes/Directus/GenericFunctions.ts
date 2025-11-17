@@ -136,13 +136,29 @@ export async function directusApiRequest(
 	qs: IDataObject = {},
 	retryConfig: Partial<IRetryConfig> = {},
 ): Promise<any> {
-	const credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
+	// Try to get OAuth2 credentials first, fallback to regular credentials
+	let credentials: IDirectusCredentials | null = null;
+	let credentialType: 'directusApi' | 'directusOAuth2Api' = 'directusApi';
+	let baseUrl = '';
 
-	if (!credentials) {
-		throw new DirectusAuthenticationError('No credentials configured');
+	try {
+		const oAuth2Credentials = await this.getCredentials('directusOAuth2Api');
+		if (oAuth2Credentials) {
+			credentialType = 'directusOAuth2Api';
+			baseUrl = (oAuth2Credentials.instanceUrl as string).replace(/\/$/, '');
+		}
+	} catch (error) {
+		// OAuth2 credentials not available, try regular credentials
 	}
 
-	const baseUrl = credentials.url.replace(/\/$/, '');
+	if (!baseUrl) {
+		credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
+		if (!credentials) {
+			throw new DirectusAuthenticationError('No credentials configured');
+		}
+		baseUrl = credentials.url.replace(/\/$/, '');
+	}
+
 	const url = `${baseUrl}/${endpoint.replace(/^\//, '')}`;
 
 	// Merge retry config with defaults
@@ -154,16 +170,18 @@ export async function directusApiRequest(
 		body,
 		qs,
 		json: true,
-		timeout: credentials.timeout || 30000,
+		timeout: credentials?.timeout || 30000,
 		headers: {
 			'Content-Type': 'application/json',
 			'User-Agent': 'n8n-nodes-directus',
 		},
 	};
 
-	// Add authentication
-	if (credentials.authMethod === 'staticToken' && credentials.staticToken) {
-		options.headers!['Authorization'] = `Bearer ${credentials.staticToken}`;
+	// Add authentication for regular credentials (OAuth2 is handled automatically by httpRequestWithAuthentication)
+	if (credentialType === 'directusApi' && credentials) {
+		if (credentials.authMethod === 'staticToken' && credentials.staticToken) {
+			options.headers!['Authorization'] = `Bearer ${credentials.staticToken}`;
+		}
 	}
 
 	// Retry logic with exponential backoff
@@ -172,7 +190,7 @@ export async function directusApiRequest(
 		try {
 			const response = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'directusApi',
+				credentialType,
 				options,
 			);
 
@@ -181,6 +199,14 @@ export async function directusApiRequest(
 		} catch (error: any) {
 			lastError = error;
 			const statusCode = error.response?.status || error.statusCode || 0;
+
+			// For OAuth2, 401 errors are automatically handled by n8n (token refresh)
+			// But we still want to retry once if it's the first attempt
+			if (credentialType === 'directusOAuth2Api' && statusCode === 401 && attempt === 0) {
+				Logger.warn(`OAuth2 token may be expired, attempting refresh and retry...`);
+				await sleep(config.retryDelay);
+				continue;
+			}
 
 			// Check if error is retryable
 			const isRetryable = config.retryableStatusCodes.includes(statusCode);
@@ -193,6 +219,7 @@ export async function directusApiRequest(
 					statusCode,
 					message: parsedError.message,
 					attempt: attempt + 1,
+					credentialType,
 				});
 				throw parsedError;
 			}
@@ -352,14 +379,29 @@ export async function directusApiAssetRequest(
 	dataPropertyName: string,
 	qs: IDataObject = {},
 ): Promise<any> {
-	const credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
-	
-	if (!credentials) {
-		throw new Error('No credentials configured');
+	// Try to get OAuth2 credentials first, fallback to regular credentials
+	let credentials: IDirectusCredentials | null = null;
+	let credentialType: 'directusApi' | 'directusOAuth2Api' = 'directusApi';
+	let baseUrl = '';
+
+	try {
+		const oAuth2Credentials = await this.getCredentials('directusOAuth2Api');
+		if (oAuth2Credentials) {
+			credentialType = 'directusOAuth2Api';
+			baseUrl = (oAuth2Credentials.instanceUrl as string).replace(/\/$/, '');
+		}
+	} catch (error) {
+		// OAuth2 credentials not available, try regular credentials
 	}
 
-	const baseUrl = credentials.url.replace(/\/$/, '');
-	
+	if (!baseUrl) {
+		credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
+		if (!credentials) {
+			throw new Error('No credentials configured');
+		}
+		baseUrl = credentials.url.replace(/\/$/, '');
+	}
+
 	try {
 		// Get file info first
 		const fileOptions: IHttpRequestOptions = {
@@ -373,13 +415,13 @@ export async function directusApiAssetRequest(
 			},
 		};
 
-		if (credentials.authMethod === 'staticToken' && credentials.staticToken) {
+		if (credentialType === 'directusApi' && credentials?.authMethod === 'staticToken' && credentials.staticToken) {
 			fileOptions.headers!['Authorization'] = `Bearer ${credentials.staticToken}`;
 		}
 
-		const fileResponse = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', fileOptions);
+		const fileResponse = await this.helpers.httpRequestWithAuthentication.call(this, credentialType, fileOptions);
 		const file = fileResponse.data || fileResponse;
-		
+
 		// Get asset binary data
 		const assetOptions: IHttpRequestOptions = {
 			method: 'GET',
@@ -391,13 +433,13 @@ export async function directusApiAssetRequest(
 			},
 		};
 
-		if (credentials.authMethod === 'staticToken' && credentials.staticToken) {
+		if (credentialType === 'directusApi' && credentials?.authMethod === 'staticToken' && credentials.staticToken) {
 			assetOptions.headers!['Authorization'] = `Bearer ${credentials.staticToken}`;
 		}
 
-		const assetResponse = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', assetOptions);
+		const assetResponse = await this.helpers.httpRequestWithAuthentication.call(this, credentialType, assetOptions);
 		const binaryData = Buffer.from(assetResponse as ArrayBuffer);
-		
+
 		const binary: IBinaryKeyData = {};
 		binary[dataPropertyName] = await this.helpers.prepareBinaryData(
 			binaryData,
@@ -410,7 +452,7 @@ export async function directusApiAssetRequest(
 			json,
 			binary,
 		};
-		
+
 		return result;
 	} catch (error: any) {
 		Logger.error('Directus Asset Error:', error);
@@ -426,13 +468,28 @@ export async function directusApiFileRequest(
 	body: any = {},
 	qs: IDataObject = {},
 ): Promise<any> {
-	const credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
+	// Try to get OAuth2 credentials first, fallback to regular credentials
+	let credentials: IDirectusCredentials | null = null;
+	let credentialType: 'directusApi' | 'directusOAuth2Api' = 'directusApi';
+	let baseUrl = '';
 
-	if (!credentials) {
-		throw new Error('No credentials configured');
+	try {
+		const oAuth2Credentials = await this.getCredentials('directusOAuth2Api');
+		if (oAuth2Credentials) {
+			credentialType = 'directusOAuth2Api';
+			baseUrl = (oAuth2Credentials.instanceUrl as string).replace(/\/$/, '');
+		}
+	} catch (error) {
+		// OAuth2 credentials not available, try regular credentials
 	}
 
-	const baseUrl = credentials.url.replace(/\/$/, '');
+	if (!baseUrl) {
+		credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
+		if (!credentials) {
+			throw new Error('No credentials configured');
+		}
+		baseUrl = credentials.url.replace(/\/$/, '');
+	}
 
 	try {
 		Logger.info('Processing file request');
@@ -449,11 +506,11 @@ export async function directusApiFileRequest(
 				},
 			};
 
-			if (credentials.authMethod === 'staticToken' && credentials.staticToken) {
+			if (credentialType === 'directusApi' && credentials?.authMethod === 'staticToken' && credentials.staticToken) {
 				options.headers!['Authorization'] = `Bearer ${credentials.staticToken}`;
 			}
 
-			const response = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', options);
+			const response = await this.helpers.httpRequestWithAuthentication.call(this, credentialType, options);
 			const file = response.data || response;
 
 			// Update file metadata if body provided
@@ -481,11 +538,11 @@ export async function directusApiFileRequest(
 					},
 				};
 
-				if (credentials.authMethod === 'staticToken' && credentials.staticToken) {
+				if (credentialType === 'directusApi' && credentials?.authMethod === 'staticToken' && credentials.staticToken) {
 					formOptions.headers!['Authorization'] = `Bearer ${credentials.staticToken}`;
 				}
 
-				const formResponse = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', formOptions);
+				const formResponse = await this.helpers.httpRequestWithAuthentication.call(this, credentialType, formOptions);
 				result = formResponse.data || formResponse;
 			}
 
@@ -566,13 +623,26 @@ export async function getFlowWebhookUrl(
 	this: IExecuteFunctions | IExecuteSingleFunctions,
 	flowId: string,
 ): Promise<string> {
-	const credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
+	// Try to get OAuth2 credentials first, fallback to regular credentials
+	let baseUrl = '';
 
-	if (!credentials) {
-		throw new DirectusAuthenticationError('No credentials configured');
+	try {
+		const oAuth2Credentials = await this.getCredentials('directusOAuth2Api');
+		if (oAuth2Credentials) {
+			baseUrl = (oAuth2Credentials.instanceUrl as string).replace(/\/$/, '');
+		}
+	} catch (error) {
+		// OAuth2 credentials not available, try regular credentials
 	}
 
-	const baseUrl = credentials.url.replace(/\/$/, '');
+	if (!baseUrl) {
+		const credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
+		if (!credentials) {
+			throw new DirectusAuthenticationError('No credentials configured');
+		}
+		baseUrl = credentials.url.replace(/\/$/, '');
+	}
+
 	return `${baseUrl}/flows/trigger/${flowId}`;
 }
 

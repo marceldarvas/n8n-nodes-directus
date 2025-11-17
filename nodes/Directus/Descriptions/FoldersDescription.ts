@@ -26,7 +26,7 @@ export const foldersOperations: INodeProperties[] = [
 				name: 'Create Multiple',
 				value: 'createMultiple',
 				description: 'Create Multiple Folders',
-				action: 'Create Multiple a folders',
+				action: 'Create multiple a folders',
 			},
 			{
 				name: 'Delete',
@@ -38,7 +38,7 @@ export const foldersOperations: INodeProperties[] = [
 				name: 'Delete Multiple',
 				value: 'deleteMultiple',
 				description: 'Delete Multiple Folders',
-				action: 'Delete Multiple a folders',
+				action: 'Delete multiple a folders',
 			},
 			{
 				name: 'Get',
@@ -62,7 +62,7 @@ export const foldersOperations: INodeProperties[] = [
 				name: 'Update Multiple',
 				value: 'updateMultiple',
 				description: 'Update Multiple Folders',
-				action: 'Update Multiple a folders',
+				action: 'Update multiple a folders',
 			},
 		],
 		default: 'list',
@@ -91,7 +91,7 @@ export const foldersFields: INodeProperties[] = [
 		},
 		placeholder: 'Nature',
 		default: '',
-		description: 'Name of the folder.',
+		description: 'Name of the folder',
 		required: true,
 	},
 	{
@@ -110,7 +110,7 @@ export const foldersFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -185,7 +185,7 @@ export const foldersFields: INodeProperties[] = [
 		},
 		placeholder: '0fca80c4-d61c-4404-9fd7-6ba86b64154d',
 		default: '',
-		description: 'Unique ID of the file object.',
+		description: 'Unique ID of the file object',
 		required: true,
 	},
 	{
@@ -204,7 +204,7 @@ export const foldersFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -291,7 +291,7 @@ export const foldersFields: INodeProperties[] = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit',
+		description: 'Whether to return all results or only up to a given limit',
 		required: true,
 	},
 	{
@@ -318,7 +318,7 @@ export const foldersFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.',
+		description: 'Max number of results to return',
 		required: true,
 		typeOptions: {
 			minValue: 1,
@@ -358,7 +358,7 @@ export const foldersFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -413,7 +413,7 @@ export const foldersFields: INodeProperties[] = [
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
 				default: {},
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -498,7 +498,7 @@ export const foldersFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -531,7 +531,7 @@ export const foldersFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Control what fields are being returned in the object.',
+				description: 'Control what fields are being returned in the object',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -546,7 +546,7 @@ export const foldersFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.',
+				description: 'Select items in collection by given conditions',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -565,7 +565,7 @@ export const foldersFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 			{
 				displayName: 'Offset',
@@ -573,7 +573,7 @@ export const foldersFields: INodeProperties[] = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.',
+				description: 'How many items to skip when fetching data',
 			},
 			{
 				displayName: 'Search',
@@ -581,7 +581,7 @@ export const foldersFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Filter by items that contain the given search query in one of their fields.',
+				description: 'Filter by items that contain the given search query in one of their fields',
 			},
 			{
 				displayName: 'Sort',
@@ -609,7 +609,7 @@ export const foldersFields: INodeProperties[] = [
 		},
 		placeholder: '0fca80c4-d61c-4404-9fd7-6ba86b64154d',
 		default: '',
-		description: 'Unique ID of the file object.',
+		description: 'Unique ID of the file object',
 		required: true,
 	},
 	{
@@ -628,7 +628,7 @@ export const foldersFields: INodeProperties[] = [
 		},
 		placeholder: '["d97c2e0e-293d-4eb5-9e1c-27d3460ad29d", "fc02d733-95b8-4e27-bd4b-08a32cbe4e66"]',
 		default: null,
-		description: 'An array of folder primary keys.',
+		description: 'An array of folder primary keys',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -650,7 +650,7 @@ export const foldersFields: INodeProperties[] = [
 		},
 		placeholder: '{\n	"keys": ["fac21847-d5ce-4e4b-a288-9abafbdfbc87", "a5bdb793-dd85-4ac9-882a-b42862092983"],\n	"data": {\n		"parent": "d97c2e0e-293d-4eb5-9e1c-27d3460ad29d"\n	}\n}',
 		default: null,
-		description: 'Any of [the folder object](https://docs.directus.io/reference/api/system/folders/#the-folder-object)\'s properties.',
+		description: 'Any of [the folder object](https://docs.directus.io/reference/api/system/folders/#the-folder-object)\'s properties',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -672,7 +672,7 @@ export const foldersFields: INodeProperties[] = [
 		},
 		placeholder: '0fca80c4-d61c-4404-9fd7-6ba86b64154d',
 		default: '',
-		description: 'Unique ID of the file object.',
+		description: 'Unique ID of the file object',
 		required: true,
 	},
 	{
@@ -691,7 +691,7 @@ export const foldersFields: INodeProperties[] = [
 		},
 		placeholder: '[\n	{\n		"name": "Nature",\n                 "parent":"0fca80c4-d61c-4404-9fd7-6ba86b64154d"\n	},\n	{\n		"name": "Cities"\n	}\n]',
 		default: null,
-		description: 'An array of partial [folder objects](https://docs.directus.io/reference/api/system/folders/#the-folder-object). `name` is required.',
+		description: 'An array of partial [folder objects](https://docs.directus.io/reference/api/system/folders/#the-folder-object). `name` is required',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,

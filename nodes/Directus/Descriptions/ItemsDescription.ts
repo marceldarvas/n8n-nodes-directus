@@ -26,7 +26,7 @@ export const itemsOperations: INodeProperties[] = [
 				name: 'Create Multiple',
 				value: 'createMultiple',
 				description: 'Create multiple items',
-				action: 'Create Multiple an items',
+				action: 'Create multiple an items',
 			},
 			{
 				name: 'Delete',
@@ -38,7 +38,7 @@ export const itemsOperations: INodeProperties[] = [
 				name: 'Delete Multiple',
 				value: 'deleteMultiple',
 				description: 'Delete multiple items',
-				action: 'Delete Multiple an items',
+				action: 'Delete multiple an items',
 			},
 			{
 				name: 'Get',
@@ -62,7 +62,7 @@ export const itemsOperations: INodeProperties[] = [
 				name: 'Update Multiple',
 				value: 'updateMultiple',
 				description: 'Update multiple items',
-				action: 'Update Multiple an items',
+				action: 'Update multiple an items',
 			},
 		],
 		default: 'list',
@@ -86,7 +86,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: '15',
 		default: '',
-		description: 'Unique ID of the file object.',
+		description: 'Unique ID of the file object',
 		required: true,
 	},
 	{
@@ -105,7 +105,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: 'articles',
 		default: '',
-		description: 'Unique name of the parent collection.',
+		description: 'Unique name of the parent collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -131,7 +131,7 @@ export const itemsFields: INodeProperties[] = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit',
+		description: 'Whether to return all results or only up to a given limit',
 		required: true,
 	},
 	{
@@ -153,7 +153,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.',
+		description: 'Max number of results to return',
 		required: true,
 		typeOptions: {
 			minValue: 1,
@@ -182,7 +182,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
 				default: {},
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -267,7 +267,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -300,7 +300,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Control what fields are being returned in the object.',
+				description: 'Control what fields are being returned in the object',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -315,7 +315,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.',
+				description: 'Select items in collection by given conditions',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -334,7 +334,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 			{
 				displayName: 'Offset',
@@ -342,7 +342,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.',
+				description: 'How many items to skip when fetching data',
 			},
 			{
 				displayName: 'Search',
@@ -350,7 +350,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Filter by items that contain the given search query in one of their fields.',
+				description: 'Filter by items that contain the given search query in one of their fields',
 			},
 			{
 				displayName: 'Sort',
@@ -378,7 +378,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: 'articles',
 		default: '',
-		description: 'Unique name of the parent collection.',
+		description: 'Unique name of the parent collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -400,7 +400,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: '{\n	"title": "Hello world!",\n	"body": "This is our first article"\n}',
 		default: null,
-		description: 'The partial [item object](https://docs.directus.io/reference/api/items/#the-item-object).',
+		description: 'The partial [item object](https://docs.directus.io/reference/api/items/#the-item-object)',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -422,7 +422,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: 'articles',
 		default: '',
-		description: 'Unique name of the parent collection.',
+		description: 'Unique name of the parent collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -444,7 +444,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: '[\n	{\n		"title": "Hello world!",\n		"body": "This is our first article"\n	},\n	{\n		"title": "Hello again, world!",\n		"body": "This is our second article"\n	}\n]',
 		default: null,
-		description: 'An array of partial [item objects](https://docs.directus.io/reference/api/items/#the-item-object).',
+		description: 'An array of partial [item objects](https://docs.directus.io/reference/api/items/#the-item-object)',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -466,7 +466,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: 'articles',
 		default: '',
-		description: 'Unique name of the parent collection.',
+		description: 'Unique name of the parent collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -492,7 +492,7 @@ export const itemsFields: INodeProperties[] = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit',
+		description: 'Whether to return all results or only up to a given limit',
 		required: true,
 	},
 	{
@@ -519,7 +519,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.',
+		description: 'Max number of results to return',
 		required: true,
 		typeOptions: {
 			minValue: 1,
@@ -559,7 +559,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -614,7 +614,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
 				default: {},
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -699,7 +699,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -732,7 +732,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Control what fields are being returned in the object.',
+				description: 'Control what fields are being returned in the object',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -747,7 +747,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.',
+				description: 'Select items in collection by given conditions',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -766,7 +766,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 			{
 				displayName: 'Offset',
@@ -774,7 +774,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.',
+				description: 'How many items to skip when fetching data',
 			},
 			{
 				displayName: 'Search',
@@ -782,7 +782,7 @@ export const itemsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Filter by items that contain the given search query in one of their fields.',
+				description: 'Filter by items that contain the given search query in one of their fields',
 			},
 			{
 				displayName: 'Sort',
@@ -810,7 +810,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: '15',
 		default: '',
-		description: 'Unique ID of the file object.',
+		description: 'Unique ID of the file object',
 		required: true,
 	},
 	{
@@ -829,7 +829,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: 'articles',
 		default: '',
-		description: 'Unique name of the parent collection.',
+		description: 'Unique name of the parent collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -851,7 +851,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: '{\n	"title": "Hello world!",\n	"body": "This is our first article"\n}',
 		default: null,
-		description: 'The partial [item object](https://docs.directus.io/reference/api/items/#the-item-object).',
+		description: 'The partial [item object](https://docs.directus.io/reference/api/items/#the-item-object)',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -873,7 +873,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: '{\n	"keys": [1, 2],\n	"data": {\n		"status": "published"\n	}\n}',
 		default: null,
-		description: 'An array of partial [item objects](https://docs.directus.io/reference/api/items/#the-item-object).',
+		description: 'An array of partial [item objects](https://docs.directus.io/reference/api/items/#the-item-object)',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -895,7 +895,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: 'articles',
 		default: '',
-		description: 'Unique name of the parent collection.',
+		description: 'Unique name of the parent collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -917,7 +917,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: '15',
 		default: '',
-		description: 'Unique ID of the file object.',
+		description: 'Unique ID of the file object',
 		required: true,
 	},
 	{
@@ -936,7 +936,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: 'articles',
 		default: '',
-		description: 'Unique name of the parent collection.',
+		description: 'Unique name of the parent collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -958,7 +958,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: 'articles',
 		default: '',
-		description: 'Unique name of the parent collection.',
+		description: 'Unique name of the parent collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCustomCollections',
@@ -980,7 +980,7 @@ export const itemsFields: INodeProperties[] = [
 		},
 		placeholder: '[15, 16, 21]',
 		default: null,
-		description: 'An array of item primary keys.',
+		description: 'An array of item primary keys',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,

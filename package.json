@@ -33,7 +33,8 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/DirectusApi.credentials.js"
+      "dist/credentials/DirectusApi.credentials.js",
+      "dist/credentials/DirectusOAuth2Api.credentials.js"
     ],
     "nodes": [
       "dist/nodes/Directus/Directus.node.js"

@@ -133,7 +133,11 @@ export class Directus implements INodeType {
 		credentials: [
 			{
 				name: "directusApi",
-				required: true,
+				required: false,
+			},
+			{
+				name: "directusOAuth2Api",
+				required: false,
 			},
 		],
 		properties: [
@@ -196,11 +200,11 @@ export class Directus implements INodeType {
 						value: "relations",
 					},
 					{
-						name: "Revisions",
+						name: 'Revision',
 						value: "revisions",
 					},
 					{
-						name: "Roles",
+						name: 'Role',
 						value: "roles",
 					},
 					{
@@ -208,19 +212,19 @@ export class Directus implements INodeType {
 						value: "server",
 					},
 					{
-						name: "Settings",
+						name: 'Setting',
 						value: "settings",
 					},
 					{
-						name: "Users",
+						name: 'User',
 						value: "users",
 					},
 					{
-						name: "Utilities",
+						name: 'Utility',
 						value: "utils",
 					},
 					{
-						name: "Webhooks",
+						name: 'Webhook',
 						value: "webhooks",
 					},
 				],

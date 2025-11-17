@@ -11,9 +11,20 @@ import {
 	IWebhookFunctions,
 	IPollFunctions,
 	LoggerProxy as Logger,
+	NodeApiError,
 } from 'n8n-workflow';
 
 import { Buffer } from 'buffer';
+
+import {
+	DirectusApiError,
+	DirectusRateLimitError,
+	DirectusAuthenticationError,
+	DirectusPermissionError,
+	DirectusValidationError,
+	DirectusNetworkError,
+	DirectusTimeoutError,
+} from './Errors';
 
 export interface IDirectusCredentials {
 	url: string;
@@ -21,6 +32,100 @@ export interface IDirectusCredentials {
 	staticToken?: string;
 	email?: string;
 	password?: string;
+	timeout?: number;
+}
+
+// Retry configuration
+interface IRetryConfig {
+	maxRetries: number;
+	retryDelay: number;
+	backoffMultiplier: number;
+	retryableStatusCodes: number[];
+}
+
+const DEFAULT_RETRY_CONFIG: IRetryConfig = {
+	maxRetries: 3,
+	retryDelay: 1000,
+	backoffMultiplier: 2,
+	retryableStatusCodes: [408, 429, 500, 502, 503, 504],
+};
+
+/**
+ * Sleep helper for retry delays
+ */
+function sleep(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Parse error response and create appropriate error object
+ */
+function parseDirectusError(error: any, endpoint: string): Error {
+	const statusCode = error.response?.status || error.statusCode || 0;
+	const errorBody = error.response?.data || error.response?.body || {};
+	const errorMessage = errorBody.errors?.[0]?.message || errorBody.message || error.message || 'Unknown error';
+
+	// Handle specific error codes
+	switch (statusCode) {
+		case 401:
+			return new DirectusAuthenticationError(
+				`Authentication failed: ${errorMessage}. Check your API token or credentials.`,
+				endpoint,
+			);
+		case 403:
+			return new DirectusPermissionError(
+				`Permission denied: ${errorMessage}. Check your user role has access to this resource.`,
+				endpoint,
+			);
+		case 404:
+			return new DirectusApiError(
+				`Resource not found: ${errorMessage}. Endpoint: ${endpoint}`,
+				404,
+				errorBody.errors,
+				endpoint,
+			);
+		case 429:
+			const retryAfter = error.response?.headers?.['retry-after'];
+			return new DirectusRateLimitError(
+				`Rate limit exceeded: ${errorMessage}. ${retryAfter ? `Retry after ${retryAfter} seconds.` : ''}`,
+				retryAfter ? parseInt(retryAfter, 10) : undefined,
+				endpoint,
+			);
+		case 400:
+		case 422:
+			return new DirectusValidationError(
+				`Validation error: ${errorMessage}`,
+				errorBody.errors || [],
+				endpoint,
+			);
+		default:
+			if (statusCode >= 500) {
+				return new DirectusApiError(
+					`Server error: ${errorMessage}. Endpoint: ${endpoint}`,
+					statusCode,
+					errorBody.errors,
+					endpoint,
+				);
+			}
+			if (error.code === 'ETIMEDOUT' || error.code === 'ESOCKETTIMEDOUT') {
+				return new DirectusTimeoutError(
+					`Request timeout: ${errorMessage}`,
+					error.timeout || 30000,
+				);
+			}
+			if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+				return new DirectusNetworkError(
+					`Network error: Cannot connect to Directus instance. ${errorMessage}`,
+					error,
+				);
+			}
+			return new DirectusApiError(
+				`Directus API Error: ${errorMessage}`,
+				statusCode,
+				errorBody.errors,
+				endpoint,
+			);
+	}
 }
 
 export async function directusApiRequest(
@@ -29,22 +134,27 @@ export async function directusApiRequest(
 	endpoint: string,
 	body: any = {},
 	qs: IDataObject = {},
+	retryConfig: Partial<IRetryConfig> = {},
 ): Promise<any> {
 	const credentials = (await this.getCredentials('directusApi')) as IDirectusCredentials;
-	
+
 	if (!credentials) {
-		throw new Error('No credentials configured');
+		throw new DirectusAuthenticationError('No credentials configured');
 	}
 
 	const baseUrl = credentials.url.replace(/\/$/, '');
 	const url = `${baseUrl}/${endpoint.replace(/^\//, '')}`;
-	
+
+	// Merge retry config with defaults
+	const config = { ...DEFAULT_RETRY_CONFIG, ...retryConfig };
+
 	const options: IHttpRequestOptions = {
 		method: method.toUpperCase() as any,
 		url,
 		body,
 		qs,
 		json: true,
+		timeout: credentials.timeout || 30000,
 		headers: {
 			'Content-Type': 'application/json',
 			'User-Agent': 'n8n-nodes-directus',
@@ -56,13 +166,60 @@ export async function directusApiRequest(
 		options.headers!['Authorization'] = `Bearer ${credentials.staticToken}`;
 	}
 
-	try {
-		const response = await this.helpers.httpRequestWithAuthentication.call(this, 'directusApi', options);
-		return response;
-	} catch (error: any) {
-		Logger.error('Directus API Error:', error);
-		throw new Error(`Directus API Error: ${error.message || error}`);
+	// Retry logic with exponential backoff
+	let lastError: any;
+	for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
+		try {
+			const response = await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				'directusApi',
+				options,
+			);
+
+			// Success - return response
+			return response;
+		} catch (error: any) {
+			lastError = error;
+			const statusCode = error.response?.status || error.statusCode || 0;
+
+			// Check if error is retryable
+			const isRetryable = config.retryableStatusCodes.includes(statusCode);
+			const isLastAttempt = attempt >= config.maxRetries;
+
+			if (!isRetryable || isLastAttempt) {
+				// Non-retryable error or max retries reached - throw immediately
+				const parsedError = parseDirectusError(error, endpoint);
+				Logger.error(`Directus API Error [${method} ${endpoint}]:`, {
+					statusCode,
+					message: parsedError.message,
+					attempt: attempt + 1,
+				});
+				throw parsedError;
+			}
+
+			// Calculate retry delay
+			let retryDelay = config.retryDelay * Math.pow(config.backoffMultiplier, attempt);
+
+			// Handle rate limit with Retry-After header
+			if (statusCode === 429) {
+				const retryAfter = error.response?.headers?.['retry-after'];
+				if (retryAfter) {
+					retryDelay = parseInt(retryAfter, 10) * 1000; // Convert to ms
+				}
+			}
+
+			Logger.warn(`Directus API Error [${method} ${endpoint}]: Retrying in ${retryDelay}ms (attempt ${attempt + 1}/${config.maxRetries})`, {
+				statusCode,
+				retryDelay,
+			});
+
+			// Wait before retrying
+			await sleep(retryDelay);
+		}
 	}
+
+	// Should never reach here, but just in case
+	throw parseDirectusError(lastError, endpoint);
 }
 
 export function validateJSON(json: string | undefined): any {

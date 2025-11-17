@@ -21,6 +21,8 @@ import {
 	directusApiFileRequest,
 	directusApiRequest,
 	validateJSON,
+	triggerFlow,
+	pollFlowExecution,
 } from "./GenericFunctions";
 
 import {
@@ -49,6 +51,8 @@ import {
 	fieldsFields,
 	fieldsOperations,
 } from "./Descriptions/FieldsDescription";
+
+import { flowFields, flowOperations } from "./Descriptions/FlowDescription";
 
 import { filesFields, filesOperations } from "./Descriptions/FilesDescription";
 
@@ -152,6 +156,10 @@ export class Directus implements INodeType {
 						value: "fields",
 					},
 					{
+						name: 'Flow',
+						value: "flow",
+					},
+					{
 						name: 'File',
 						value: "files",
 					},
@@ -231,6 +239,10 @@ export class Directus implements INodeType {
 			// FIELDS
 			...fieldsOperations,
 			...fieldsFields,
+
+			// FLOW
+			...flowOperations,
+			...flowFields,
 
 			// FILES
 			...filesOperations,
@@ -1645,6 +1657,156 @@ export class Directus implements INodeType {
 						responseData = response;
 						//////////////////////////////////
 						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+			}
+			if (resource === "flow") {
+				if (operation === "trigger") {
+					try {
+						const flowId = this.getNodeParameter("flowId", i) as string;
+						const payloadJson = this.getNodeParameter("payload", i, "{}") as string;
+						const executionMode = this.getNodeParameter("executionMode", i) as string;
+						const queryParametersCollection = this.getNodeParameter("queryParameters", i, {}) as IDataObject;
+
+						// Parse the payload JSON
+						const payload = validateJSON(payloadJson);
+
+						// Convert fixedCollection query parameters to query string
+						const queryParams: IDataObject = {};
+						if (queryParametersCollection && queryParametersCollection.parameter) {
+							const parameters = queryParametersCollection.parameter as Array<{name: string, value: string}>;
+							parameters.forEach((param) => {
+								queryParams[param.name] = param.value;
+							});
+						}
+
+						// Trigger the flow
+						const response = await triggerFlow.call(
+							this,
+							flowId,
+							payload,
+							queryParams,
+						);
+
+						// If sync mode, poll for completion
+						if (executionMode === "sync") {
+							const maxWaitTime = this.getNodeParameter("maxWaitTime", i, 60) as number;
+							const executionId = response.executionId || response.data?.executionId;
+
+							if (executionId) {
+								const pollResult = await pollFlowExecution.call(
+									this,
+									executionId,
+									maxWaitTime * 1000, // Convert to milliseconds
+								);
+								responseData = pollResult;
+							} else {
+								responseData = response;
+							}
+						} else {
+							responseData = response;
+						}
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "get") {
+					try {
+						const flowId = this.getNodeParameter("flowId", i) as string;
+
+						requestMethod = "GET";
+						endpoint = `flows/${flowId}`;
+
+						const response = await directusApiRequest.call(
+							this,
+							requestMethod,
+							endpoint,
+							{},
+							{},
+						);
+
+						if (typeof response !== "object") {
+							responseData = { response };
+						} else {
+							responseData = response.data ?? response;
+						}
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "list") {
+					try {
+						returnAll = this.getNodeParameter("returnAll", i, false) as boolean;
+						const options = this.getNodeParameter("options", i, {}) as IDataObject;
+
+						requestMethod = "GET";
+						endpoint = "flows";
+
+						// Build query string
+						if (returnAll) {
+							qs.limit = -1;
+						} else {
+							qs.limit = this.getNodeParameter("limit", i, 50) as number;
+						}
+
+						// Add filter if provided
+						if (options.filter) {
+							const filterJson = validateJSON(options.filter as string);
+							if (filterJson) {
+								qs.filter = JSON.stringify(filterJson);
+							}
+						}
+
+						// Add sort if provided
+						if (options.sort) {
+							qs.sort = options.sort as string;
+						}
+
+						// Add fields if provided
+						if (options.fields) {
+							qs.fields = options.fields as string;
+						}
+
+						const response = await directusApiRequest.call(
+							this,
+							requestMethod,
+							endpoint,
+							{},
+							qs,
+						);
+
+						if (typeof response !== "object") {
+							responseData = { response };
+						} else {
+							responseData = response.data ?? response;
+						}
+
+						// Return each flow as a separate item
+						if (Array.isArray(responseData)) {
+							responseData.forEach((item: any) => {
+								returnItems.push({ json: item });
+							});
+						} else {
+							returnItems.push({ json: responseData });
+						}
 					} catch (error) {
 						if (this.continueOnFail()) {
 							returnItems.push({ json: { error: error.message } });

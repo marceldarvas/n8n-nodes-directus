@@ -224,12 +224,121 @@ export async function directusApiRequest(
 
 export function validateJSON(json: string | undefined): any {
 	if (!json) return undefined;
-	
+
 	try {
 		return JSON.parse(json);
 	} catch (exception) {
 		return undefined;
 	}
+}
+
+/**
+ * Trigger a Directus Flow via webhook
+ */
+export async function triggerFlow(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	flowId: string,
+	payload?: any,
+	queryParams?: IDataObject,
+): Promise<any> {
+	const method = payload && Object.keys(payload).length > 0 ? 'POST' : 'GET';
+	const endpoint = `flows/trigger/${flowId}`;
+
+	const response = await directusApiRequest.call(
+		this,
+		method,
+		endpoint,
+		payload || {},
+		queryParams || {},
+	);
+
+	return response;
+}
+
+/**
+ * Get flow ID by name
+ */
+export async function getFlowIdByName(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	flowName: string,
+): Promise<string> {
+	const response = await directusApiRequest.call(
+		this,
+		'GET',
+		'flows',
+		{},
+		{
+			filter: JSON.stringify({ name: { _eq: flowName } }),
+			limit: 1,
+		},
+	);
+
+	const flows = response.data || response;
+
+	if (!flows || flows.length === 0) {
+		throw new Error(`Flow "${flowName}" not found`);
+	}
+
+	return flows[0].id;
+}
+
+/**
+ * Poll flow execution until complete (for sync mode)
+ */
+export async function pollFlowExecution(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	executionId: string,
+	maxWaitMs: number = 60000,
+	intervalMs: number = 1000,
+): Promise<any> {
+	const startTime = Date.now();
+
+	while (Date.now() - startTime < maxWaitMs) {
+		try {
+			// Query activity logs for this execution
+			const response = await directusApiRequest.call(
+				this,
+				'GET',
+				'activity',
+				{},
+				{
+					filter: JSON.stringify({
+						_and: [
+							{ action: { _eq: 'run' } },
+							{ collection: { _eq: 'directus_flows' } },
+							{ comment: { _contains: executionId } },
+						],
+					}),
+					sort: '-timestamp',
+					limit: 1,
+				},
+			);
+
+			const activities = response.data || response;
+
+			if (activities && activities.length > 0) {
+				const activity = activities[0];
+				const status = activity.revisions?.[0]?.data?.status;
+
+				if (status === 'completed' || status === 'failed') {
+					return {
+						executionId,
+						status,
+						activity,
+					};
+				}
+			}
+		} catch (error) {
+			Logger.warn(`Error polling flow execution: ${error}`);
+		}
+
+		await sleep(intervalMs);
+	}
+
+	throw new DirectusTimeoutError(
+		`Flow execution ${executionId} timed out after ${maxWaitMs}ms`,
+		maxWaitMs,
+	);
 }
 
 export async function directusApiAssetRequest(

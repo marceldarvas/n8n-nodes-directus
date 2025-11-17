@@ -325,6 +325,9 @@ export async function pollFlowExecution(
 						executionId,
 						status,
 						activity,
+						timestamp: activity.timestamp,
+						user: activity.user,
+						duration: Date.now() - startTime,
 					};
 				}
 			}
@@ -571,4 +574,193 @@ export async function getFlowWebhookUrl(
 
 	const baseUrl = credentials.url.replace(/\/$/, '');
 	return `${baseUrl}/flows/trigger/${flowId}`;
+}
+
+/**
+ * Get flow execution details from activity logs
+ */
+export async function getFlowExecution(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	executionId: string,
+	fields?: string,
+): Promise<any> {
+	const qs: IDataObject = {
+		filter: JSON.stringify({
+			_and: [
+				{ action: { _eq: 'run' } },
+				{ collection: { _eq: 'directus_flows' } },
+				{ comment: { _contains: executionId } },
+			],
+		}),
+		sort: '-timestamp',
+		limit: 1,
+	};
+
+	if (fields) {
+		qs.fields = fields;
+	}
+
+	const response = await directusApiRequest.call(
+		this,
+		'GET',
+		'activity',
+		{},
+		qs,
+	);
+
+	const activities = response.data || response;
+
+	if (!activities || activities.length === 0) {
+		throw new DirectusApiError(
+			`Execution with ID ${executionId} not found`,
+			404,
+			[],
+			'activity',
+		);
+	}
+
+	return activities[0];
+}
+
+/**
+ * List flow executions with filtering support
+ */
+export async function listFlowExecutions(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	filters: IDataObject = {},
+	options: IDataObject = {},
+): Promise<any> {
+	// Build filter conditions
+	const filterConditions: any[] = [
+		{ action: { _eq: 'run' } },
+		{ collection: { _eq: 'directus_flows' } },
+	];
+
+	// Add flow ID filter if provided
+	if (filters.flowId) {
+		filterConditions.push({ item: { _eq: filters.flowId } });
+	}
+
+	// Add status filter if provided and not 'all'
+	if (filters.status && filters.status !== 'all') {
+		// Map status to appropriate filter
+		// Note: This is a simplified mapping - you may need to adjust based on actual Directus activity structure
+		if (filters.status === 'success') {
+			filterConditions.push({
+				_or: [
+					{ comment: { _contains: 'completed' } },
+					{ comment: { _contains: 'success' } },
+				],
+			});
+		} else if (filters.status === 'failed') {
+			filterConditions.push({
+				_or: [
+					{ comment: { _contains: 'failed' } },
+					{ comment: { _contains: 'error' } },
+				],
+			});
+		} else if (filters.status === 'running') {
+			filterConditions.push({
+				_or: [
+					{ comment: { _contains: 'running' } },
+					{ comment: { _contains: 'started' } },
+				],
+			});
+		}
+	}
+
+	// Add date range filters if provided
+	if (filters.dateFrom) {
+		filterConditions.push({ timestamp: { _gte: filters.dateFrom } });
+	}
+
+	if (filters.dateTo) {
+		filterConditions.push({ timestamp: { _lte: filters.dateTo } });
+	}
+
+	// Add user ID filter if provided
+	if (filters.userId) {
+		filterConditions.push({ user: { _eq: filters.userId } });
+	}
+
+	// Build query string
+	const qs: IDataObject = {
+		filter: JSON.stringify({ _and: filterConditions }),
+		sort: options.sort || '-timestamp',
+	};
+
+	// Add limit
+	if (filters.returnAll) {
+		qs.limit = -1;
+	} else {
+		qs.limit = filters.limit || 100;
+	}
+
+	// Add pagination if page is specified
+	if (options.page && typeof options.page === 'number' && options.page > 1) {
+		const limit = typeof filters.limit === 'number' ? filters.limit : 100;
+		qs.offset = (options.page - 1) * limit;
+	}
+
+	// Add fields if provided
+	if (options.fields) {
+		qs.fields = options.fields;
+	}
+
+	const response = await directusApiRequest.call(
+		this,
+		'GET',
+		'activity',
+		{},
+		qs,
+	);
+
+	return response.data || response;
+}
+
+/**
+ * Get detailed operation logs for a flow execution
+ */
+export async function getFlowExecutionLogs(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	executionId: string,
+	options: IDataObject = {},
+): Promise<any> {
+	const qs: IDataObject = {
+		filter: JSON.stringify({
+			_and: [
+				{ action: { _eq: 'run' } },
+				{ collection: { _eq: 'directus_flows' } },
+				{ comment: { _contains: executionId } },
+			],
+		}),
+		sort: '-timestamp',
+		limit: options.limit || 100,
+	};
+
+	// Add fields if provided
+	if (options.fields) {
+		qs.fields = options.fields;
+	}
+
+	const response = await directusApiRequest.call(
+		this,
+		'GET',
+		'activity',
+		{},
+		qs,
+	);
+
+	const activities = response.data || response;
+
+	if (!activities || activities.length === 0) {
+		throw new DirectusApiError(
+			`No logs found for execution ID ${executionId}`,
+			404,
+			[],
+			'activity',
+		);
+	}
+
+	return activities;
 }

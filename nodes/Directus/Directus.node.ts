@@ -27,6 +27,9 @@ import {
 	updateFlow,
 	deleteFlow,
 	getFlowWebhookUrl,
+	getFlowExecution,
+	listFlowExecutions,
+	getFlowExecutionLogs,
 } from "./GenericFunctions";
 
 import {
@@ -1967,6 +1970,111 @@ export class Directus implements INodeType {
 						};
 
 						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "getExecution") {
+					try {
+						const executionId = this.getNodeParameter("executionId", i) as string;
+						const additionalFields = this.getNodeParameter("additionalFields", i, {}) as IDataObject;
+
+						// Get fields if provided
+						const fields = additionalFields.fields as string | undefined;
+
+						// Get execution details
+						const execution = await getFlowExecution.call(this, executionId, fields);
+
+						responseData = execution;
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "listExecutions") {
+					try {
+						returnAll = this.getNodeParameter("returnAll", i, false) as boolean;
+						const filtersParam = this.getNodeParameter("filters", i, {}) as IDataObject;
+						const options = this.getNodeParameter("options", i, {}) as IDataObject;
+
+						// Build filters object
+						const filters: IDataObject = {
+							returnAll,
+						};
+
+						// Add limit if not returning all
+						if (!returnAll) {
+							filters.limit = this.getNodeParameter("limit", i, 100) as number;
+						}
+
+						// Add flow ID filter if provided
+						if (filtersParam.flowId) {
+							filters.flowId = filtersParam.flowId as string;
+						}
+
+						// Add status filter if provided
+						if (filtersParam.status) {
+							filters.status = filtersParam.status as string;
+						}
+
+						// Add date filters if provided
+						if (filtersParam.dateFrom) {
+							filters.dateFrom = filtersParam.dateFrom as string;
+						}
+
+						if (filtersParam.dateTo) {
+							filters.dateTo = filtersParam.dateTo as string;
+						}
+
+						// Add user ID filter if provided
+						if (filtersParam.userId) {
+							filters.userId = filtersParam.userId as string;
+						}
+
+						// List executions
+						const executions = await listFlowExecutions.call(this, filters, options);
+
+						// Return each execution as a separate item
+						if (Array.isArray(executions)) {
+							executions.forEach((execution: any) => {
+								returnItems.push({ json: execution });
+							});
+						} else {
+							returnItems.push({ json: executions });
+						}
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "getExecutionLogs") {
+					try {
+						const executionId = this.getNodeParameter("executionId", i) as string;
+						const options = this.getNodeParameter("options", i, {}) as IDataObject;
+
+						// Get execution logs
+						const logs = await getFlowExecutionLogs.call(this, executionId, options);
+
+						// Return each log entry as a separate item
+						if (Array.isArray(logs)) {
+							logs.forEach((log: any) => {
+								returnItems.push({ json: log });
+							});
+						} else {
+							returnItems.push({ json: logs });
+						}
 					} catch (error) {
 						if (this.continueOnFail()) {
 							returnItems.push({ json: { error: error.message } });

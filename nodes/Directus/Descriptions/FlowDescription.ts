@@ -31,10 +31,28 @@ export const flowOperations: INodeProperties[] = [
 				action: 'Get a flow',
 			},
 			{
+				name: 'Get Execution',
+				value: 'getExecution',
+				description: 'Get details of a flow execution by ID',
+				action: 'Get execution details',
+			},
+			{
+				name: 'Get Execution Logs',
+				value: 'getExecutionLogs',
+				description: 'Get detailed logs for a flow execution',
+				action: 'Get execution logs',
+			},
+			{
 				name: 'List',
 				value: 'list',
 				description: 'List all flows',
 				action: 'List flows',
+			},
+			{
+				name: 'List Executions',
+				value: 'listExecutions',
+				description: 'List flow executions with filters',
+				action: 'List executions',
 			},
 			{
 				name: 'Trigger',
@@ -515,6 +533,243 @@ export const flowFields: INodeProperties[] = [
 				default: '',
 				description: 'Comma-separated list of fields to return',
 				placeholder: 'e.g., id,name,status',
+			},
+		],
+	},
+	// ----------------------------------
+	//         Get Execution operation fields
+	// ----------------------------------
+	{
+		displayName: 'Execution ID',
+		name: 'executionId',
+		type: 'string',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['flow'],
+				operation: ['getExecution'],
+			},
+		},
+		default: '',
+		placeholder: 'e.g., 8cbb43fe-4cdf-4991-8352-c461779cad5f',
+		description: 'The ID of the execution to retrieve',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['flow'],
+				operation: ['getExecution'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Fields',
+				name: 'fields',
+				type: 'string',
+				default: '',
+				description: 'Comma-separated list of fields to return',
+				placeholder: 'e.g., id,action,timestamp,user',
+			},
+		],
+	},
+	// ----------------------------------
+	//         List Executions operation fields
+	// ----------------------------------
+	{
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				resource: ['flow'],
+				operation: ['listExecutions'],
+			},
+		},
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
+	},
+	{
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number',
+		displayOptions: {
+			show: {
+				resource: ['flow'],
+				operation: ['listExecutions'],
+				returnAll: [false],
+			},
+		},
+		typeOptions: {
+			minValue: 1,
+			maxValue: 500,
+		},
+		default: 100,
+		description: 'Max number of results to return',
+	},
+	{
+		displayName: 'Filters',
+		name: 'filters',
+		type: 'collection',
+		placeholder: 'Add Filter',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['flow'],
+				operation: ['listExecutions'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Flow ID',
+				name: 'flowId',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g., 8cbb43fe-4cdf-4991-8352-c461779cad5f',
+				description: 'Filter executions by flow ID',
+			},
+			{
+				displayName: 'Status',
+				name: 'status',
+				type: 'options',
+				options: [
+					{
+						name: 'All',
+						value: 'all',
+					},
+					{
+						name: 'Success',
+						value: 'success',
+					},
+					{
+						name: 'Failed',
+						value: 'failed',
+					},
+					{
+						name: 'Running',
+						value: 'running',
+					},
+				],
+				default: 'all',
+				description: 'Filter executions by status',
+			},
+			{
+				displayName: 'Date From',
+				name: 'dateFrom',
+				type: 'dateTime',
+				default: '',
+				description: 'Filter executions from this date onwards',
+			},
+			{
+				displayName: 'Date To',
+				name: 'dateTo',
+				type: 'dateTime',
+				default: '',
+				description: 'Filter executions up to this date',
+			},
+			{
+				displayName: 'User ID',
+				name: 'userId',
+				type: 'string',
+				default: '',
+				description: 'Filter executions by user ID',
+			},
+		],
+	},
+	{
+		displayName: 'Options',
+		name: 'options',
+		type: 'collection',
+		placeholder: 'Add Option',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['flow'],
+				operation: ['listExecutions'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Sort',
+				name: 'sort',
+				type: 'string',
+				default: '-timestamp',
+				description: 'Sort by field (prefix with - for descending)',
+				placeholder: 'e.g., -timestamp',
+			},
+			{
+				displayName: 'Fields',
+				name: 'fields',
+				type: 'string',
+				default: '',
+				description: 'Comma-separated list of fields to return',
+				placeholder: 'e.g., id,action,timestamp,user',
+			},
+			{
+				displayName: 'Page',
+				name: 'page',
+				type: 'number',
+				default: 1,
+				description: 'Page number for pagination (starts at 1)',
+				typeOptions: {
+					minValue: 1,
+				},
+			},
+		],
+	},
+	// ----------------------------------
+	//         Get Execution Logs operation fields
+	// ----------------------------------
+	{
+		displayName: 'Execution ID',
+		name: 'executionId',
+		type: 'string',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['flow'],
+				operation: ['getExecutionLogs'],
+			},
+		},
+		default: '',
+		placeholder: 'e.g., 8cbb43fe-4cdf-4991-8352-c461779cad5f',
+		description: 'The ID of the execution to retrieve logs for',
+	},
+	{
+		displayName: 'Options',
+		name: 'options',
+		type: 'collection',
+		placeholder: 'Add Option',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['flow'],
+				operation: ['getExecutionLogs'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Limit',
+				name: 'limit',
+				type: 'number',
+				default: 100,
+				description: 'Max number of log entries to return',
+				typeOptions: {
+					minValue: 1,
+					maxValue: 1000,
+				},
+			},
+			{
+				displayName: 'Fields',
+				name: 'fields',
+				type: 'string',
+				default: '',
+				description: 'Comma-separated list of fields to return',
+				placeholder: 'e.g., id,action,timestamp,comment,revisions',
 			},
 		],
 	},

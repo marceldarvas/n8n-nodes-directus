@@ -173,9 +173,7 @@ export const usersFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Provide a custom invite URL which the link in the email will lead to. The invite token will be passed as a parameter.
-Note: You need to configure the [`USER_INVITE_URL_ALLOW_LIST` environment variable](https://docs.directus.io/reference/environment-variables/#security) to enable this feature.
-',
+				description: 'Provide a custom invite URL which the link in the email will lead to. The invite token will be passed as a parameter. Note: You need to configure the [`USER_INVITE_URL_ALLOW_LIST` environment variable](https://docs.directus.io/reference/environment-variables/#security) to enable this feature.',
 			},
 		],
 	},
@@ -441,9 +439,7 @@ Note: You need to configure the [`USER_INVITE_URL_ALLOW_LIST` environment vari
 				type: 'string',
 				placeholder: 'en-US',
 				default: '',
-				description: 'Language the Admin App is rendered in. See [our Crowdin page ](https://locales.directus.io/)
-[(opens new window)](https://locales.directus.io/)
-for all available languages and translations.',
+				description: 'Language the Admin App is rendered in. See [our Crowdin page ](https://locales.directus.io/) [(opens new window)](https://locales.directus.io/) for all available languages and translations.',
 			},
 			{
 				displayName: 'Last Name',
@@ -795,8 +791,7 @@ for all available languages and translations.',
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
-',
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.',
 				options: [
 					{
 						name: 'CSV',
@@ -937,9 +932,7 @@ for all available languages and translations.',
 		},
 		placeholder: '{\n	"keys": ["72a1ce24-4748-47de-a05f-ce9af3033727", "9c3d75a8-7a5f-41a4-be0a-1488fd974511"],\n	"data": {\n		"title": "CTO"\n	}\n}',
 		default: null,
-		description: 'Required:
-- **`keys`** [Array of primary keys of the users you\'d like to update.]
-- **`data`** [Any of [the user object](https://docs.directus.io/reference/api/system/users/#the-user-object)\'s properties.]',
+		description: 'Required: - **`keys`** [Array of primary keys of the users you\'d like to update.] - **`data`** [Any of [the user object](https://docs.directus.io/reference/api/system/users/#the-user-object)\'s properties.]',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,

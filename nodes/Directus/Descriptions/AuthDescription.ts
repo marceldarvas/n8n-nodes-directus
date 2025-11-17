@@ -285,9 +285,7 @@ export const authFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Provide a custom reset URL which the link in the email will lead to. The reset token will be passed as a parameter.
-Note: You need to configure the [`PASSWORD_RESET_URL_ALLOW_LIST` environment variable](https://docs.directus.io/reference/environment-variables/#security) to enable this feature.
-',
+				description: 'Provide a custom reset URL which the link in the email will lead to. The reset token will be passed as a parameter. Note: You need to configure the [`PASSWORD_RESET_URL_ALLOW_LIST` environment variable](https://docs.directus.io/reference/environment-variables/#security) to enable this feature.',
 			},
 		],
 	},
@@ -443,8 +441,7 @@ Note: You need to configure the [`PASSWORD_RESET_URL_ALLOW_LIST` environment v
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Where to redirect on successful login.If set the authentication details are set inside cookies otherwise a JSON is returned.
-',
+				description: 'Where to redirect on successful login.If set the authentication details are set inside cookies otherwise a JSON is returned.',
 			},
 		],
 	},

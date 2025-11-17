@@ -125,9 +125,7 @@ export const permissionsFields: INodeProperties[] = [
 				],
 			},
 		},
-		placeholder: '{
-	"fields": ["ID", "title", "body"]
-}',
+		placeholder: '{ "fields": ["ID", "title", "body"] }',
 		default: null,
 		description: 'A partial [permissions object](https://docs.directus.io/reference/api/system/permissions/#the-permission-object).',
 		required: true,
@@ -280,16 +278,9 @@ export const permissionsFields: INodeProperties[] = [
 				],
 			},
 		},
-		placeholder: '{
-	"keys": [34, 65],
-	"data": {
-		"fields": ["ID", "title", "body"]
-	}
-}',
+		placeholder: '{ "keys": [34, 65], "data": { "fields": ["ID", "title", "body"] } }',
 		default: null,
-		description: 'Required:
-- keys [Array of primary keys of the permissions you\'d like to update.]
-- data [Any of [the permission object](https://docs.directus.io/reference/api/system/permissions/#the-permission-object)\'s properties.]',
+		description: 'Required: - keys [Array of primary keys of the permissions you\'d like to update.] - data [Any of [the permission object](https://docs.directus.io/reference/api/system/permissions/#the-permission-object)\'s properties.]',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -552,8 +543,7 @@ export const permissionsFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
-',
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.',
 				options: [
 					{
 						name: 'CSV',
@@ -651,20 +641,7 @@ export const permissionsFields: INodeProperties[] = [
 				],
 			},
 		},
-		placeholder: '[
-	{
-		"collection": "pages",
-		"action": "read",
-		"role": "c86c2761-65d3-43c3-897f-6f74ad6a5bd7",
-		"fields": ["ID", "title"]
-	},
-	{
-		"collection": "pages",
-		"action": "create",
-		"role": "c86c2761-65d3-43c3-897f-6f74ad6a5bd7",
-		"fields": ["id", "title"]
-	}
-]',
+		placeholder: '[ { "collection": "pages", "action": "read", "role": "c86c2761-65d3-43c3-897f-6f74ad6a5bd7", "fields": ["ID", "title"] }, { "collection": "pages", "action": "create", "role": "c86c2761-65d3-43c3-897f-6f74ad6a5bd7", "fields": ["id", "title"] } ]',
 		default: null,
 		description: 'An array of partial [permissions objects](https://docs.directus.io/reference/api/system/permissions/#the-permission-object). `action` and `collection` are required.',
 		required: true,

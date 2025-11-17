@@ -533,8 +533,7 @@ export const activityFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
-',
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.',
 				options: [
 					{
 						name: 'CSV',

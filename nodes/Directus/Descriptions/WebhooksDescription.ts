@@ -242,9 +242,7 @@ export const webhooksFields: INodeProperties[] = [
 		},
 		placeholder: '[\n	{\n		"name": "Example",\n		"actions": ["create", "update"],\n		"collections": ["articles"],\n		"url": "https://example.com"\n	},\n	{\n		"name": "Second Example",\n		"actions": ["delete"],\n		"collections": ["articles"],\n		"url": "https://example.com/on-delete"\n	}\n]',
 		default: null,
-		description: 'An array of partial [webhook object](https://docs.directus.io/reference/api/system/webhooks/#the-webhook-object).
-`name`, `actions`, `collections`, and `URL` are required.
-',
+		description: 'An array of partial [webhook object](https://docs.directus.io/reference/api/system/webhooks/#the-webhook-object). `name`, `actions`, `collections`, and `URL` are required.',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -502,8 +500,7 @@ export const webhooksFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
-',
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.',
 				options: [
 					{
 						name: 'CSV',
@@ -603,9 +600,7 @@ export const webhooksFields: INodeProperties[] = [
 		},
 		placeholder: '{\n	"keys": [15, 41],\n	"data": {\n		"name": "Build Website"\n	}\n}',
 		default: null,
-		description: 'Required:
-- **`keys`** [Array of primary keys of the webhooks you\'d like to update]
-- **`data`** [Any of [the webhook object](https://docs.directus.io/reference/api/system/webhooks/#the-webhook-object)\'s properties]',
+		description: 'Required: - **`keys`** [Array of primary keys of the webhooks you\'d like to update] - **`data`** [Any of [the webhook object](https://docs.directus.io/reference/api/system/webhooks/#the-webhook-object)\'s properties]',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,

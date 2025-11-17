@@ -168,9 +168,7 @@ export const presetsFields: INodeProperties[] = [
 		},
 		placeholder: '{\n	"keys": [15, 64],\n	"data": {\n		"layout": "tabular"\n	}\n}',
 		default: null,
-		description: 'Required:
-- keys [Array of primary keys of the presets you\'d like to update.]
-- data [Any of [the preset object](https://docs.directus.io/reference/api/system/presets/#the-preset-object)\'s properties.] ',
+		description: 'Required: - keys [Array of primary keys of the presets you\'d like to update.] - data [Any of [the preset object](https://docs.directus.io/reference/api/system/presets/#the-preset-object)\'s properties.]',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -414,8 +412,7 @@ export const presetsFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
-',
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.',
 				options: [
 					{
 						name: 'CSV',

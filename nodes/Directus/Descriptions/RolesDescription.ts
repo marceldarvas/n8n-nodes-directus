@@ -308,8 +308,7 @@ export const rolesFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
-',
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.',
 				options: [
 					{
 						name: 'CSV',
@@ -409,9 +408,7 @@ export const rolesFields: INodeProperties[] = [
 		},
 		placeholder: '{\n	"keys": ["c86c2761-65d3-43c3-897f-6f74ad6a5bd7", "6fc3d5d3-a37b-4da8-a2f4-ed62ad5abe03"],\n	"data": {\n		"icon": "attractions"\n	}\n}',
 		default: null,
-		description: 'Required:
-- **`keys`** [Array of primary keys of the roles you\'d like to update.]
-- **`data`** [Any of [the role object](https://docs.directus.io/reference/api/system/roles/#the-role-object)\'s properties.]',
+		description: 'Required: - **`keys`** [Array of primary keys of the roles you\'d like to update.] - **`data`** [Any of [the role object](https://docs.directus.io/reference/api/system/roles/#the-role-object)\'s properties.]',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,

@@ -1398,3 +1398,269 @@ export async function getRoleIdByName(
 		);
 	}
 }
+
+/**
+ * Parse CSV data to JSON array
+ * Converts CSV string to array of objects using first row as headers
+ */
+export function parseCSV(csvData: string): any[] {
+	if (!csvData || typeof csvData !== 'string') {
+		throw new Error('CSV data must be a non-empty string');
+	}
+
+	const lines = csvData.trim().split('\n');
+	if (lines.length < 2) {
+		throw new Error('CSV must have at least a header row and one data row');
+	}
+
+	// Parse header row
+	const headers = lines[0].split(',').map((h) => h.trim());
+
+	// Parse data rows
+	const result: any[] = [];
+	for (let i = 1; i < lines.length; i++) {
+		const line = lines[i].trim();
+		if (!line) continue; // Skip empty lines
+
+		const values = line.split(',').map((v) => v.trim());
+		const obj: any = {};
+
+		headers.forEach((header, index) => {
+			if (index < values.length) {
+				obj[header] = values[index];
+			}
+		});
+
+		result.push(obj);
+	}
+
+	return result;
+}
+
+/**
+ * Create multiple users via POST /users with array
+ * Handles role name resolution and provides detailed error reporting
+ */
+export async function bulkCreateUsers(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	users: any[],
+	errorHandling: 'stop' | 'continue' = 'stop',
+): Promise<{ success: boolean; created: any[]; failed: any[]; stats: any }> {
+	const created: any[] = [];
+	const failed: any[] = [];
+
+	if (errorHandling === 'continue') {
+		// Process each user individually for granular error handling
+		for (let i = 0; i < users.length; i++) {
+			const user = users[i];
+			try {
+				// Handle role name resolution
+				if (user.role && typeof user.role === 'string' && !isUUID(user.role)) {
+					user.role = await getRoleIdByName.call(this, user.role);
+				}
+
+				const response = await directusApiRequest.call(
+					this,
+					'POST',
+					'users',
+					user,
+					{},
+				);
+
+				const userData = response.data || response;
+				created.push(userData);
+			} catch (error: any) {
+				failed.push({
+					index: i,
+					user,
+					error: error.message || 'Unknown error',
+				});
+			}
+		}
+	} else {
+		// Process all users in bulk (stop on first error)
+		try {
+			// Handle role name resolution for all users
+			for (const user of users) {
+				if (user.role && typeof user.role === 'string' && !isUUID(user.role)) {
+					user.role = await getRoleIdByName.call(this, user.role);
+				}
+			}
+
+			const response = await directusApiRequest.call(
+				this,
+				'POST',
+				'users',
+				users,
+				{},
+			);
+
+			const userData = response.data || response;
+			if (Array.isArray(userData)) {
+				created.push(...userData);
+			} else {
+				created.push(userData);
+			}
+		} catch (error: any) {
+			throw new DirectusApiError(
+				`Bulk user creation failed: ${error.message}`,
+				error.statusCode || 500,
+				error.errors || [],
+				'users',
+			);
+		}
+	}
+
+	return {
+		success: failed.length === 0,
+		created,
+		failed,
+		stats: {
+			total: users.length,
+			created: created.length,
+			failed: failed.length,
+		},
+	};
+}
+
+/**
+ * Update multiple users via PATCH /users with array
+ * Handles partial failures and provides detailed error reporting
+ */
+export async function bulkUpdateUsers(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	updates: { keys: string[]; data: any },
+	errorHandling: 'stop' | 'continue' = 'stop',
+): Promise<{ success: boolean; updated: any[]; failed: any[]; stats: any }> {
+	const updated: any[] = [];
+	const failed: any[] = [];
+
+	if (errorHandling === 'continue') {
+		// Process each user individually for granular error handling
+		for (let i = 0; i < updates.keys.length; i++) {
+			const userId = updates.keys[i];
+			try {
+				const response = await directusApiRequest.call(
+					this,
+					'PATCH',
+					`users/${userId}`,
+					updates.data,
+					{},
+				);
+
+				const userData = response.data || response;
+				updated.push(userData);
+			} catch (error: any) {
+				failed.push({
+					index: i,
+					userId,
+					error: error.message || 'Unknown error',
+				});
+			}
+		}
+	} else {
+		// Process all users in bulk (stop on first error)
+		try {
+			const response = await directusApiRequest.call(
+				this,
+				'PATCH',
+				'users',
+				updates,
+				{},
+			);
+
+			const userData = response.data || response;
+			if (Array.isArray(userData)) {
+				updated.push(...userData);
+			} else {
+				updated.push(userData);
+			}
+		} catch (error: any) {
+			throw new DirectusApiError(
+				`Bulk user update failed: ${error.message}`,
+				error.statusCode || 500,
+				error.errors || [],
+				'users',
+			);
+		}
+	}
+
+	return {
+		success: failed.length === 0,
+		updated,
+		failed,
+		stats: {
+			total: updates.keys.length,
+			updated: updated.length,
+			failed: failed.length,
+		},
+	};
+}
+
+/**
+ * Delete multiple users via DELETE /users
+ * Handles partial failures and provides detailed error reporting
+ */
+export async function bulkDeleteUsers(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	userIds: string[],
+	errorHandling: 'stop' | 'continue' = 'stop',
+): Promise<{ success: boolean; deleted: string[]; failed: any[]; stats: any }> {
+	const deleted: string[] = [];
+	const failed: any[] = [];
+
+	if (errorHandling === 'continue') {
+		// Process each user individually for granular error handling
+		for (let i = 0; i < userIds.length; i++) {
+			const userId = userIds[i];
+			try {
+				await directusApiRequest.call(
+					this,
+					'DELETE',
+					`users/${userId}`,
+					{},
+					{},
+				);
+
+				deleted.push(userId);
+			} catch (error: any) {
+				failed.push({
+					index: i,
+					userId,
+					error: error.message || 'Unknown error',
+				});
+			}
+		}
+	} else {
+		// Process all users in bulk (stop on first error)
+		try {
+			await directusApiRequest.call(
+				this,
+				'DELETE',
+				'users',
+				userIds,
+				{},
+			);
+
+			deleted.push(...userIds);
+		} catch (error: any) {
+			throw new DirectusApiError(
+				`Bulk user deletion failed: ${error.message}`,
+				error.statusCode || 500,
+				error.errors || [],
+				'users',
+			);
+		}
+	}
+
+	return {
+		success: failed.length === 0,
+		deleted,
+		failed,
+		stats: {
+			total: userIds.length,
+			deleted: deleted.length,
+			failed: failed.length,
+		},
+	};
+}

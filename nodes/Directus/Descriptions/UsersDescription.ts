@@ -528,15 +528,101 @@ export const usersFields: INodeProperties[] = [
 				resource: [
 					'users',
 				],
+				inputType: [
+					'json',
+				],
 			},
 		},
-		placeholder: '[\n	{\n		"email": "admin@example.com",\n		"password": "p455w0rd",\n		"role": "c86c2761-65d3-43c3-897f-6f74ad6a5bd7"\n	},\n	{\n		"email": "another@example.com",\n		"password": "d1r3ctu5",\n		"role": "c86c2761-65d3-43c3-897f-6f74ad6a5bd7"\n	}\n]',
+		placeholder: '[\n	{\n		"email": "admin@example.com",\n		"password": "p455w0rd",\n		"role": "Administrator"\n	},\n	{\n		"email": "another@example.com",\n		"password": "d1r3ctu5",\n		"role": "Administrator"\n	}\n]',
 		default: null,
-		description: 'An array of partial [user objects](https://docs.directus.io/reference/api/system/users/#the-user-object)',
+		description: 'An array of partial [user objects](https://docs.directus.io/reference/api/system/users/#the-user-object). Role can be UUID or role name (e.g., "Administrator").',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
 		},
+	},
+	{
+		displayName: 'Input Type',
+		name: 'inputType',
+		type: 'options',
+		displayOptions: {
+			show: {
+				operation: [
+					'createMultiple',
+				],
+				resource: [
+					'users',
+				],
+			},
+		},
+		options: [
+			{
+				name: 'JSON',
+				value: 'json',
+				description: 'Provide user data as JSON array',
+			},
+			{
+				name: 'CSV',
+				value: 'csv',
+				description: 'Provide user data as CSV',
+			},
+		],
+		default: 'json',
+		description: 'Input format for user data (JSON or CSV)',
+	},
+	{
+		displayName: 'Data (CSV)',
+		name: 'csvData',
+		type: 'string',
+		displayOptions: {
+			show: {
+				operation: [
+					'createMultiple',
+				],
+				resource: [
+					'users',
+				],
+				inputType: [
+					'csv',
+				],
+			},
+		},
+		placeholder: 'email,password,role,first_name,last_name\nadmin@example.com,p455w0rd,Administrator,John,Doe\nanother@example.com,d1r3ctu5,Administrator,Jane,Smith',
+		default: '',
+		description: 'CSV data with header row. First row must contain field names. Role can be UUID or role name (e.g., "Administrator").',
+		required: true,
+		typeOptions: {
+			rows: 10,
+		},
+	},
+	{
+		displayName: 'Error Handling',
+		name: 'errorHandling',
+		type: 'options',
+		displayOptions: {
+			show: {
+				operation: [
+					'createMultiple',
+				],
+				resource: [
+					'users',
+				],
+			},
+		},
+		options: [
+			{
+				name: 'Stop on First Error',
+				value: 'stop',
+				description: 'Stop processing when the first error occurs',
+			},
+			{
+				name: 'Continue on Error',
+				value: 'continue',
+				description: 'Continue processing remaining items even if errors occur',
+			},
+		],
+		default: 'stop',
+		description: 'How to handle errors during bulk creation',
 	},
 	{
 		displayName: 'ID',
@@ -938,6 +1024,35 @@ export const usersFields: INodeProperties[] = [
 		},
 	},
 	{
+		displayName: 'Error Handling',
+		name: 'errorHandling',
+		type: 'options',
+		displayOptions: {
+			show: {
+				operation: [
+					'updateMultiple',
+				],
+				resource: [
+					'users',
+				],
+			},
+		},
+		options: [
+			{
+				name: 'Stop on First Error',
+				value: 'stop',
+				description: 'Stop processing when the first error occurs',
+			},
+			{
+				name: 'Continue on Error',
+				value: 'continue',
+				description: 'Continue processing remaining items even if errors occur',
+			},
+		],
+		default: 'stop',
+		description: 'How to handle errors during bulk update',
+	},
+	{
 		displayName: 'ID',
 		name: 'id',
 		type: 'string',
@@ -977,6 +1092,35 @@ export const usersFields: INodeProperties[] = [
 		typeOptions: {
 			alwaysOpenEditWindow: true,
 		},
+	},
+	{
+		displayName: 'Error Handling',
+		name: 'errorHandling',
+		type: 'options',
+		displayOptions: {
+			show: {
+				operation: [
+					'deleteMultiple',
+				],
+				resource: [
+					'users',
+				],
+			},
+		},
+		options: [
+			{
+				name: 'Stop on First Error',
+				value: 'stop',
+				description: 'Stop processing when the first error occurs',
+			},
+			{
+				name: 'Continue on Error',
+				value: 'continue',
+				description: 'Continue processing remaining items even if errors occur',
+			},
+		],
+		default: 'stop',
+		description: 'How to handle errors during bulk deletion',
 	},
 	{
 		displayName: 'Data (JSON)',

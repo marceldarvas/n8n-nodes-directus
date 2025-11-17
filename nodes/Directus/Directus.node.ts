@@ -37,6 +37,10 @@ import {
 	calculateFlowPerformanceMetrics,
 	isUUID,
 	getRoleIdByName,
+	parseCSV,
+	bulkCreateUsers,
+	bulkUpdateUsers,
+	bulkDeleteUsers,
 } from "./GenericFunctions";
 
 import {
@@ -5590,40 +5594,43 @@ export class Directus implements INodeType {
 				}
 				if (operation == "createMultiple") {
 					try {
-						const data = this.getNodeParameter("data", i) as object | string;
+						const inputType = (this.getNodeParameter("inputType", i) as string) || 'json';
+						const errorHandling = (this.getNodeParameter("errorHandling", i) as 'stop' | 'continue') || 'stop';
 
-						requestMethod = "POST";
-						endpoint = `users`;
+						let users: any[] = [];
 
-						let response;
-						if (typeof data == "string") {
-							body = JSON.parse(data);
+						// Parse input based on type
+						if (inputType === 'csv') {
+							const csvData = this.getNodeParameter("csvData", i) as string;
+							users = parseCSV(csvData);
 						} else {
-							body = JSON.parse(JSON.stringify(data));
-						}
-
-						// Handle role lookup for createMultiple (body should be an array)
-						if (Array.isArray(body)) {
-							for (const user of body) {
-								if (user.role && typeof user.role === 'string' && !isUUID(user.role)) {
-									user.role = await getRoleIdByName.call(this, user.role);
-								}
+							const data = this.getNodeParameter("data", i) as object | string;
+							if (typeof data === "string") {
+								users = JSON.parse(data);
+							} else {
+								users = JSON.parse(JSON.stringify(data));
 							}
 						}
 
-						response = await directusApiRequest.call(
-							this,
-							requestMethod,
-							endpoint,
-							body,
-							qs,
-						);
-						if (typeof response != "object") {
-							responseData = { response };
-						} else {
-							responseData = response.data ?? {};
+						// Validate that users is an array
+						if (!Array.isArray(users)) {
+							throw new Error('User data must be an array');
 						}
-						//////////////////////////////////
+
+						// Use bulk create function with enhanced error handling
+						const result = await bulkCreateUsers.call(this, users, errorHandling);
+
+						// Return comprehensive results
+						responseData = {
+							success: result.success,
+							operation: 'createMultiple',
+							inputType,
+							errorHandling,
+							stats: result.stats,
+							created: result.created,
+							...(result.failed.length > 0 && { failed: result.failed }),
+						};
+
 						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {
@@ -5673,30 +5680,36 @@ export class Directus implements INodeType {
 				if (operation == "updateMultiple") {
 					try {
 						const data = this.getNodeParameter("data", i) as object | string;
+						const errorHandling = (this.getNodeParameter("errorHandling", i) as 'stop' | 'continue') || 'stop';
 
-						requestMethod = "PATCH";
-						endpoint = `users`;
-
-						let response;
-						if (typeof data == "string") {
-							body = JSON.parse(data);
+						let updates: { keys: string[]; data: any };
+						if (typeof data === "string") {
+							updates = JSON.parse(data);
 						} else {
-							body = JSON.parse(JSON.stringify(data));
+							updates = JSON.parse(JSON.stringify(data));
 						}
 
-						response = await directusApiRequest.call(
-							this,
-							requestMethod,
-							endpoint,
-							body,
-							qs,
-						);
-						if (typeof response != "object") {
-							responseData = { response };
-						} else {
-							responseData = response.data ?? {};
+						// Validate structure
+						if (!updates.keys || !Array.isArray(updates.keys)) {
+							throw new Error('Update data must contain a "keys" array');
 						}
-						//////////////////////////////////
+						if (!updates.data || typeof updates.data !== 'object') {
+							throw new Error('Update data must contain a "data" object');
+						}
+
+						// Use bulk update function with enhanced error handling
+						const result = await bulkUpdateUsers.call(this, updates, errorHandling);
+
+						// Return comprehensive results
+						responseData = {
+							success: result.success,
+							operation: 'updateMultiple',
+							errorHandling,
+							stats: result.stats,
+							updated: result.updated,
+							...(result.failed.length > 0 && { failed: result.failed }),
+						};
+
 						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {
@@ -5740,30 +5753,33 @@ export class Directus implements INodeType {
 				if (operation == "deleteMultiple") {
 					try {
 						const data = this.getNodeParameter("keys", i) as object | string;
+						const errorHandling = (this.getNodeParameter("errorHandling", i) as 'stop' | 'continue') || 'stop';
 
-						requestMethod = "DELETE";
-						endpoint = `users`;
-
-						let response;
-						if (typeof data == "string") {
-							body = JSON.parse(data);
+						let userIds: string[];
+						if (typeof data === "string") {
+							userIds = JSON.parse(data);
 						} else {
-							body = JSON.parse(JSON.stringify(data));
+							userIds = JSON.parse(JSON.stringify(data));
 						}
 
-						response = await directusApiRequest.call(
-							this,
-							requestMethod,
-							endpoint,
-							body,
-							qs,
-						);
-						if (typeof response != "object") {
-							responseData = { response };
-						} else {
-							responseData = response.data ?? {};
+						// Validate that userIds is an array
+						if (!Array.isArray(userIds)) {
+							throw new Error('User IDs must be an array');
 						}
-						//////////////////////////////////
+
+						// Use bulk delete function with enhanced error handling
+						const result = await bulkDeleteUsers.call(this, userIds, errorHandling);
+
+						// Return comprehensive results
+						responseData = {
+							success: result.success,
+							operation: 'deleteMultiple',
+							errorHandling,
+							stats: result.stats,
+							deleted: result.deleted,
+							...(result.failed.length > 0 && { failed: result.failed }),
+						};
+
 						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {

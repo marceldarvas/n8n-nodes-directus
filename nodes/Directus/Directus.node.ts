@@ -35,6 +35,8 @@ import {
 	transformFlowData,
 	getFlowActivity,
 	calculateFlowPerformanceMetrics,
+	isUUID,
+	getRoleIdByName,
 } from "./GenericFunctions";
 
 import {
@@ -5537,6 +5539,11 @@ export class Directus implements INodeType {
 							} else {
 								body = JSON.parse(JSON.stringify(bodyParametersJson));
 							}
+
+							// Handle role lookup for JSON parameters
+							if (body.role && typeof body.role === 'string' && !isUUID(body.role)) {
+								body.role = await getRoleIdByName.call(this, body.role);
+							}
 						} else {
 							for (const key in additionalFields) {
 								if (["deep", "filter"].includes(key)) {
@@ -5552,6 +5559,11 @@ export class Directus implements INodeType {
 							}
 							body["email"] = this.getNodeParameter("email", i) as string;
 							body["password"] = this.getNodeParameter("password", i) as string;
+
+							// Handle role lookup for form parameters
+							if (body.role && typeof body.role === 'string' && !isUUID(body.role)) {
+								body.role = await getRoleIdByName.call(this, body.role);
+							}
 						}
 
 						response = await directusApiRequest.call(
@@ -5588,6 +5600,15 @@ export class Directus implements INodeType {
 							body = JSON.parse(data);
 						} else {
 							body = JSON.parse(JSON.stringify(data));
+						}
+
+						// Handle role lookup for createMultiple (body should be an array)
+						if (Array.isArray(body)) {
+							for (const user of body) {
+								if (user.role && typeof user.role === 'string' && !isUUID(user.role)) {
+									user.role = await getRoleIdByName.call(this, user.role);
+								}
+							}
 						}
 
 						response = await directusApiRequest.call(
@@ -5820,7 +5841,7 @@ export class Directus implements INodeType {
 				if (operation == "inviteUser") {
 					try {
 						const email = this.getNodeParameter("email", i) as string;
-						const role = this.getNodeParameter("role", i) as string;
+						let role = this.getNodeParameter("role", i) as string;
 						const additionalFields =
 							(this.getNodeParameter("additionalFields", i) as IDataObject) ??
 							{};
@@ -5831,6 +5852,11 @@ export class Directus implements INodeType {
 						endpoint = `users/invite`;
 
 						let response;
+
+						// Handle role lookup - convert role name to UUID if needed
+						if (role && !isUUID(role)) {
+							role = await getRoleIdByName.call(this, role);
+						}
 
 						for (const key in additionalFields) {
 							if (["deep", "filter"].includes(key)) {

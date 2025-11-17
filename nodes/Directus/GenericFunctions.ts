@@ -1323,3 +1323,78 @@ export async function loopFlows(
 		errors: errors.length > 0 ? errors : undefined,
 	};
 }
+
+/**
+ * Role name to UUID cache for performance
+ * Maps role name to role UUID
+ */
+const roleCache = new Map<string, string>();
+
+/**
+ * Check if a string is a valid UUID
+ * UUID pattern: 8-4-4-4-12 hex characters (e.g., c86c2761-65d3-43c3-897f-6f74ad6a5bd7)
+ */
+export function isUUID(value: string): boolean {
+	if (!value || typeof value !== 'string') {
+		return false;
+	}
+
+	const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+	return uuidRegex.test(value);
+}
+
+/**
+ * Get role UUID by role name
+ * Queries the roles endpoint and returns the UUID for a given role name
+ * Results are cached to avoid repeated lookups
+ */
+export async function getRoleIdByName(
+	this: IExecuteFunctions | IExecuteSingleFunctions | ILoadOptionsFunctions,
+	roleName: string,
+): Promise<string> {
+	// Check cache first
+	if (roleCache.has(roleName)) {
+		return roleCache.get(roleName)!;
+	}
+
+	try {
+		const response = await directusApiRequest.call(
+			this,
+			'GET',
+			'roles',
+			{},
+			{
+				filter: JSON.stringify({ name: { _eq: roleName } }),
+				limit: 1,
+			},
+		);
+
+		const roles = response.data || response;
+
+		if (!roles || roles.length === 0) {
+			throw new DirectusApiError(
+				`Role "${roleName}" not found. Please check the role name and ensure it exists in Directus.`,
+				404,
+				[],
+				'roles',
+			);
+		}
+
+		const roleId = roles[0].id;
+
+		// Cache the result
+		roleCache.set(roleName, roleId);
+
+		return roleId;
+	} catch (error: any) {
+		if (error instanceof DirectusApiError) {
+			throw error;
+		}
+		throw new DirectusApiError(
+			`Failed to lookup role "${roleName}": ${error.message}`,
+			500,
+			[],
+			'roles',
+		);
+	}
+}

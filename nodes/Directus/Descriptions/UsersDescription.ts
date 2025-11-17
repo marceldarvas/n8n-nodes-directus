@@ -145,9 +145,9 @@ export const usersFields: INodeProperties[] = [
 				],
 			},
 		},
-		placeholder: 'c86c2761-65d3-43c3-897f-6f74ad6a5bd7',
+		placeholder: 'Administrator',
 		default: '',
-		description: 'Role of the new user',
+		description: 'Role of the new user. Can be either a role UUID (e.g., c86c2761-65d3-43c3-897f-6f74ad6a5bd7) or role name (e.g., Administrator). Common roles: Administrator, Public.',
 		required: true,
 	},
 	{
@@ -463,7 +463,7 @@ export const usersFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: '',
 				default: '',
-				description: 'Role of the User. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				description: 'Role of the User. Can be a role UUID, role name, or choose from the list. The role name will be automatically resolved to its UUID. Common roles: Administrator, Public.',
 				typeOptions: {
 					loadOptionsMethod: 'getRoles',
 				},

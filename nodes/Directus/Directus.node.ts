@@ -1,4 +1,5 @@
 import {
+	ApplicationError,
 	IBinaryData,
 	IBinaryKeyData,
 	IDataObject,
@@ -2279,7 +2280,7 @@ export class Directus implements INodeType {
 						const initialPayload = validateJSON(initialPayloadJson);
 
 						if (!flowChain || !Array.isArray(flowChain)) {
-							throw new Error("Flow chain must be a valid JSON array");
+							throw new ApplicationError("Flow chain must be a valid JSON array");
 						}
 
 						// Build options object
@@ -2319,7 +2320,7 @@ export class Directus implements INodeType {
 						const dataArray = validateJSON(dataArrayJson);
 
 						if (!dataArray || !Array.isArray(dataArray)) {
-							throw new Error("Data array must be a valid JSON array");
+							throw new ApplicationError("Data array must be a valid JSON array");
 						}
 
 						// Build options object
@@ -5805,7 +5806,7 @@ export class Directus implements INodeType {
 
 						// Validate that users is an array
 						if (!Array.isArray(users)) {
-							throw new Error('User data must be an array');
+							throw new ApplicationError('User data must be an array');
 						}
 
 						// Use bulk create function with enhanced error handling
@@ -5882,10 +5883,10 @@ export class Directus implements INodeType {
 
 						// Validate structure
 						if (!updates.keys || !Array.isArray(updates.keys)) {
-							throw new Error('Update data must contain a "keys" array');
+							throw new ApplicationError('Update data must contain a "keys" array');
 						}
 						if (!updates.data || typeof updates.data !== 'object') {
-							throw new Error('Update data must contain a "data" object');
+							throw new ApplicationError('Update data must contain a "data" object');
 						}
 
 						// Use bulk update function with enhanced error handling
@@ -5955,7 +5956,7 @@ export class Directus implements INodeType {
 
 						// Validate that userIds is an array
 						if (!Array.isArray(userIds)) {
-							throw new Error('User IDs must be an array');
+							throw new ApplicationError('User IDs must be an array');
 						}
 
 						// Use bulk delete function with enhanced error handling
@@ -6175,7 +6176,7 @@ export class Directus implements INodeType {
 
 						// Validate invitations array
 						if (!Array.isArray(invitations) || invitations.length === 0) {
-							throw new Error('Invitations must be a non-empty array');
+							throw new ApplicationError('Invitations must be a non-empty array');
 						}
 
 						// Bulk invite users with options

@@ -202,7 +202,7 @@ export const usersFields: INodeProperties[] = [
 				},
 				placeholder: 'Hi {{first_name}}, you have been invited to join our project. Click the link below to accept the invitation.',
 				default: '',
-				description: 'Custom email body/message for the invitation. Supports variable substitution: {{first_name}}, {{last_name}}, {{email}}, {{role}}',
+				description: 'Custom email body/message for the invitation. Supports variable substitution: {{first_name}}, {{last_name}}, {{email}}, {{role}}.',
 			},
 			{
 				displayName: 'Expiration Hours',
@@ -416,7 +416,7 @@ export const usersFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
+		description: 'Whether if the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -519,7 +519,7 @@ export const usersFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: '',
 				default: '',
-				description: 'Role of the User. Can be a role UUID, role name, or choose from the list. The role name will be automatically resolved to its UUID. Common roles: Administrator, Public.',
+				description: 'Role of the User. Can be a role UUID, role name, or choose from the list. The role name will be automatically resolved to its UUID. Common roles: Administrator, Public. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 				typeOptions: {
 					loadOptionsMethod: 'getRoles',
 				},
@@ -752,7 +752,7 @@ export const usersFields: INodeProperties[] = [
 		name: 'splitIntoItems',
 		type: 'boolean',
 		default: false,
-		description: 'Outputs each element of an array as own item',
+		description: 'Whether outputs each element of an array as own item',
 		required: true,
 		displayOptions: {
 			show: {
@@ -781,7 +781,7 @@ export const usersFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
+		description: 'Whether if the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -1217,7 +1217,7 @@ export const usersFields: INodeProperties[] = [
 			},
 			placeholder: 'Hi {{first_name}}, you have been invited to join our project. Click the link below to accept the invitation.',
 			default: '',
-			description: 'Custom email body/message for the invitation. Supports variable substitution: {{first_name}}, {{last_name}}, {{email}}, {{role}}',
+			description: 'Custom email body/message for the invitation. Supports variable substitution: {{first_name}}, {{last_name}}, {{email}}, {{role}}.',
 		},
 		{
 			displayName: 'Expiration Hours',
@@ -1477,7 +1477,7 @@ export const usersFields: INodeProperties[] = [
 				},
 				placeholder: 'Hi {{first_name}}, you have been invited to join our project.',
 				default: '',
-				description: 'Custom email body/message. Supports variable substitution: {{first_name}}, {{last_name}}, {{email}}, {{role}}',
+				description: 'Custom email body/message. Supports variable substitution: {{first_name}}, {{last_name}}, {{email}}, {{role}}.',
 			},
 			{
 				displayName: 'Invite URL',

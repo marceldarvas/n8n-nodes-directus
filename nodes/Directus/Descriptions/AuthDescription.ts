@@ -387,7 +387,7 @@ export const authFields: INodeProperties[] = [
 		name: 'splitIntoItems',
 		type: 'boolean',
 		default: false,
-		description: 'Outputs each element of an array as own item',
+		description: 'Whether outputs each element of an array as own item',
 		required: true,
 		displayOptions: {
 			show: {

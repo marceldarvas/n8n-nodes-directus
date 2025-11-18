@@ -72,7 +72,7 @@ export const settingsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
+		description: 'Whether if the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -323,7 +323,7 @@ export const settingsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
+		description: 'Whether if the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{

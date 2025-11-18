@@ -17,6 +17,30 @@ export const activityOperations: INodeProperties[] = [
 		},
 		options: [
 			{
+				name: 'Aggregate by Collection',
+				value: 'aggregateByCollection',
+				description: 'Aggregate activity logs by collection to see usage statistics',
+				action: 'Aggregate activity by collection',
+			},
+			{
+				name: 'Aggregate by User',
+				value: 'aggregateByUser',
+				description: 'Generate user activity summaries with action counts',
+				action: 'Aggregate activity by user',
+			},
+			{
+				name: 'Aggregate Errors',
+				value: 'aggregateErrors',
+				description: 'Analyze error frequency by type and collection',
+				action: 'Aggregate errors',
+			},
+			{
+				name: 'Analyze Peak Usage',
+				value: 'analyzePeakUsage',
+				description: 'Identify peak usage times by hour and day of week',
+				action: 'Analyze peak usage times',
+			},
+			{
 				name: 'Create',
 				value: 'create',
 				description: 'Creates a new comment',
@@ -52,6 +76,162 @@ export const activityOperations: INodeProperties[] = [
 ];
 
 export const activityFields: INodeProperties[] = [
+	// Aggregation operation parameters
+	{
+		displayName: 'Date Range',
+		name: 'dateRange',
+		type: 'fixedCollection',
+		displayOptions: {
+			show: {
+				operation: [
+					'aggregateByUser',
+					'aggregateByCollection',
+					'aggregateErrors',
+					'analyzePeakUsage',
+				],
+				resource: [
+					'activity',
+				],
+			},
+		},
+		default: {},
+		placeholder: 'Add Date Range',
+		options: [
+			{
+				name: 'range',
+				displayName: 'Range',
+				values: [
+					{
+						displayName: 'From Date',
+						name: 'from',
+						type: 'dateTime',
+						default: '',
+						description: 'Start date for the analysis (ISO 8601 format)',
+					},
+					{
+						displayName: 'To Date',
+						name: 'to',
+						type: 'dateTime',
+						default: '',
+						description: 'End date for the analysis (ISO 8601 format)',
+					},
+				],
+			},
+		],
+	},
+	{
+		displayName: 'Export Format',
+		name: 'exportFormat',
+		type: 'options',
+		displayOptions: {
+			show: {
+				operation: [
+					'aggregateByUser',
+					'aggregateByCollection',
+					'aggregateErrors',
+					'analyzePeakUsage',
+				],
+				resource: [
+					'activity',
+				],
+			},
+		},
+		options: [
+			{
+				name: 'JSON',
+				value: 'json',
+			},
+			{
+				name: 'CSV',
+				value: 'csv',
+			},
+		],
+		default: 'json',
+		description: 'Format for the aggregation results',
+	},
+	{
+		displayName: 'Include User Details',
+		name: 'includeUserDetails',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				operation: [
+					'aggregateByUser',
+				],
+				resource: [
+					'activity',
+				],
+			},
+		},
+		default: true,
+		description: 'Whether to include user details (email, name) in the results',
+	},
+	{
+		displayName: 'Group By Action',
+		name: 'groupByAction',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				operation: [
+					'aggregateByUser',
+					'aggregateByCollection',
+				],
+				resource: [
+					'activity',
+				],
+			},
+		},
+		default: true,
+		description: 'Whether to break down statistics by action type (create, update, delete)',
+	},
+	{
+		displayName: 'Include Success Rate',
+		name: 'includeSuccessRate',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				operation: [
+					'aggregateErrors',
+				],
+				resource: [
+					'activity',
+				],
+			},
+		},
+		default: true,
+		description: 'Whether to include success vs error rate statistics',
+	},
+	{
+		displayName: 'Time Granularity',
+		name: 'timeGranularity',
+		type: 'options',
+		displayOptions: {
+			show: {
+				operation: [
+					'analyzePeakUsage',
+				],
+				resource: [
+					'activity',
+				],
+			},
+		},
+		options: [
+			{
+				name: 'Hour of Day',
+				value: 'hour',
+			},
+			{
+				name: 'Day of Week',
+				value: 'day',
+			},
+			{
+				name: 'Both',
+				value: 'both',
+			},
+		],
+		default: 'both',
+		description: 'How to analyze peak usage times',
+	},
 	{
 		displayName: 'ID',
 		name: 'id',
@@ -68,7 +248,7 @@ export const activityFields: INodeProperties[] = [
 		},
 		placeholder: '1',
 		default: 1,
-		description: 'Unique identifier for the object.',
+		description: 'Unique identifier for the object',
 		required: true,
 		typeOptions: {
 			minValue: 1,
@@ -95,7 +275,7 @@ export const activityFields: INodeProperties[] = [
 		},
 		placeholder: '1',
 		default: '1\n',
-		description: 'Primary Key of the item to comment on.',
+		description: 'Primary Key of the item to comment on',
 		required: true,
 		typeOptions: {
 			minValue: 1,
@@ -146,7 +326,7 @@ export const activityFields: INodeProperties[] = [
 		},
 		placeholder: 'projects',
 		default: '',
-		description: 'Collection in which the item resides.',
+		description: 'Collection in which the item resides. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
@@ -168,7 +348,7 @@ export const activityFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -223,7 +403,7 @@ export const activityFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 		],
 	},
@@ -291,7 +471,7 @@ export const activityFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 		],
 	},
@@ -315,7 +495,7 @@ export const activityFields: INodeProperties[] = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit',
+		description: 'Whether to return all results or only up to a given limit',
 		required: true,
 	},
 	{
@@ -342,7 +522,7 @@ export const activityFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.',
+		description: 'Max number of results to return',
 		required: true,
 		typeOptions: {
 			minValue: 1,
@@ -382,7 +562,7 @@ export const activityFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -437,7 +617,7 @@ export const activityFields: INodeProperties[] = [
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
 				default: {},
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -510,6 +690,59 @@ export const activityFields: INodeProperties[] = [
 				],
 			},
 			{
+				displayName: 'Flow ID',
+				name: 'flowId',
+				type: 'string',
+				placeholder: '',
+				default: '',
+				description: 'Filter activity by specific flow ID. Only returns activity logs related to this flow.',
+			},
+			{
+				displayName: 'Flow Execution ID',
+				name: 'flowExecutionId',
+				type: 'string',
+				placeholder: '',
+				default: '',
+				description: 'Filter activity by specific flow execution ID. Returns logs for a specific flow execution.',
+			},
+			{
+				displayName: 'Flow Operation Type',
+				name: 'flowOperationType',
+				type: 'options',
+				placeholder: 'Select operation type',
+				default: '',
+				description: 'Filter by operation type within flows',
+				options: [
+					{
+						name: 'All',
+						value: '',
+					},
+					{
+						name: 'Run',
+						value: 'run',
+					},
+					{
+						name: 'Create',
+						value: 'create',
+					},
+					{
+						name: 'Update',
+						value: 'update',
+					},
+					{
+						name: 'Delete',
+						value: 'delete',
+					},
+				],
+			},
+			{
+				displayName: 'Calculate Performance Metrics',
+				name: 'calculatePerformanceMetrics',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to calculate and return performance metrics for flow activities (execution time, success/fail counts, etc.)',
+			},
+			{
 				displayName: 'Binary Property for Export Data',
 				name: 'binaryPropertyName',
 				type: 'string',
@@ -522,7 +755,7 @@ export const activityFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -533,8 +766,7 @@ export const activityFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
-',
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.',
 				options: [
 					{
 						name: 'CSV',
@@ -556,7 +788,7 @@ export const activityFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Control what fields are being returned in the object.',
+				description: 'Control what fields are being returned in the object',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -571,7 +803,7 @@ export const activityFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.',
+				description: 'Select items in collection by given conditions',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -590,7 +822,7 @@ export const activityFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 			{
 				displayName: 'Offset',
@@ -598,7 +830,7 @@ export const activityFields: INodeProperties[] = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.',
+				description: 'How many items to skip when fetching data',
 			},
 			{
 				displayName: 'Search',
@@ -606,7 +838,7 @@ export const activityFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Filter by items that contain the given search query in one of their fields.',
+				description: 'Filter by items that contain the given search query in one of their fields',
 			},
 			{
 				displayName: 'Sort',
@@ -663,7 +895,7 @@ export const activityFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Control what fields are being returned in the object.',
+				description: 'Control what fields are being returned in the object',
 			},
 			{
 				displayName: 'Meta',
@@ -671,7 +903,7 @@ export const activityFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 		],
 	},

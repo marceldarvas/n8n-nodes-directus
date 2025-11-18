@@ -50,7 +50,7 @@ export const settingsFields: INodeProperties[] = [
 		},
 		placeholder: '{\n	"project_url": "https://example.com/"\n}',
 		default: null,
-		description: 'A partial [settings object](https://docs.directus.io/reference/api/system/settings/#the-settings-object).',
+		description: 'A partial [settings object](https://docs.directus.io/reference/api/system/settings/#the-settings-object)',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -72,7 +72,7 @@ export const settingsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -127,7 +127,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
 				default: {},
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -212,7 +212,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -223,8 +223,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
-',
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.',
 				options: [
 					{
 						name: 'CSV',
@@ -246,7 +245,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Control what fields are being returned in the object.',
+				description: 'Control what fields are being returned in the object',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -261,7 +260,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.',
+				description: 'Select items in collection by given conditions',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -280,7 +279,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 			{
 				displayName: 'Offset',
@@ -288,7 +287,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.',
+				description: 'How many items to skip when fetching data',
 			},
 			{
 				displayName: 'Search',
@@ -296,7 +295,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Filter by items that contain the given search query in one of their fields.',
+				description: 'Filter by items that contain the given search query in one of their fields',
 			},
 			{
 				displayName: 'Sort',
@@ -324,7 +323,7 @@ export const settingsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -379,7 +378,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
 				default: {},
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -464,7 +463,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -475,8 +474,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
-',
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.',
 				options: [
 					{
 						name: 'CSV',
@@ -498,7 +496,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Control what fields are being returned in the object.',
+				description: 'Control what fields are being returned in the object',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -513,7 +511,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.',
+				description: 'Select items in collection by given conditions',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -532,7 +530,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 			{
 				displayName: 'Offset',
@@ -540,7 +538,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.',
+				description: 'How many items to skip when fetching data',
 			},
 			{
 				displayName: 'Search',
@@ -548,7 +546,7 @@ export const settingsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Filter by items that contain the given search query in one of their fields.',
+				description: 'Filter by items that contain the given search query in one of their fields',
 			},
 			{
 				displayName: 'Sort',

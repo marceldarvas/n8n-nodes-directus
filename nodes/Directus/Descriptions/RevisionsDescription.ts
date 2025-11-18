@@ -17,10 +17,22 @@ export const revisionsOperations: INodeProperties[] = [
 		},
 		options: [
 			{
+				name: 'Compare',
+				value: 'compare',
+				description: 'Compare two revisions and show field-by-field differences',
+				action: 'Compare two revisions',
+			},
+			{
 				name: 'Get',
 				value: 'get',
 				description: 'Retrieve a single revision by unique identifier',
 				action: 'Get a revisions',
+			},
+			{
+				name: 'Get Rollback Data',
+				value: 'getRollbackData',
+				description: 'Extract rollback data from a revision for reverting changes',
+				action: 'Get rollback data from revision',
 			},
 			{
 				name: 'List',
@@ -34,6 +46,130 @@ export const revisionsOperations: INodeProperties[] = [
 ];
 
 export const revisionsFields: INodeProperties[] = [
+	// Compare operation parameters
+	{
+		displayName: 'Revision ID 1',
+		name: 'revisionId1',
+		type: 'string',
+		displayOptions: {
+			show: {
+				resource: [
+					'revisions',
+				],
+				operation: [
+					'compare',
+				],
+			},
+		},
+		placeholder: '368',
+		default: '',
+		description: 'Primary key of the first revision to compare',
+		required: true,
+	},
+	{
+		displayName: 'Revision ID 2',
+		name: 'revisionId2',
+		type: 'string',
+		displayOptions: {
+			show: {
+				resource: [
+					'revisions',
+				],
+				operation: [
+					'compare',
+				],
+			},
+		},
+		placeholder: '369',
+		default: '',
+		description: 'Primary key of the second revision to compare',
+		required: true,
+	},
+	{
+		displayName: 'Output Format',
+		name: 'outputFormat',
+		type: 'options',
+		displayOptions: {
+			show: {
+				resource: [
+					'revisions',
+				],
+				operation: [
+					'compare',
+				],
+			},
+		},
+		options: [
+			{
+				name: 'JSON',
+				value: 'json',
+			},
+			{
+				name: 'HTML',
+				value: 'html',
+			},
+			{
+				name: 'Text',
+				value: 'text',
+			},
+		],
+		default: 'json',
+		description: 'Format for the comparison output',
+	},
+	{
+		displayName: 'Include Unchanged Fields',
+		name: 'includeUnchanged',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				resource: [
+					'revisions',
+				],
+				operation: [
+					'compare',
+				],
+			},
+		},
+		default: false,
+		description: 'Whether to include fields that have not changed in the comparison',
+	},
+	// Get Rollback Data operation parameters
+	{
+		displayName: 'Revision ID',
+		name: 'revisionId',
+		type: 'string',
+		displayOptions: {
+			show: {
+				resource: [
+					'revisions',
+				],
+				operation: [
+					'getRollbackData',
+				],
+			},
+		},
+		placeholder: '368',
+		default: '',
+		description: 'Primary key of the revision to extract rollback data from',
+		required: true,
+	},
+	{
+		displayName: 'Include Preview',
+		name: 'includePreview',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				resource: [
+					'revisions',
+				],
+				operation: [
+					'getRollbackData',
+				],
+			},
+		},
+		default: true,
+		description: 'Whether to include a preview of what the rollback will change',
+	},
 	{
 		displayName: 'Return All',
 		name: 'returnAll',
@@ -54,7 +190,7 @@ export const revisionsFields: INodeProperties[] = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit',
+		description: 'Whether to return all results or only up to a given limit',
 		required: true,
 	},
 	{
@@ -81,7 +217,7 @@ export const revisionsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.',
+		description: 'Max number of results to return',
 		required: true,
 		typeOptions: {
 			minValue: 1,
@@ -121,7 +257,7 @@ export const revisionsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -176,7 +312,7 @@ export const revisionsFields: INodeProperties[] = [
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
 				default: {},
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -261,7 +397,7 @@ export const revisionsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -272,8 +408,7 @@ export const revisionsFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
-',
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.',
 				options: [
 					{
 						name: 'CSV',
@@ -295,7 +430,7 @@ export const revisionsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Control what fields are being returned in the object.',
+				description: 'Control what fields are being returned in the object',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -310,7 +445,7 @@ export const revisionsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.',
+				description: 'Select items in collection by given conditions',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -329,7 +464,7 @@ export const revisionsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 			{
 				displayName: 'Offset',
@@ -337,7 +472,7 @@ export const revisionsFields: INodeProperties[] = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.',
+				description: 'How many items to skip when fetching data',
 			},
 			{
 				displayName: 'Search',
@@ -345,7 +480,7 @@ export const revisionsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Filter by items that contain the given search query in one of their fields.',
+				description: 'Filter by items that contain the given search query in one of their fields',
 			},
 			{
 				displayName: 'Sort',
@@ -373,7 +508,7 @@ export const revisionsFields: INodeProperties[] = [
 		},
 		placeholder: '368',
 		default: '',
-		description: 'Primary key of the revision.',
+		description: 'Primary key of the revision',
 		required: true,
 	},
 ];

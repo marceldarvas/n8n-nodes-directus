@@ -44,7 +44,7 @@ export const relationsOperations: INodeProperties[] = [
 				name: 'List All',
 				value: 'listAll',
 				description: 'List all relations that exist in Directus',
-				action: 'List All a relations',
+				action: 'List all a relations',
 			},
 			{
 				name: 'Update',
@@ -74,7 +74,7 @@ export const relationsFields: INodeProperties[] = [
 		},
 		placeholder: 'books',
 		default: '',
-		description: 'Unique name of the parent collection',
+		description: 'Unique name of the parent collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
@@ -96,7 +96,7 @@ export const relationsFields: INodeProperties[] = [
 		},
 		placeholder: 'author',
 		default: '',
-		description: 'Name of the field that holds the related primary key. This matches the column name in the database.',
+		description: 'Name of the field that holds the related primary key. This matches the column name in the database. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getRelationalFields',
@@ -121,7 +121,7 @@ export const relationsFields: INodeProperties[] = [
 		},
 		placeholder: '{\n	"collection": "articles",\n	"field": "featured_image",\n	"related_collection": "directus_files"\n}',
 		default: null,
-		description: 'A partial [relation object](https://docs.directus.io/reference/api/system/relations/#the-relation-object).',
+		description: 'A partial [relation object](https://docs.directus.io/reference/api/system/relations/#the-relation-object)',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -143,7 +143,7 @@ export const relationsFields: INodeProperties[] = [
 		},
 		placeholder: 'articles',
 		default: '',
-		description: 'Unique name of the parent collection',
+		description: 'Unique name of the parent collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
@@ -183,7 +183,7 @@ export const relationsFields: INodeProperties[] = [
 		},
 		placeholder: 'books',
 		default: '',
-		description: 'Unique name of the parent collection',
+		description: 'Unique name of the parent collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
@@ -205,7 +205,7 @@ export const relationsFields: INodeProperties[] = [
 		},
 		placeholder: 'author',
 		default: '',
-		description: 'Name of the field that holds the related primary key. This matches the column name in the database.',
+		description: 'Name of the field that holds the related primary key. This matches the column name in the database. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getRelationalFields',
@@ -230,7 +230,7 @@ export const relationsFields: INodeProperties[] = [
 		},
 		placeholder: 'books',
 		default: '',
-		description: 'Unique name of the parent collection',
+		description: 'Unique name of the parent collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
@@ -252,7 +252,7 @@ export const relationsFields: INodeProperties[] = [
 		},
 		placeholder: 'author',
 		default: '',
-		description: 'Name of the field that holds the related primary key. This matches the column name in the database.',
+		description: 'Name of the field that holds the related primary key. This matches the column name in the database. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getRelationalFields',
@@ -277,7 +277,7 @@ export const relationsFields: INodeProperties[] = [
 		},
 		placeholder: '{\n	"meta": {\n		"one_field": "articles"\n	}\n}',
 		default: null,
-		description: 'A partial [relation object](https://docs.directus.io/reference/api/system/relations/#the-relation-object).',
+		description: 'A partial [relation object](https://docs.directus.io/reference/api/system/relations/#the-relation-object)',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -303,7 +303,7 @@ export const relationsFields: INodeProperties[] = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit',
+		description: 'Whether to return all results or only up to a given limit',
 		required: true,
 	},
 	{
@@ -330,7 +330,7 @@ export const relationsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.',
+		description: 'Max number of results to return',
 		required: true,
 		typeOptions: {
 			minValue: 1,
@@ -370,7 +370,7 @@ export const relationsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -425,7 +425,7 @@ export const relationsFields: INodeProperties[] = [
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
 				default: {},
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -510,7 +510,7 @@ export const relationsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -521,8 +521,7 @@ export const relationsFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
-',
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.',
 				options: [
 					{
 						name: 'CSV',
@@ -544,7 +543,7 @@ export const relationsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Control what fields are being returned in the object.',
+				description: 'Control what fields are being returned in the object',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -559,7 +558,7 @@ export const relationsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.',
+				description: 'Select items in collection by given conditions',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -578,7 +577,7 @@ export const relationsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 			{
 				displayName: 'Offset',
@@ -586,7 +585,7 @@ export const relationsFields: INodeProperties[] = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.',
+				description: 'How many items to skip when fetching data',
 			},
 			{
 				displayName: 'Search',
@@ -594,7 +593,7 @@ export const relationsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Filter by items that contain the given search query in one of their fields.',
+				description: 'Filter by items that contain the given search query in one of their fields',
 			},
 			{
 				displayName: 'Sort',

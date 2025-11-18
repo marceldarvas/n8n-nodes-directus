@@ -31,30 +31,31 @@ export const authOperations: INodeProperties[] = [
 			{
 				name: 'Log Out',
 				value: 'logout',
+				action: 'Log out an auth',
 			},
 			{
 				name: 'Refresh Token',
 				value: 'refreshToken',
 				description: 'Refresh a Temporary Access Token',
-				action: 'Refresh Token an auth',
+				action: 'Refresh token an auth',
 			},
 			{
 				name: 'Request Password Reset',
 				value: 'requestReset',
 				description: 'Request a reset password email to be send',
-				action: 'Request Password Reset an auth',
+				action: 'Request password reset an auth',
 			},
 			{
 				name: 'Reset Password',
 				value: 'resetPassword',
 				description: 'The request a password reset endpoint sends an email with a link to the admin app which in turn uses this endpoint to allow the user to reset their password',
-				action: 'Reset Password an auth',
+				action: 'Reset password an auth',
 			},
 			{
 				name: 'Start OAuth Flow',
 				value: 'startOauthFlow',
 				description: 'Start OAuth flow using the specified provider',
-				action: 'Start OAuth Flow an auth',
+				action: 'Start o auth flow an auth',
 			},
 		],
 		default: 'list',
@@ -84,7 +85,7 @@ export const authFields: INodeProperties[] = [
 		},
 		placeholder: 'password',
 		default: '',
-		description: 'Password of the user.',
+		description: 'Password of the user',
 		required: true,
 	},
 	{
@@ -108,7 +109,7 @@ export const authFields: INodeProperties[] = [
 		},
 		placeholder: 'admin@example.com',
 		default: '',
-		description: 'Email address of the user you\'re retrieving the access token for.',
+		description: 'Email address of the user you\'re retrieving the access token for',
 		required: true,
 	},
 	{
@@ -181,7 +182,7 @@ export const authFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'cookie',
-				description: 'Choose between retrieving the token as a string, or setting it as a cookie.',
+				description: 'Choose between retrieving the token as a string, or setting it as a cookie',
 				options: [
 					{
 						name: 'Cookie',
@@ -199,7 +200,7 @@ export const authFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'If 2FA is enabled, you need to pass the one time password.',
+				description: 'If 2FA is enabled, you need to pass the one time password',
 			},
 		],
 	},
@@ -240,7 +241,7 @@ export const authFields: INodeProperties[] = [
 		},
 		placeholder: 'eyJ0eXAiOiJKV...',
 		default: '',
-		description: 'JWT access token you want to logout.',
+		description: 'JWT access token you want to logout',
 		required: true,
 	},
 	{
@@ -259,7 +260,7 @@ export const authFields: INodeProperties[] = [
 		},
 		placeholder: 'admin@example.com',
 		default: '',
-		description: 'Email address of the user you\'re requesting a reset for.',
+		description: 'Email address of the user you\'re requesting a reset for',
 		required: true,
 	},
 	{
@@ -285,9 +286,7 @@ export const authFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Provide a custom reset URL which the link in the email will lead to. The reset token will be passed as a parameter.
-Note: You need to configure the [`PASSWORD_RESET_URL_ALLOW_LIST` environment variable](https://docs.directus.io/reference/environment-variables/#security) to enable this feature.
-',
+				description: 'Provide a custom reset URL which the link in the email will lead to. The reset token will be passed as a parameter. Note: You need to configure the [`PASSWORD_RESET_URL_ALLOW_LIST` environment variable](https://docs.directus.io/reference/environment-variables/#security) to enable this feature.',
 			},
 		],
 	},
@@ -313,7 +312,7 @@ Note: You need to configure the [`PASSWORD_RESET_URL_ALLOW_LIST` environment v
 		},
 		placeholder: 'eyJ0eXAiOiJKV1Qi...',
 		default: '',
-		description: 'One-time use JWT token that is used to verify the user.',
+		description: 'One-time use JWT token that is used to verify the user',
 		required: true,
 	},
 	{
@@ -338,7 +337,7 @@ Note: You need to configure the [`PASSWORD_RESET_URL_ALLOW_LIST` environment v
 		},
 		placeholder: 'password',
 		default: '',
-		description: 'New password for the user.',
+		description: 'New password for the user',
 		required: true,
 	},
 	{
@@ -417,7 +416,7 @@ Note: You need to configure the [`PASSWORD_RESET_URL_ALLOW_LIST` environment v
 		},
 		placeholder: '',
 		default: '',
-		description: 'Key of the activated OAuth provider.',
+		description: 'Key of the activated OAuth provider',
 		required: true,
 	},
 	{
@@ -443,8 +442,7 @@ Note: You need to configure the [`PASSWORD_RESET_URL_ALLOW_LIST` environment v
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Where to redirect on successful login.If set the authentication details are set inside cookies otherwise a JSON is returned.
-',
+				description: 'Where to redirect on successful login.If set the authentication details are set inside cookies otherwise a JSON is returned',
 			},
 		],
 	},

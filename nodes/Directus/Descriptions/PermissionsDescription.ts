@@ -26,7 +26,7 @@ export const permissionsOperations: INodeProperties[] = [
 				name: 'Create Multiple',
 				value: 'createMultiple',
 				description: 'Create Multiple Permission Rules',
-				action: 'Create Multiple a permissions',
+				action: 'Create multiple a permissions',
 			},
 			{
 				name: 'Delete',
@@ -38,7 +38,7 @@ export const permissionsOperations: INodeProperties[] = [
 				name: 'Delete Multiple',
 				value: 'deleteMultiple',
 				description: 'Delete Multiple Permissions',
-				action: 'Delete Multiple a permissions',
+				action: 'Delete multiple a permissions',
 			},
 			{
 				name: 'Get',
@@ -62,7 +62,7 @@ export const permissionsOperations: INodeProperties[] = [
 				name: 'Update Multiple',
 				value: 'updateMultiple',
 				description: 'Update Multiple Permissions',
-				action: 'Update Multiple a permissions',
+				action: 'Update multiple a permissions',
 			},
 		],
 		default: 'list',
@@ -108,7 +108,7 @@ export const permissionsFields: INodeProperties[] = [
 		},
 		placeholder: '34',
 		default: '',
-		description: 'Primary key of the permission rule.',
+		description: 'Primary key of the permission rule',
 		required: true,
 	},
 	{
@@ -125,11 +125,9 @@ export const permissionsFields: INodeProperties[] = [
 				],
 			},
 		},
-		placeholder: '{
-	"fields": ["ID", "title", "body"]
-}',
+		placeholder: '{ "fields": ["ID", "title", "body"] }',
 		default: null,
-		description: 'A partial [permissions object](https://docs.directus.io/reference/api/system/permissions/#the-permission-object).',
+		description: 'A partial [permissions object](https://docs.directus.io/reference/api/system/permissions/#the-permission-object)',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -151,7 +149,7 @@ export const permissionsFields: INodeProperties[] = [
 		},
 		placeholder: '34',
 		default: '',
-		description: 'Primary key of the permission rule.',
+		description: 'Primary key of the permission rule',
 		required: true,
 	},
 	{
@@ -175,7 +173,7 @@ export const permissionsFields: INodeProperties[] = [
 		},
 		placeholder: 'customers',
 		default: '',
-		description: 'What collection this permission applies to.',
+		description: 'What collection this permission applies to. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		required: true,
 		typeOptions: {
 			loadOptionsMethod: 'getCollections',
@@ -208,18 +206,22 @@ export const permissionsFields: INodeProperties[] = [
 			{
 				name: 'Create',
 				value: 'create',
+				action: 'Create a permissions',
 			},
 			{
 				name: 'Delete',
 				value: 'delete',
+				action: 'Delete a permissions',
 			},
 			{
 				name: 'Read',
 				value: 'read',
+				action: 'Read a permissions',
 			},
 			{
 				name: 'Update',
 				value: 'update',
+				action: 'Update a permissions',
 			},
 		],
 	},
@@ -239,7 +241,7 @@ export const permissionsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -280,16 +282,9 @@ export const permissionsFields: INodeProperties[] = [
 				],
 			},
 		},
-		placeholder: '{
-	"keys": [34, 65],
-	"data": {
-		"fields": ["ID", "title", "body"]
-	}
-}',
+		placeholder: '{ "keys": [34, 65], "data": { "fields": ["ID", "title", "body"] } }',
 		default: null,
-		description: 'Required:
-- keys [Array of primary keys of the permissions you\'d like to update.]
-- data [Any of [the permission object](https://docs.directus.io/reference/api/system/permissions/#the-permission-object)\'s properties.]',
+		description: 'Required: - keys [Array of primary keys of the permissions you\'d like to update.] - data [Any of [the permission object](https://docs.directus.io/reference/api/system/permissions/#the-permission-object)\'s properties.]',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,
@@ -311,7 +306,7 @@ export const permissionsFields: INodeProperties[] = [
 		},
 		placeholder: '34',
 		default: '',
-		description: 'Primary key of the permission rule.',
+		description: 'Primary key of the permission rule',
 		required: true,
 	},
 	{
@@ -334,7 +329,7 @@ export const permissionsFields: INodeProperties[] = [
 			},
 		},
 		default: true,
-		description: 'If all results should be returned or only up to a given limit',
+		description: 'Whether to return all results or only up to a given limit',
 		required: true,
 	},
 	{
@@ -361,7 +356,7 @@ export const permissionsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: 50,
-		description: 'A limit on the number of objects that are returned.',
+		description: 'Max number of results to return',
 		required: true,
 		typeOptions: {
 			minValue: 1,
@@ -401,7 +396,7 @@ export const permissionsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW.',
+		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -456,7 +451,7 @@ export const permissionsFields: INodeProperties[] = [
 				type: 'fixedCollection',
 				placeholder: 'Add Aggregation Functions',
 				default: {},
-				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result.',
+				description: 'Aggregate functions allow you to perform calculations on a set of values, returning a single result',
 				typeOptions: {
 					multipleValues: true,
 				},
@@ -541,7 +536,7 @@ export const permissionsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset.',
+				description: 'Deep allows you to set any of the other query parameters on a nested relational dataset',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -552,8 +547,7 @@ export const permissionsFields: INodeProperties[] = [
 				type: 'options',
 				placeholder: 'Select an option',
 				default: 'csv',
-				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.
-',
+				description: 'Saves the API response to a file. Accepts one of JSON, csv, xml.',
 				options: [
 					{
 						name: 'CSV',
@@ -575,7 +569,7 @@ export const permissionsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Control what fields are being returned in the object.',
+				description: 'Control what fields are being returned in the object',
 			},
 			{
 				displayName: 'File Name for Export Data',
@@ -590,7 +584,7 @@ export const permissionsFields: INodeProperties[] = [
 				type: 'json',
 				placeholder: '',
 				default: null,
-				description: 'Select items in collection by given conditions.',
+				description: 'Select items in collection by given conditions',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
@@ -609,7 +603,7 @@ export const permissionsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'What metadata to return in the response.',
+				description: 'What metadata to return in the response',
 			},
 			{
 				displayName: 'Offset',
@@ -617,7 +611,7 @@ export const permissionsFields: INodeProperties[] = [
 				type: 'number',
 				placeholder: '',
 				default: null,
-				description: 'How many items to skip when fetching data.',
+				description: 'How many items to skip when fetching data',
 			},
 			{
 				displayName: 'Search',
@@ -625,7 +619,7 @@ export const permissionsFields: INodeProperties[] = [
 				type: 'string',
 				placeholder: '',
 				default: '',
-				description: 'Filter by items that contain the given search query in one of their fields.',
+				description: 'Filter by items that contain the given search query in one of their fields',
 			},
 			{
 				displayName: 'Sort',
@@ -651,22 +645,9 @@ export const permissionsFields: INodeProperties[] = [
 				],
 			},
 		},
-		placeholder: '[
-	{
-		"collection": "pages",
-		"action": "read",
-		"role": "c86c2761-65d3-43c3-897f-6f74ad6a5bd7",
-		"fields": ["ID", "title"]
-	},
-	{
-		"collection": "pages",
-		"action": "create",
-		"role": "c86c2761-65d3-43c3-897f-6f74ad6a5bd7",
-		"fields": ["id", "title"]
-	}
-]',
+		placeholder: '[ { "collection": "pages", "action": "read", "role": "c86c2761-65d3-43c3-897f-6f74ad6a5bd7", "fields": ["ID", "title"] }, { "collection": "pages", "action": "create", "role": "c86c2761-65d3-43c3-897f-6f74ad6a5bd7", "fields": ["id", "title"] } ]',
 		default: null,
-		description: 'An array of partial [permissions objects](https://docs.directus.io/reference/api/system/permissions/#the-permission-object). `action` and `collection` are required.',
+		description: 'An array of partial [permissions objects](https://docs.directus.io/reference/api/system/permissions/#the-permission-object). `action` and `collection` are required',
 		required: true,
 		typeOptions: {
 			alwaysOpenEditWindow: true,

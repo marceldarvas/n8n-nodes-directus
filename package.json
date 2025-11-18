@@ -25,6 +25,10 @@
     "dev": "tsc --watch",
     "format": "prettier nodes credentials --write",
     "lint": "eslint nodes credentials --ext .ts --fix",
+    "test": "jest",
+    "test:integration": "jest --config jest.config.integration.js --testPathPattern=test/integration",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "prepublishOnly": "npm run build && npm run lint"
   },
   "files": [
@@ -33,7 +37,8 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/DirectusApi.credentials.js"
+      "dist/credentials/DirectusApi.credentials.js",
+      "dist/credentials/DirectusOAuth2Api.credentials.js"
     ],
     "nodes": [
       "dist/nodes/Directus/Directus.node.js"

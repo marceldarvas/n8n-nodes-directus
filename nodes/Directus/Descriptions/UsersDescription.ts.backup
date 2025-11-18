@@ -75,12 +75,12 @@ export const usersOperations: INodeProperties[] = [
 				value: 'getCurrent',
 				description: 'Retrieve the currently authenticated user',
 				action: 'Get current a users',
-		},
-		{
-			name: 'Invite Multiple Users',
-			value: 'inviteMultiple',
-			description: 'Invite multiple users at once with custom email templates and options',
-			action: 'Invite multiple users a users',
+			},
+			{
+				name: 'Invite Multiple Users',
+				value: 'inviteMultiple',
+				description: 'Invite multiple users at once with custom email templates and options',
+				action: 'Invite multiple users a users',
 			},
 			{
 				name: 'Invite User',
@@ -93,18 +93,18 @@ export const usersOperations: INodeProperties[] = [
 				value: 'list',
 				description: 'List the users',
 				action: 'List a users',
-		},
-		{
-			name: 'List Invitations',
-			value: 'listInvitations',
-			description: 'List pending/accepted invitations with status filter',
-			action: 'List invitations a users',
-		},
-		{
-			name: 'Resend Invitation',
-			value: 'resendInvitation',
-			description: 'Resend invitation to a user',
-			action: 'Resend invitation a users',
+			},
+			{
+				name: 'List Invitations',
+				value: 'listInvitations',
+				description: 'List pending/accepted invitations with status filter',
+				action: 'List invitations a users',
+			},
+			{
+				name: 'Resend Invitation',
+				value: 'resendInvitation',
+				description: 'Resend invitation to a user',
+				action: 'Resend invitation a users',
 			},
 			{
 				name: 'Update',
@@ -186,6 +186,7 @@ export const usersFields: INodeProperties[] = [
 		},
 		options: [
 			{
+			{
 				displayName: 'Email Subject',
 				name: 'emailSubject',
 				type: 'string',
@@ -215,7 +216,6 @@ export const usersFields: INodeProperties[] = [
 					minValue: 1,
 				},
 			},
-			{
 				displayName: 'Invite URL',
 				name: 'inviteUrl',
 				type: 'string',
@@ -1199,295 +1199,6 @@ export const usersFields: INodeProperties[] = [
 		typeOptions: {
 			alwaysOpenEditWindow: true,
 		},
-	},
-		{
-			displayName: 'Email Subject',
-			name: 'emailSubject',
-			type: 'string',
-			placeholder: 'You have been invited to join',
-			default: '',
-			description: 'Custom email subject for the invitation',
-		},
-		{
-			displayName: 'Email Message',
-			name: 'emailMessage',
-			type: 'string',
-			typeOptions: {
-				rows: 4,
-			},
-			placeholder: 'Hi {{first_name}}, you have been invited to join our project. Click the link below to accept the invitation.',
-			default: '',
-			description: 'Custom email body/message for the invitation. Supports variable substitution: {{first_name}}, {{last_name}}, {{email}}, {{role}}',
-		},
-		{
-			displayName: 'Expiration Hours',
-			name: 'expirationHours',
-			type: 'number',
-			placeholder: '72',
-			default: '',
-			description: 'Invitation expiration time in hours',
-			typeOptions: {
-				minValue: 1,
-			},
-		},
-		{
-			displayName: 'Invite URL',
-			name: 'inviteUrl',
-			type: 'string',
-			placeholder: '',
-			default: '',
-			description: 'Provide a custom invite URL which the link in the email will lead to. The invite token will be passed as a parameter. Note: You need to configure the [`USER_INVITE_URL_ALLOW_LIST` environment variable](https://docs.directus.io/reference/environment-variables/#security) to enable this feature.',
-		},
-		{
-			displayName: 'Redirect URL',
-			name: 'redirectUrl',
-			type: 'string',
-			placeholder: 'https://example.com/welcome',
-			default: '',
-			description: 'Custom redirect URL after invitation acceptance',
-		},
-	// listInvitations fields
-	{
-		displayName: 'Return All',
-		name: 'returnAll',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: [
-					'users',
-				],
-				operation: [
-					'listInvitations',
-				],
-			},
-		},
-		default: true,
-		description: 'Whether to return all results or only up to a given limit',
-		required: true,
-	},
-	{
-		displayName: 'Limit',
-		name: 'limit',
-		type: 'number',
-		displayOptions: {
-			show: {
-				operation: [
-					'listInvitations',
-				],
-				resource: [
-					'users',
-				],
-				returnAll: [
-					false,
-				],
-			},
-		},
-		placeholder: '',
-		default: 50,
-		description: 'Max number of results to return',
-		required: true,
-		typeOptions: {
-			minValue: 1,
-		},
-	},
-	{
-		displayName: 'Status Filter',
-		name: 'statusFilter',
-		type: 'options',
-		displayOptions: {
-			show: {
-				operation: [
-					'listInvitations',
-				],
-				resource: [
-					'users',
-				],
-			},
-		},
-		options: [
-			{
-				name: 'All',
-				value: 'all',
-				description: 'Return all invitations',
-			},
-			{
-				name: 'Pending',
-				value: 'pending',
-				description: 'Return pending invitations (invited status)',
-			},
-			{
-				name: 'Accepted',
-				value: 'accepted',
-				description: 'Return accepted invitations (active status)',
-			},
-		],
-		default: 'all',
-		description: 'Filter invitations by status',
-	},
-	// resendInvitation fields
-	{
-		displayName: 'User ID',
-		name: 'userId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				operation: [
-					'resendInvitation',
-				],
-				resource: [
-					'users',
-				],
-			},
-		},
-		placeholder: '72a1ce24-4748-47de-a05f-ce9af3033727',
-		default: '',
-		description: 'ID of the user to resend invitation to',
-		required: true,
-	},
-	// inviteMultiple fields
-	{
-		displayName: 'Input Type',
-		name: 'inputType',
-		type: 'options',
-		displayOptions: {
-			show: {
-				operation: [
-					'inviteMultiple',
-				],
-				resource: [
-					'users',
-				],
-			},
-		},
-		options: [
-			{
-				name: 'JSON',
-				value: 'json',
-				description: 'Provide emails and options as JSON array',
-			},
-			{
-				name: 'Comma-Separated',
-				value: 'csv',
-				description: 'Provide emails as comma-separated string',
-			},
-		],
-		default: 'json',
-		description: 'Format for providing email addresses',
-	},
-	{
-		displayName: 'Emails (JSON)',
-		name: 'emailsJson',
-		type: 'json',
-		displayOptions: {
-			show: {
-				operation: [
-					'inviteMultiple',
-				],
-				resource: [
-					'users',
-				],
-				inputType: [
-					'json',
-				],
-			},
-		},
-		placeholder: '[\n	{\n		"email": "user1@example.com",\n		"role": "Administrator"\n	},\n	{\n		"email": "user2@example.com",\n		"role": "Editor"\n	}\n]',
-		default: null,
-		description: 'Array of invitation objects with email and role. Role can be UUID or role name.',
-		required: true,
-		typeOptions: {
-			alwaysOpenEditWindow: true,
-		},
-	},
-	{
-		displayName: 'Emails (Comma-Separated)',
-		name: 'emailsCsv',
-		type: 'string',
-		displayOptions: {
-			show: {
-				operation: [
-					'inviteMultiple',
-				],
-				resource: [
-					'users',
-				],
-				inputType: [
-					'csv',
-				],
-			},
-		},
-		placeholder: 'user1@example.com, user2@example.com, user3@example.com',
-		default: '',
-		description: 'Comma-separated list of email addresses',
-		required: true,
-	},
-	{
-		displayName: 'Role',
-		name: 'role',
-		type: 'string',
-		displayOptions: {
-			show: {
-				operation: [
-					'inviteMultiple',
-				],
-				resource: [
-					'users',
-				],
-				inputType: [
-					'csv',
-				],
-			},
-		},
-		placeholder: 'Administrator',
-		default: '',
-		description: 'Role for all invited users (when using comma-separated emails). Can be role UUID or name.',
-		required: true,
-	},
-	{
-		displayName: 'Additional Options',
-		name: 'additionalOptions',
-		type: 'collection',
-		placeholder: 'Add Option',
-		default: {},
-		displayOptions: {
-			show: {
-				operation: [
-					'inviteMultiple',
-				],
-				resource: [
-					'users',
-				],
-			},
-		},
-		options: [
-			{
-				displayName: 'Email Subject',
-				name: 'emailSubject',
-				type: 'string',
-				placeholder: 'You have been invited to join',
-				default: '',
-				description: 'Custom email subject for the invitations',
-			},
-			{
-				displayName: 'Email Message',
-				name: 'emailMessage',
-				type: 'string',
-				typeOptions: {
-					rows: 4,
-				},
-				placeholder: 'Hi {{first_name}}, you have been invited to join our project.',
-				default: '',
-				description: 'Custom email body/message. Supports variable substitution: {{first_name}}, {{last_name}}, {{email}}, {{role}}',
-			},
-			{
-				displayName: 'Invite URL',
-				name: 'inviteUrl',
-				type: 'string',
-				placeholder: '',
-				default: '',
-				description: 'Custom invite URL for all invitations',
-			},
-		],
 	},
 ];
 

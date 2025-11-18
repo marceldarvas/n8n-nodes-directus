@@ -21,6 +21,38 @@ import {
 	directusApiFileRequest,
 	directusApiRequest,
 	validateJSON,
+	triggerFlow,
+	pollFlowExecution,
+	createFlow,
+	updateFlow,
+	deleteFlow,
+	getFlowWebhookUrl,
+	getFlowExecution,
+	listFlowExecutions,
+	getFlowExecutionLogs,
+	chainFlows,
+	loopFlows,
+	transformFlowData,
+	getFlowActivity,
+	calculateFlowPerformanceMetrics,
+	isUUID,
+	getRoleIdByName,
+	parseCSV,
+	bulkCreateUsers,
+	bulkUpdateUsers,
+	bulkDeleteUsers,
+	listUserInvitations,
+	resendUserInvitation,
+	bulkInviteUsers,
+	aggregateActivityByUser,
+	aggregateActivityByCollection,
+	aggregateErrorsByType,
+	analyzePeakUsageTimes,
+	convertToCSV,
+	compareRevisions,
+	formatDiffAsHTML,
+	formatDiffAsText,
+	getRollbackData,
 } from "./GenericFunctions";
 
 import {
@@ -49,6 +81,8 @@ import {
 	fieldsFields,
 	fieldsOperations,
 } from "./Descriptions/FieldsDescription";
+
+import { flowFields, flowOperations } from "./Descriptions/FlowDescription";
 
 import { filesFields, filesOperations } from "./Descriptions/FilesDescription";
 
@@ -117,7 +151,11 @@ export class Directus implements INodeType {
 		credentials: [
 			{
 				name: "directusApi",
-				required: true,
+				required: false,
+			},
+			{
+				name: "directusOAuth2Api",
+				required: false,
 			},
 		],
 		properties: [
@@ -152,6 +190,10 @@ export class Directus implements INodeType {
 						value: "fields",
 					},
 					{
+						name: 'Flow',
+						value: "flow",
+					},
+					{
 						name: 'File',
 						value: "files",
 					},
@@ -176,11 +218,11 @@ export class Directus implements INodeType {
 						value: "relations",
 					},
 					{
-						name: "Revisions",
+						name: 'Revision',
 						value: "revisions",
 					},
 					{
-						name: "Roles",
+						name: 'Role',
 						value: "roles",
 					},
 					{
@@ -188,19 +230,19 @@ export class Directus implements INodeType {
 						value: "server",
 					},
 					{
-						name: "Settings",
+						name: 'Setting',
 						value: "settings",
 					},
 					{
-						name: "Users",
+						name: 'User',
 						value: "users",
 					},
 					{
-						name: "Utilities",
+						name: 'Utility',
 						value: "utils",
 					},
 					{
-						name: "Webhooks",
+						name: 'Webhook',
 						value: "webhooks",
 					},
 				],
@@ -231,6 +273,10 @@ export class Directus implements INodeType {
 			// FIELDS
 			...fieldsOperations,
 			...fieldsFields,
+
+			// FLOW
+			...flowOperations,
+			...flowFields,
 
 			// FILES
 			...filesOperations,
@@ -518,8 +564,45 @@ export class Directus implements INodeType {
 						requestMethod = "GET";
 						endpoint = `activity`;
 
-						let response;
+					let response;
 
+					// Check for flow-specific filters
+					const flowId = additionalFields.flowId as string;
+					const flowExecutionId = additionalFields.flowExecutionId as string;
+					const flowOperationType = additionalFields.flowOperationType as string;
+					const calculatePerformanceMetrics = additionalFields.calculatePerformanceMetrics as boolean;
+
+					const hasFlowFilters = flowId || flowExecutionId || flowOperationType;
+
+					if (hasFlowFilters) {
+						// Use flow-specific activity filtering
+						const flowFilters: IDataObject = {
+							returnAll,
+							limit: returnAll ? -1 : (this.getNodeParameter("limit", i) as number) || 100,
+						};
+
+						if (flowId) flowFilters.flowId = flowId;
+						if (flowExecutionId) flowFilters.flowExecutionId = flowExecutionId;
+						if (flowOperationType) flowFilters.flowOperationType = flowOperationType;
+
+						// Add other filters from additionalFields
+						if (additionalFields.fields) flowFilters.fields = additionalFields.fields;
+						if (additionalFields.sort) flowFilters.sort = additionalFields.sort;
+
+						response = await getFlowActivity.call(this, flowFilters);
+
+						// Calculate performance metrics if requested
+						if (calculatePerformanceMetrics && Array.isArray(response)) {
+							const metrics = calculateFlowPerformanceMetrics(response);
+							responseData = {
+								activities: response,
+								performanceMetrics: metrics,
+							};
+						} else {
+							responseData = response;
+						}
+					} else {
+						// Standard activity list operation
 						if (!parametersAreJson && returnAll === true) {
 							qs.limit = -1;
 						} else if (!parametersAreJson) {
@@ -550,7 +633,7 @@ export class Directus implements INodeType {
 									} else {
 										qs[key] = JSON.stringify(object);
 									}
-								} else {
+								} else if (!["flowId", "flowExecutionId", "flowOperationType", "calculatePerformanceMetrics"].includes(key)) {
 									qs[key] = additionalFields[key];
 								}
 							}
@@ -569,6 +652,7 @@ export class Directus implements INodeType {
 						} else {
 							responseData = response.data ?? {};
 						}
+					}
 						//////////////////////////////////
 						const exportType = (additionalFields.export as string) ?? null;
 						const binary: IBinaryKeyData = {};
@@ -750,6 +834,124 @@ export class Directus implements INodeType {
 						} else {
 							responseData = response.data ?? {};
 						}
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "aggregateByUser") {
+					try {
+						const dateRangeData = this.getNodeParameter("dateRange", i) as IDataObject;
+						const dateRange = dateRangeData?.range as IDataObject | undefined;
+						const exportFormat = this.getNodeParameter("exportFormat", i) as string;
+						const includeUserDetails = this.getNodeParameter("includeUserDetails", i) as boolean;
+						const groupByAction = this.getNodeParameter("groupByAction", i) as boolean;
+
+						const aggregatedData = await aggregateActivityByUser.call(
+							this,
+							dateRange ? { from: dateRange.from as string, to: dateRange.to as string } : undefined,
+							includeUserDetails,
+							groupByAction,
+						);
+
+						if (exportFormat === 'csv') {
+							const csvData = convertToCSV(aggregatedData, 'user');
+							responseData = { csv: csvData, data: aggregatedData } as IDataObject;
+						} else {
+							responseData = { results: aggregatedData } as IDataObject;
+						}
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "aggregateByCollection") {
+					try {
+						const dateRangeData = this.getNodeParameter("dateRange", i) as IDataObject;
+						const dateRange = dateRangeData?.range as IDataObject | undefined;
+						const exportFormat = this.getNodeParameter("exportFormat", i) as string;
+						const groupByAction = this.getNodeParameter("groupByAction", i) as boolean;
+
+						const aggregatedData = await aggregateActivityByCollection.call(
+							this,
+							dateRange ? { from: dateRange.from as string, to: dateRange.to as string } : undefined,
+							groupByAction,
+						);
+
+						if (exportFormat === 'csv') {
+							const csvData = convertToCSV(aggregatedData, 'collection');
+							responseData = { csv: csvData, data: aggregatedData } as IDataObject;
+						} else {
+							responseData = { results: aggregatedData } as IDataObject;
+						}
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "aggregateErrors") {
+					try {
+						const dateRangeData = this.getNodeParameter("dateRange", i) as IDataObject;
+						const dateRange = dateRangeData?.range as IDataObject | undefined;
+						const exportFormat = this.getNodeParameter("exportFormat", i) as string;
+						const includeSuccessRate = this.getNodeParameter("includeSuccessRate", i) as boolean;
+
+						const aggregatedData = await aggregateErrorsByType.call(
+							this,
+							dateRange ? { from: dateRange.from as string, to: dateRange.to as string } : undefined,
+							includeSuccessRate,
+						);
+
+						if (exportFormat === 'csv') {
+							const csvData = convertToCSV(aggregatedData.errorsByType || [], 'error');
+							responseData = { csv: csvData, data: aggregatedData } as IDataObject;
+						} else {
+							responseData = aggregatedData as IDataObject;
+						}
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "analyzePeakUsage") {
+					try {
+						const dateRangeData = this.getNodeParameter("dateRange", i) as IDataObject;
+						const dateRange = dateRangeData?.range as IDataObject | undefined;
+						const exportFormat = this.getNodeParameter("exportFormat", i) as string;
+						const timeGranularity = this.getNodeParameter("timeGranularity", i) as 'hour' | 'day' | 'both';
+
+						const analysisData = await analyzePeakUsageTimes.call(
+							this,
+							dateRange ? { from: dateRange.from as string, to: dateRange.to as string } : undefined,
+							timeGranularity,
+						);
+
+						if (exportFormat === 'csv') {
+							const csvData = convertToCSV(analysisData, 'peak');
+							responseData = { csv: csvData, data: analysisData } as IDataObject;
+						} else {
+							responseData = analysisData as IDataObject;
+						}
+
 						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {
@@ -1644,6 +1846,498 @@ export class Directus implements INodeType {
 						);
 						responseData = response;
 						//////////////////////////////////
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+			}
+			if (resource === "flow") {
+				if (operation === "trigger") {
+					try {
+						const flowId = this.getNodeParameter("flowId", i) as string;
+						const payloadJson = this.getNodeParameter("payload", i, "{}") as string;
+						const executionMode = this.getNodeParameter("executionMode", i) as string;
+						const queryParametersCollection = this.getNodeParameter("queryParameters", i, {}) as IDataObject;
+
+						// Parse the payload JSON
+						const payload = validateJSON(payloadJson);
+
+						// Convert fixedCollection query parameters to query string
+						const queryParams: IDataObject = {};
+						if (queryParametersCollection && queryParametersCollection.parameter) {
+							const parameters = queryParametersCollection.parameter as Array<{name: string, value: string}>;
+							parameters.forEach((param) => {
+								queryParams[param.name] = param.value;
+							});
+						}
+
+						// Trigger the flow
+						const response = await triggerFlow.call(
+							this,
+							flowId,
+							payload,
+							queryParams,
+						);
+
+						// If sync mode, poll for completion
+						if (executionMode === "sync") {
+							const maxWaitTime = this.getNodeParameter("maxWaitTime", i, 60) as number;
+							const executionId = response.executionId || response.data?.executionId;
+
+							if (executionId) {
+								const pollResult = await pollFlowExecution.call(
+									this,
+									executionId,
+									maxWaitTime * 1000, // Convert to milliseconds
+								);
+								responseData = pollResult;
+							} else {
+								responseData = response;
+							}
+						} else {
+							responseData = response;
+						}
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "get") {
+					try {
+						const flowId = this.getNodeParameter("flowId", i) as string;
+
+						requestMethod = "GET";
+						endpoint = `flows/${flowId}`;
+
+						const response = await directusApiRequest.call(
+							this,
+							requestMethod,
+							endpoint,
+							{},
+							{},
+						);
+
+						if (typeof response !== "object") {
+							responseData = { response };
+						} else {
+							responseData = response.data ?? response;
+						}
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "list") {
+					try {
+						returnAll = this.getNodeParameter("returnAll", i, false) as boolean;
+						const options = this.getNodeParameter("options", i, {}) as IDataObject;
+
+						requestMethod = "GET";
+						endpoint = "flows";
+
+						// Build query string
+						if (returnAll) {
+							qs.limit = -1;
+						} else {
+							qs.limit = this.getNodeParameter("limit", i, 50) as number;
+						}
+
+						// Add filter if provided
+						if (options.filter) {
+							const filterJson = validateJSON(options.filter as string);
+							if (filterJson) {
+								qs.filter = JSON.stringify(filterJson);
+							}
+						}
+
+						// Add sort if provided
+						if (options.sort) {
+							qs.sort = options.sort as string;
+						}
+
+						// Add fields if provided
+						if (options.fields) {
+							qs.fields = options.fields as string;
+						}
+
+						const response = await directusApiRequest.call(
+							this,
+							requestMethod,
+							endpoint,
+							{},
+							qs,
+						);
+
+						if (typeof response !== "object") {
+							responseData = { response };
+						} else {
+							responseData = response.data ?? response;
+						}
+
+						// Return each flow as a separate item
+						if (Array.isArray(responseData)) {
+							responseData.forEach((item: any) => {
+								returnItems.push({ json: item });
+							});
+						} else {
+							returnItems.push({ json: responseData });
+						}
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "create") {
+					try {
+						const name = this.getNodeParameter("name", i) as string;
+						const triggerType = this.getNodeParameter("triggerType", i) as string;
+						const status = this.getNodeParameter("status", i) as string;
+						const additionalFields = this.getNodeParameter("additionalFields", i, {}) as IDataObject;
+
+						// Build flow data object
+						const flowData: IDataObject = {
+							name,
+							status,
+						};
+
+						// Add description if provided
+						if (additionalFields.description) {
+							flowData.description = additionalFields.description as string;
+						}
+
+						// Add icon if provided
+						if (additionalFields.icon) {
+							flowData.icon = additionalFields.icon as string;
+						}
+
+						// Add color if provided
+						if (additionalFields.color) {
+							flowData.color = additionalFields.color as string;
+						}
+
+						// Build trigger configuration based on trigger type
+						if (triggerType === "webhook") {
+							const webhookMethod = this.getNodeParameter("webhookMethod", i, "POST") as string;
+							flowData.trigger = "webhook";
+							flowData.options = {
+								method: webhookMethod,
+								...validateJSON(additionalFields.options as string || "{}"),
+							};
+						} else if (triggerType === "event") {
+							flowData.trigger = "event";
+							flowData.options = validateJSON(additionalFields.options as string || "{}");
+						} else if (triggerType === "schedule") {
+							flowData.trigger = "schedule";
+							flowData.options = validateJSON(additionalFields.options as string || "{}");
+						} else if (triggerType === "manual") {
+							flowData.trigger = "manual";
+							flowData.options = validateJSON(additionalFields.options as string || "{}");
+						}
+
+						// Add operations if provided
+						if (additionalFields.operations) {
+							const operations = validateJSON(additionalFields.operations as string);
+							if (operations) {
+								flowData.operations = operations;
+							}
+						}
+
+						// Create the flow
+						const response = await createFlow.call(this, flowData);
+
+						// Generate webhook URL if it's a webhook trigger
+						let webhookUrl = null;
+						if (triggerType === "webhook" && response.id) {
+							webhookUrl = await getFlowWebhookUrl.call(this, response.id);
+						}
+
+						responseData = {
+							...response,
+							...(webhookUrl ? { webhookUrl } : {}),
+						};
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "update") {
+					try {
+						const flowId = this.getNodeParameter("flowId", i) as string;
+						const updateFields = this.getNodeParameter("updateFields", i, {}) as IDataObject;
+
+						// Build update data object
+						const flowData: IDataObject = {};
+
+						// Add fields to update
+						if (updateFields.name) {
+							flowData.name = updateFields.name as string;
+						}
+
+						if (updateFields.description !== undefined) {
+							flowData.description = updateFields.description as string;
+						}
+
+						if (updateFields.status) {
+							flowData.status = updateFields.status as string;
+						}
+
+						if (updateFields.icon !== undefined) {
+							flowData.icon = updateFields.icon as string;
+						}
+
+						if (updateFields.color !== undefined) {
+							flowData.color = updateFields.color as string;
+						}
+
+						if (updateFields.operations) {
+							const operations = validateJSON(updateFields.operations as string);
+							if (operations) {
+								flowData.operations = operations;
+							}
+						}
+
+						if (updateFields.options) {
+							const options = validateJSON(updateFields.options as string);
+							if (options) {
+								flowData.options = options;
+							}
+						}
+
+						// Update the flow
+						const response = await updateFlow.call(this, flowId, flowData);
+
+						responseData = response;
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "delete") {
+					try {
+						const flowId = this.getNodeParameter("flowId", i) as string;
+
+						// Delete the flow
+						await deleteFlow.call(this, flowId);
+
+						responseData = {
+							success: true,
+							flowId,
+						};
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "getExecution") {
+					try {
+						const executionId = this.getNodeParameter("executionId", i) as string;
+						const additionalFields = this.getNodeParameter("additionalFields", i, {}) as IDataObject;
+
+						// Get fields if provided
+						const fields = additionalFields.fields as string | undefined;
+
+						// Get execution details
+						const execution = await getFlowExecution.call(this, executionId, fields);
+
+						responseData = execution;
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "listExecutions") {
+					try {
+						returnAll = this.getNodeParameter("returnAll", i, false) as boolean;
+						const filtersParam = this.getNodeParameter("filters", i, {}) as IDataObject;
+						const options = this.getNodeParameter("options", i, {}) as IDataObject;
+
+						// Build filters object
+						const filters: IDataObject = {
+							returnAll,
+						};
+
+						// Add limit if not returning all
+						if (!returnAll) {
+							filters.limit = this.getNodeParameter("limit", i, 100) as number;
+						}
+
+						// Add flow ID filter if provided
+						if (filtersParam.flowId) {
+							filters.flowId = filtersParam.flowId as string;
+						}
+
+						// Add status filter if provided
+						if (filtersParam.status) {
+							filters.status = filtersParam.status as string;
+						}
+
+						// Add date filters if provided
+						if (filtersParam.dateFrom) {
+							filters.dateFrom = filtersParam.dateFrom as string;
+						}
+
+						if (filtersParam.dateTo) {
+							filters.dateTo = filtersParam.dateTo as string;
+						}
+
+						// Add user ID filter if provided
+						if (filtersParam.userId) {
+							filters.userId = filtersParam.userId as string;
+						}
+
+						// List executions
+						const executions = await listFlowExecutions.call(this, filters, options);
+
+						// Return each execution as a separate item
+						if (Array.isArray(executions)) {
+							executions.forEach((execution: any) => {
+								returnItems.push({ json: execution });
+							});
+						} else {
+							returnItems.push({ json: executions });
+						}
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "getExecutionLogs") {
+					try {
+						const executionId = this.getNodeParameter("executionId", i) as string;
+						const options = this.getNodeParameter("options", i, {}) as IDataObject;
+
+						// Get execution logs
+						const logs = await getFlowExecutionLogs.call(this, executionId, options);
+
+						// Return each log entry as a separate item
+						if (Array.isArray(logs)) {
+							logs.forEach((log: any) => {
+								returnItems.push({ json: log });
+							});
+						} else {
+							returnItems.push({ json: logs });
+						}
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "chainFlows") {
+					try {
+						const flowChainJson = this.getNodeParameter("flowChain", i) as string;
+						const initialPayloadJson = this.getNodeParameter("initialPayload", i, "{}") as string;
+						const executionMode = this.getNodeParameter("executionMode", i) as string;
+						const errorHandling = this.getNodeParameter("errorHandling", i) as string;
+						const options = this.getNodeParameter("options", i, {}) as IDataObject;
+
+						// Parse JSON inputs
+						const flowChain = validateJSON(flowChainJson);
+						const initialPayload = validateJSON(initialPayloadJson);
+
+						if (!flowChain || !Array.isArray(flowChain)) {
+							throw new Error("Flow chain must be a valid JSON array");
+						}
+
+						// Build options object
+						const chainOptions: IDataObject = {
+							executionMode,
+							errorHandling,
+							...options,
+						};
+
+						// Execute flow chain
+						const result = await chainFlows.call(
+							this,
+							flowChain,
+							initialPayload,
+							chainOptions,
+						);
+
+						responseData = result;
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation === "loopFlows") {
+					try {
+						const flowId = this.getNodeParameter("flowId", i) as string;
+						const dataArrayJson = this.getNodeParameter("dataArray", i) as string;
+						const executionMode = this.getNodeParameter("executionMode", i) as string;
+						const options = this.getNodeParameter("options", i, {}) as IDataObject;
+
+						// Parse JSON input
+						const dataArray = validateJSON(dataArrayJson);
+
+						if (!dataArray || !Array.isArray(dataArray)) {
+							throw new Error("Data array must be a valid JSON array");
+						}
+
+						// Build options object
+						const loopOptions: IDataObject = {
+							executionMode,
+							...options,
+						};
+
+						// Execute flow loop
+						const result = await loopFlows.call(
+							this,
+							flowId,
+							dataArray,
+							loopOptions,
+						);
+
+						responseData = result;
+
 						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {
@@ -4080,6 +4774,67 @@ export class Directus implements INodeType {
 						throw error;
 					}
 				}
+				if (operation == "compare") {
+					try {
+						const revisionId1 = this.getNodeParameter("revisionId1", i) as string;
+						const revisionId2 = this.getNodeParameter("revisionId2", i) as string;
+						const outputFormat = this.getNodeParameter("outputFormat", i) as string;
+						const includeUnchanged = this.getNodeParameter("includeUnchanged", i) as boolean;
+
+						const comparisonResult = await compareRevisions.call(
+							this,
+							revisionId1,
+							revisionId2,
+							includeUnchanged,
+						);
+
+						if (outputFormat === 'html') {
+							const htmlOutput = formatDiffAsHTML(comparisonResult);
+							responseData = {
+								...comparisonResult,
+								htmlOutput,
+							} as IDataObject;
+						} else if (outputFormat === 'text') {
+							const textOutput = formatDiffAsText(comparisonResult);
+							responseData = {
+								...comparisonResult,
+								textOutput,
+							} as IDataObject;
+						} else {
+							responseData = comparisonResult as IDataObject;
+						}
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "getRollbackData") {
+					try {
+						const revisionId = this.getNodeParameter("revisionId", i) as string;
+						const includePreview = this.getNodeParameter("includePreview", i) as boolean;
+
+						const rollbackData = await getRollbackData.call(
+							this,
+							revisionId,
+							includePreview,
+						);
+
+						responseData = rollbackData as IDataObject;
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
 			}
 			if (resource === "roles") {
 				if (operation == "get") {
@@ -4979,6 +5734,11 @@ export class Directus implements INodeType {
 							} else {
 								body = JSON.parse(JSON.stringify(bodyParametersJson));
 							}
+
+							// Handle role lookup for JSON parameters
+							if (body.role && typeof body.role === 'string' && !isUUID(body.role)) {
+								body.role = await getRoleIdByName.call(this, body.role);
+							}
 						} else {
 							for (const key in additionalFields) {
 								if (["deep", "filter"].includes(key)) {
@@ -4994,6 +5754,11 @@ export class Directus implements INodeType {
 							}
 							body["email"] = this.getNodeParameter("email", i) as string;
 							body["password"] = this.getNodeParameter("password", i) as string;
+
+							// Handle role lookup for form parameters
+							if (body.role && typeof body.role === 'string' && !isUUID(body.role)) {
+								body.role = await getRoleIdByName.call(this, body.role);
+							}
 						}
 
 						response = await directusApiRequest.call(
@@ -5020,31 +5785,43 @@ export class Directus implements INodeType {
 				}
 				if (operation == "createMultiple") {
 					try {
-						const data = this.getNodeParameter("data", i) as object | string;
+						const inputType = (this.getNodeParameter("inputType", i) as string) || 'json';
+						const errorHandling = (this.getNodeParameter("errorHandling", i) as 'stop' | 'continue') || 'stop';
 
-						requestMethod = "POST";
-						endpoint = `users`;
+						let users: any[] = [];
 
-						let response;
-						if (typeof data == "string") {
-							body = JSON.parse(data);
+						// Parse input based on type
+						if (inputType === 'csv') {
+							const csvData = this.getNodeParameter("csvData", i) as string;
+							users = parseCSV(csvData);
 						} else {
-							body = JSON.parse(JSON.stringify(data));
+							const data = this.getNodeParameter("data", i) as object | string;
+							if (typeof data === "string") {
+								users = JSON.parse(data);
+							} else {
+								users = JSON.parse(JSON.stringify(data));
+							}
 						}
 
-						response = await directusApiRequest.call(
-							this,
-							requestMethod,
-							endpoint,
-							body,
-							qs,
-						);
-						if (typeof response != "object") {
-							responseData = { response };
-						} else {
-							responseData = response.data ?? {};
+						// Validate that users is an array
+						if (!Array.isArray(users)) {
+							throw new Error('User data must be an array');
 						}
-						//////////////////////////////////
+
+						// Use bulk create function with enhanced error handling
+						const result = await bulkCreateUsers.call(this, users, errorHandling);
+
+						// Return comprehensive results
+						responseData = {
+							success: result.success,
+							operation: 'createMultiple',
+							inputType,
+							errorHandling,
+							stats: result.stats,
+							created: result.created,
+							...(result.failed.length > 0 && { failed: result.failed }),
+						};
+
 						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {
@@ -5094,30 +5871,36 @@ export class Directus implements INodeType {
 				if (operation == "updateMultiple") {
 					try {
 						const data = this.getNodeParameter("data", i) as object | string;
+						const errorHandling = (this.getNodeParameter("errorHandling", i) as 'stop' | 'continue') || 'stop';
 
-						requestMethod = "PATCH";
-						endpoint = `users`;
-
-						let response;
-						if (typeof data == "string") {
-							body = JSON.parse(data);
+						let updates: { keys: string[]; data: any };
+						if (typeof data === "string") {
+							updates = JSON.parse(data);
 						} else {
-							body = JSON.parse(JSON.stringify(data));
+							updates = JSON.parse(JSON.stringify(data));
 						}
 
-						response = await directusApiRequest.call(
-							this,
-							requestMethod,
-							endpoint,
-							body,
-							qs,
-						);
-						if (typeof response != "object") {
-							responseData = { response };
-						} else {
-							responseData = response.data ?? {};
+						// Validate structure
+						if (!updates.keys || !Array.isArray(updates.keys)) {
+							throw new Error('Update data must contain a "keys" array');
 						}
-						//////////////////////////////////
+						if (!updates.data || typeof updates.data !== 'object') {
+							throw new Error('Update data must contain a "data" object');
+						}
+
+						// Use bulk update function with enhanced error handling
+						const result = await bulkUpdateUsers.call(this, updates, errorHandling);
+
+						// Return comprehensive results
+						responseData = {
+							success: result.success,
+							operation: 'updateMultiple',
+							errorHandling,
+							stats: result.stats,
+							updated: result.updated,
+							...(result.failed.length > 0 && { failed: result.failed }),
+						};
+
 						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {
@@ -5161,30 +5944,33 @@ export class Directus implements INodeType {
 				if (operation == "deleteMultiple") {
 					try {
 						const data = this.getNodeParameter("keys", i) as object | string;
+						const errorHandling = (this.getNodeParameter("errorHandling", i) as 'stop' | 'continue') || 'stop';
 
-						requestMethod = "DELETE";
-						endpoint = `users`;
-
-						let response;
-						if (typeof data == "string") {
-							body = JSON.parse(data);
+						let userIds: string[];
+						if (typeof data === "string") {
+							userIds = JSON.parse(data);
 						} else {
-							body = JSON.parse(JSON.stringify(data));
+							userIds = JSON.parse(JSON.stringify(data));
 						}
 
-						response = await directusApiRequest.call(
-							this,
-							requestMethod,
-							endpoint,
-							body,
-							qs,
-						);
-						if (typeof response != "object") {
-							responseData = { response };
-						} else {
-							responseData = response.data ?? {};
+						// Validate that userIds is an array
+						if (!Array.isArray(userIds)) {
+							throw new Error('User IDs must be an array');
 						}
-						//////////////////////////////////
+
+						// Use bulk delete function with enhanced error handling
+						const result = await bulkDeleteUsers.call(this, userIds, errorHandling);
+
+						// Return comprehensive results
+						responseData = {
+							success: result.success,
+							operation: 'deleteMultiple',
+							errorHandling,
+							stats: result.stats,
+							deleted: result.deleted,
+							...(result.failed.length > 0 && { failed: result.failed }),
+						};
+
 						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {
@@ -5262,7 +6048,7 @@ export class Directus implements INodeType {
 				if (operation == "inviteUser") {
 					try {
 						const email = this.getNodeParameter("email", i) as string;
-						const role = this.getNodeParameter("role", i) as string;
+						let role = this.getNodeParameter("role", i) as string;
 						const additionalFields =
 							(this.getNodeParameter("additionalFields", i) as IDataObject) ??
 							{};
@@ -5273,6 +6059,11 @@ export class Directus implements INodeType {
 						endpoint = `users/invite`;
 
 						let response;
+
+						// Handle role lookup - convert role name to UUID if needed
+						if (role && !isUUID(role)) {
+							role = await getRoleIdByName.call(this, role);
+						}
 
 						for (const key in additionalFields) {
 							if (["deep", "filter"].includes(key)) {
@@ -5302,6 +6093,108 @@ export class Directus implements INodeType {
 							responseData = response.data ?? {};
 						}
 						//////////////////////////////////
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "listInvitations") {
+					try {
+						const returnAll = (this.getNodeParameter("returnAll", i) as boolean) ?? false;
+						const statusFilter = (this.getNodeParameter("statusFilter", i) as string) || 'all';
+						const limit = returnAll ? undefined : (this.getNodeParameter("limit", i) as number) || 100;
+
+						const result = await listUserInvitations.call(this, {
+							status: statusFilter,
+							returnAll,
+							limit,
+						});
+
+						responseData = {
+							invitations: result,
+							count: result.length,
+							statusFilter,
+						};
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "resendInvitation") {
+					try {
+						const userId = this.getNodeParameter("userId", i) as string;
+
+						const result = await resendUserInvitation.call(this, userId, {});
+
+						responseData = {
+							success: true,
+							message: 'Invitation resent successfully',
+							user: result,
+						};
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "inviteMultiple") {
+					try {
+						const inputType = (this.getNodeParameter("inputType", i) as string) || 'json';
+						const additionalOptions = (this.getNodeParameter("additionalOptions", i) as IDataObject) || {};
+
+						let invitations: Array<{ email: string; role: string }> = [];
+
+						if (inputType === 'json') {
+							const emailsJson = this.getNodeParameter("emailsJson", i) as object | string;
+							if (typeof emailsJson === "string") {
+								invitations = JSON.parse(emailsJson);
+							} else {
+								invitations = JSON.parse(JSON.stringify(emailsJson));
+							}
+						} else {
+							// csv format
+							const emailsCsv = this.getNodeParameter("emailsCsv", i) as string;
+							const role = this.getNodeParameter("role", i) as string;
+							
+							const emails = emailsCsv.split(',').map(e => e.trim()).filter(e => e);
+							invitations = emails.map(email => ({ email, role }));
+						}
+
+						// Validate invitations array
+						if (!Array.isArray(invitations) || invitations.length === 0) {
+							throw new Error('Invitations must be a non-empty array');
+						}
+
+						// Bulk invite users with options
+						const result = await bulkInviteUsers.call(this, invitations, {
+							emailSubject: additionalOptions.emailSubject as string,
+							emailMessage: additionalOptions.emailMessage as string,
+							inviteUrl: additionalOptions.inviteUrl as string,
+							errorHandling: 'continue',
+						});
+
+						responseData = {
+							success: result.success,
+							operation: 'inviteMultiple',
+							inputType,
+							stats: result.stats,
+							invited: result.invited,
+							...(result.failed.length > 0 && { failed: result.failed }),
+						};
+
 						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {

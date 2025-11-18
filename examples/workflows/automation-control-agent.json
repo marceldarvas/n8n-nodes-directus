@@ -1,0 +1,351 @@
+{
+  "name": "Automation Control AI Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "chat-trigger-1",
+      "name": "When chat message received",
+      "type": "n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "directus-credentials-1",
+      "name": "Directus Credentials",
+      "type": "n8n-nodes-directus.DirectusApi",
+      "typeVersion": 1,
+      "position": [450, 100]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "options": {
+          "systemMessage": "You are an automation control assistant for Directus Flows.\n\nYour role is to:\n- Trigger Directus automation flows on demand\n- Monitor flow execution status\n- Report on flow performance and results\n- Troubleshoot failed executions\n- Provide insights on automation usage\n\nAvailable flows:\n- 'Send Welcome Email': Sends welcome email to new users\n- 'Daily Report': Generates daily activity report\n- 'Process Upload': Processes uploaded files\n- 'Sync External Data': Syncs data from external APIs\n\nGuidelines:\n- Always provide execution IDs when triggering flows\n- Wait for completion when user needs results\n- Check logs if a flow fails\n- Suggest retry if execution failed due to temporary issue\n- Report execution time and status clearly\n\nWhen triggering flows:\n1. Confirm the flow name with the user\n2. Validate any required payload data\n3. Trigger the flow and provide execution ID\n4. Monitor status if requested\n5. Report results or errors clearly"
+        }
+      },
+      "id": "openai-agent-1",
+      "name": "AI Agent",
+      "type": "n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "name": "trigger_directus_flow",
+        "description": "Trigger a Directus Flow (automation workflow) with optional payload",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "flow_name": {
+              "type": "string",
+              "description": "Name or ID of the flow to trigger"
+            },
+            "payload": {
+              "type": "object",
+              "description": "Data to pass to the flow (optional)"
+            },
+            "execution_mode": {
+              "type": "string",
+              "enum": ["async", "sync"],
+              "description": "Execute asynchronously (return immediately) or synchronously (wait for completion)"
+            }
+          },
+          "required": ["flow_name"]
+        }
+      },
+      "id": "tool-trigger-flow-1",
+      "name": "Trigger Flow Tool",
+      "type": "n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1,
+      "position": [250, 500]
+    },
+    {
+      "parameters": {
+        "resource": "flows",
+        "operation": "trigger",
+        "flowId": "={{ $json.flow_name }}",
+        "payload": "={{ $json.payload }}",
+        "executionMode": "={{ $json.execution_mode || 'async' }}"
+      },
+      "id": "directus-trigger-flow-1",
+      "name": "Directus - Trigger Flow",
+      "type": "n8n-nodes-directus.directus",
+      "typeVersion": 1,
+      "position": [250, 700],
+      "credentials": {
+        "directusApi": "directus-credentials-1"
+      }
+    },
+    {
+      "parameters": {
+        "name": "get_flow_status",
+        "description": "Check the status of a flow execution",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "execution_id": {
+              "type": "string",
+              "description": "The execution ID returned when the flow was triggered"
+            }
+          },
+          "required": ["execution_id"]
+        }
+      },
+      "id": "tool-flow-status-1",
+      "name": "Get Flow Status Tool",
+      "type": "n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1,
+      "position": [450, 500]
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "operation": "get",
+        "activityId": "={{ $json.execution_id }}"
+      },
+      "id": "directus-flow-status-1",
+      "name": "Directus - Get Flow Status",
+      "type": "n8n-nodes-directus.directus",
+      "typeVersion": 1,
+      "position": [450, 700],
+      "credentials": {
+        "directusApi": "directus-credentials-1"
+      }
+    },
+    {
+      "parameters": {
+        "name": "list_flow_executions",
+        "description": "List recent executions of a specific flow",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "flow_id": {
+              "type": "string",
+              "description": "Flow ID or name"
+            },
+            "limit": {
+              "type": "number",
+              "description": "Number of executions to return (default: 10)"
+            },
+            "status": {
+              "type": "string",
+              "enum": ["completed", "failed", "running"],
+              "description": "Filter by status (optional)"
+            }
+          },
+          "required": ["flow_id"]
+        }
+      },
+      "id": "tool-list-executions-1",
+      "name": "List Executions Tool",
+      "type": "n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1,
+      "position": [650, 500]
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "operation": "getAll",
+        "filters": {
+          "collection": "directus_flows",
+          "item": "={{ $json.flow_id }}",
+          "action": "run"
+        },
+        "limit": "={{ $json.limit || 10 }}"
+      },
+      "id": "directus-list-executions-1",
+      "name": "Directus - List Executions",
+      "type": "n8n-nodes-directus.directus",
+      "typeVersion": 1,
+      "position": [650, 700],
+      "credentials": {
+        "directusApi": "directus-credentials-1"
+      }
+    },
+    {
+      "parameters": {
+        "name": "get_flow_logs",
+        "description": "Get detailed logs for a flow execution",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "execution_id": {
+              "type": "string",
+              "description": "The execution ID"
+            }
+          },
+          "required": ["execution_id"]
+        }
+      },
+      "id": "tool-flow-logs-1",
+      "name": "Get Flow Logs Tool",
+      "type": "n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1,
+      "position": [850, 500]
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "operation": "getAll",
+        "filters": {
+          "revisions": {
+            "activity": "={{ $json.execution_id }}"
+          }
+        },
+        "fields": ["action", "timestamp", "user", "comment", "ip"]
+      },
+      "id": "directus-flow-logs-1",
+      "name": "Directus - Get Flow Logs",
+      "type": "n8n-nodes-directus.directus",
+      "typeVersion": 1,
+      "position": [850, 700],
+      "credentials": {
+        "directusApi": "directus-credentials-1"
+      }
+    },
+    {
+      "parameters": {
+        "name": "analyze_flow_performance",
+        "description": "Analyze performance metrics for a flow",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "flow_id": {
+              "type": "string",
+              "description": "Flow ID or name"
+            },
+            "days": {
+              "type": "number",
+              "description": "Number of days to analyze (default: 7)"
+            }
+          },
+          "required": ["flow_id"]
+        }
+      },
+      "id": "tool-flow-performance-1",
+      "name": "Analyze Flow Performance Tool",
+      "type": "n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1,
+      "position": [1050, 500]
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "operation": "aggregate",
+        "aggregateBy": "day",
+        "filters": {
+          "collection": "directus_flows",
+          "item": "={{ $json.flow_id }}",
+          "timestamp": {
+            "_gte": "={{ $now.minus({days: $json.days || 7}).toISO() }}"
+          }
+        },
+        "metrics": ["count", "avg_duration", "success_rate"]
+      },
+      "id": "directus-flow-performance-1",
+      "name": "Directus - Flow Performance",
+      "type": "n8n-nodes-directus.directus",
+      "typeVersion": 1,
+      "position": [1050, 700],
+      "credentials": {
+        "directusApi": "directus-credentials-1"
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [[
+        {
+          "node": "AI Agent",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "AI Agent": {
+      "ai_tool": [[
+        {
+          "node": "Trigger Flow Tool",
+          "type": "ai_tool",
+          "index": 0
+        },
+        {
+          "node": "Get Flow Status Tool",
+          "type": "ai_tool",
+          "index": 0
+        },
+        {
+          "node": "List Executions Tool",
+          "type": "ai_tool",
+          "index": 0
+        },
+        {
+          "node": "Get Flow Logs Tool",
+          "type": "ai_tool",
+          "index": 0
+        },
+        {
+          "node": "Analyze Flow Performance Tool",
+          "type": "ai_tool",
+          "index": 0
+        }
+      ]]
+    },
+    "Trigger Flow Tool": {
+      "main": [[
+        {
+          "node": "Directus - Trigger Flow",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "Get Flow Status Tool": {
+      "main": [[
+        {
+          "node": "Directus - Get Flow Status",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "List Executions Tool": {
+      "main": [[
+        {
+          "node": "Directus - List Executions",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "Get Flow Logs Tool": {
+      "main": [[
+        {
+          "node": "Directus - Get Flow Logs",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "Analyze Flow Performance Tool": {
+      "main": [[
+        {
+          "node": "Directus - Flow Performance",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": ["ai-agent", "directus", "automation", "flows"],
+  "pinData": {},
+  "meta": {
+    "templateId": "directus-automation-control-agent",
+    "description": "AI agent for managing and monitoring Directus Flow automations"
+  }
+}

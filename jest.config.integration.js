@@ -5,8 +5,16 @@ module.exports = {
 	roots: ['<rootDir>/test'],
 	testMatch: ['**/test/integration/**/*.test.ts'],
 	transform: {
-		'^.+\\.ts$': 'ts-jest',
+		'^.+\\.ts$': ['ts-jest', {
+			tsconfig: {
+				esModuleInterop: true,
+				allowSyntheticDefaultImports: true,
+			},
+		}],
 	},
+	transformIgnorePatterns: [
+		'/node_modules/(?!@directus)',
+	],
 	moduleFileExtensions: ['ts', 'js', 'json'],
 	collectCoverageFrom: [
 		'nodes/**/*.ts',
@@ -28,4 +36,9 @@ module.exports = {
 	verbose: true,
 	bail: false,
 	maxWorkers: 1, // Run tests serially for integration tests
+	globals: {
+		'ts-jest': {
+			isolatedModules: true,
+		},
+	},
 };

@@ -1,0 +1,246 @@
+{
+  "name": "User Onboarding AI Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "chat-trigger-1",
+      "name": "When chat message received",
+      "type": "n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "directus-credentials-1",
+      "name": "Directus Credentials",
+      "type": "n8n-nodes-directus.DirectusApi",
+      "typeVersion": 1,
+      "position": [450, 100]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "options": {
+          "systemMessage": "You are a user onboarding assistant for a Directus CMS system.\n\nYour role is to:\n- Create new user accounts with appropriate roles\n- Send welcome emails by triggering flows\n- Track onboarding activity\n- Answer questions about the onboarding process\n\nAlways:\n- Confirm role assignments before creating users\n- Use strong passwords (minimum 12 characters with mixed case, numbers, symbols)\n- Provide the user ID and execution ID after successful operations\n- Trigger the welcome email flow after creating a user\n\nAvailable roles:\n- Administrator: Full system access\n- Editor: Can create and edit content\n- Viewer: Read-only access\n\nAfter creating a user, always trigger the 'Send Welcome Email' flow."
+        }
+      },
+      "id": "openai-agent-1",
+      "name": "AI Agent",
+      "type": "n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "name": "create_directus_user",
+        "description": "Create a new user in Directus with specified email, password, and role",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "description": "User's email address"
+            },
+            "password": {
+              "type": "string",
+              "description": "Strong password (min 12 chars)"
+            },
+            "role_name": {
+              "type": "string",
+              "description": "Role name: Administrator, Editor, or Viewer"
+            },
+            "first_name": {
+              "type": "string",
+              "description": "User's first name"
+            },
+            "last_name": {
+              "type": "string",
+              "description": "User's last name"
+            }
+          },
+          "required": ["email", "password", "role_name"]
+        }
+      },
+      "id": "tool-create-user-1",
+      "name": "Create User Tool",
+      "type": "n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1,
+      "position": [250, 500]
+    },
+    {
+      "parameters": {
+        "resource": "users",
+        "operation": "create",
+        "email": "={{ $json.email }}",
+        "password": "={{ $json.password }}",
+        "role": "={{ $json.role_name }}",
+        "first_name": "={{ $json.first_name }}",
+        "last_name": "={{ $json.last_name }}",
+        "status": "active"
+      },
+      "id": "directus-create-user-1",
+      "name": "Directus - Create User",
+      "type": "n8n-nodes-directus.directus",
+      "typeVersion": 1,
+      "position": [250, 700],
+      "credentials": {
+        "directusApi": "directus-credentials-1"
+      }
+    },
+    {
+      "parameters": {
+        "name": "trigger_directus_flow",
+        "description": "Trigger a Directus Flow (automation) with custom payload",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "flow_name": {
+              "type": "string",
+              "description": "Name of the flow to trigger (e.g., 'Send Welcome Email')"
+            },
+            "payload": {
+              "type": "object",
+              "description": "Data to pass to the flow"
+            }
+          },
+          "required": ["flow_name", "payload"]
+        }
+      },
+      "id": "tool-trigger-flow-1",
+      "name": "Trigger Flow Tool",
+      "type": "n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1,
+      "position": [450, 500]
+    },
+    {
+      "parameters": {
+        "resource": "flows",
+        "operation": "trigger",
+        "flowId": "={{ $json.flow_name }}",
+        "payload": "={{ $json.payload }}"
+      },
+      "id": "directus-trigger-flow-1",
+      "name": "Directus - Trigger Flow",
+      "type": "n8n-nodes-directus.directus",
+      "typeVersion": 1,
+      "position": [450, 700],
+      "credentials": {
+        "directusApi": "directus-credentials-1"
+      }
+    },
+    {
+      "parameters": {
+        "name": "query_directus_activity",
+        "description": "Query Directus activity logs to track operations",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "user_id": {
+              "type": "string",
+              "description": "Filter by user ID (optional)"
+            },
+            "action": {
+              "type": "string",
+              "description": "Filter by action: create, update, delete (optional)"
+            },
+            "limit": {
+              "type": "number",
+              "description": "Number of results to return (default: 10)"
+            }
+          }
+        }
+      },
+      "id": "tool-query-activity-1",
+      "name": "Query Activity Tool",
+      "type": "n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1,
+      "position": [650, 500]
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "operation": "getAll",
+        "filters": {
+          "user": "={{ $json.user_id }}",
+          "action": "={{ $json.action }}"
+        },
+        "limit": "={{ $json.limit || 10 }}"
+      },
+      "id": "directus-query-activity-1",
+      "name": "Directus - Query Activity",
+      "type": "n8n-nodes-directus.directus",
+      "typeVersion": 1,
+      "position": [650, 700],
+      "credentials": {
+        "directusApi": "directus-credentials-1"
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [[
+        {
+          "node": "AI Agent",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "AI Agent": {
+      "ai_tool": [[
+        {
+          "node": "Create User Tool",
+          "type": "ai_tool",
+          "index": 0
+        },
+        {
+          "node": "Trigger Flow Tool",
+          "type": "ai_tool",
+          "index": 0
+        },
+        {
+          "node": "Query Activity Tool",
+          "type": "ai_tool",
+          "index": 0
+        }
+      ]]
+    },
+    "Create User Tool": {
+      "main": [[
+        {
+          "node": "Directus - Create User",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "Trigger Flow Tool": {
+      "main": [[
+        {
+          "node": "Directus - Trigger Flow",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "Query Activity Tool": {
+      "main": [[
+        {
+          "node": "Directus - Query Activity",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": ["ai-agent", "directus", "user-management"],
+  "pinData": {},
+  "meta": {
+    "templateId": "directus-user-onboarding-agent",
+    "description": "AI agent that helps with user onboarding in Directus, including user creation and welcome email automation"
+  }
+}

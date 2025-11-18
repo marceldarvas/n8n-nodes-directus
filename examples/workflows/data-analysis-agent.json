@@ -1,0 +1,312 @@
+{
+  "name": "Data Analysis AI Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "chat-trigger-1",
+      "name": "When chat message received",
+      "type": "n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "directus-credentials-1",
+      "name": "Directus Credentials",
+      "type": "n8n-nodes-directus.DirectusApi",
+      "typeVersion": 1,
+      "position": [450, 100]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "options": {
+          "systemMessage": "You are a data analysis assistant for a Directus CMS system.\n\nYour role is to:\n- Query data using saved presets for common reports\n- Analyze activity logs to understand usage patterns\n- Identify trends and anomalies\n- Export data in various formats\n- Answer questions about the data\n\nAvailable presets:\n- 'Published Articles': Articles with status=published\n- 'Draft Articles': Articles with status=draft\n- 'Recent Users': Users created in last 30 days\n- 'Active Users': Users who logged in recently\n\nGuidelines:\n- Always ask which preset to use if not specified\n- Limit results to reasonable amounts (≤100 by default)\n- Provide summaries and insights, not just raw data\n- Suggest additional filters if results are too broad\n- Offer to export data if datasets are large\n\nWhen analyzing data:\n1. Use the appropriate preset\n2. Apply additional filters if needed\n3. Summarize key findings\n4. Highlight interesting patterns or anomalies"
+        }
+      },
+      "id": "openai-agent-1",
+      "name": "AI Agent",
+      "type": "n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "name": "query_with_preset",
+        "description": "Query Directus data using a saved preset (filter template)",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "preset_name": {
+              "type": "string",
+              "description": "Name of the preset to use (e.g., 'Published Articles')"
+            },
+            "collection": {
+              "type": "string",
+              "description": "Collection name (e.g., 'articles')"
+            },
+            "additional_filters": {
+              "type": "object",
+              "description": "Additional filters to apply on top of preset (optional)"
+            },
+            "limit": {
+              "type": "number",
+              "description": "Maximum number of results (default: 50)"
+            }
+          },
+          "required": ["preset_name", "collection"]
+        }
+      },
+      "id": "tool-query-preset-1",
+      "name": "Query with Preset Tool",
+      "type": "n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1,
+      "position": [250, 500]
+    },
+    {
+      "parameters": {
+        "resource": "presets",
+        "operation": "apply",
+        "presetName": "={{ $json.preset_name }}",
+        "collection": "={{ $json.collection }}",
+        "additionalFilters": "={{ $json.additional_filters }}",
+        "limit": "={{ $json.limit || 50 }}"
+      },
+      "id": "directus-apply-preset-1",
+      "name": "Directus - Apply Preset",
+      "type": "n8n-nodes-directus.directus",
+      "typeVersion": 1,
+      "position": [250, 700],
+      "credentials": {
+        "directusApi": "directus-credentials-1"
+      }
+    },
+    {
+      "parameters": {
+        "name": "query_directus_activity",
+        "description": "Query activity logs to analyze user behavior and system usage",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "collection": {
+              "type": "string",
+              "description": "Filter by collection name (optional)"
+            },
+            "action": {
+              "type": "string",
+              "description": "Filter by action: create, update, delete, login (optional)"
+            },
+            "date_from": {
+              "type": "string",
+              "description": "Start date (ISO format) (optional)"
+            },
+            "date_to": {
+              "type": "string",
+              "description": "End date (ISO format) (optional)"
+            },
+            "limit": {
+              "type": "number",
+              "description": "Number of results (default: 100)"
+            }
+          }
+        }
+      },
+      "id": "tool-query-activity-1",
+      "name": "Query Activity Tool",
+      "type": "n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1,
+      "position": [450, 500]
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "operation": "getAll",
+        "filters": {
+          "collection": "={{ $json.collection }}",
+          "action": "={{ $json.action }}",
+          "timestamp": {
+            "_gte": "={{ $json.date_from }}",
+            "_lte": "={{ $json.date_to }}"
+          }
+        },
+        "limit": "={{ $json.limit || 100 }}"
+      },
+      "id": "directus-query-activity-1",
+      "name": "Directus - Query Activity",
+      "type": "n8n-nodes-directus.directus",
+      "typeVersion": 1,
+      "position": [450, 700],
+      "credentials": {
+        "directusApi": "directus-credentials-1"
+      }
+    },
+    {
+      "parameters": {
+        "name": "aggregate_activity",
+        "description": "Aggregate activity data to get statistics and insights",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "groupBy": {
+              "type": "string",
+              "description": "Group by: user, collection, action, date"
+            },
+            "date_from": {
+              "type": "string",
+              "description": "Start date (ISO format) (optional)"
+            },
+            "date_to": {
+              "type": "string",
+              "description": "End date (ISO format) (optional)"
+            }
+          },
+          "required": ["groupBy"]
+        }
+      },
+      "id": "tool-aggregate-activity-1",
+      "name": "Aggregate Activity Tool",
+      "type": "n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1,
+      "position": [650, 500]
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "operation": "aggregate",
+        "aggregateBy": "={{ $json.groupBy }}",
+        "filters": {
+          "timestamp": {
+            "_gte": "={{ $json.date_from }}",
+            "_lte": "={{ $json.date_to }}"
+          }
+        }
+      },
+      "id": "directus-aggregate-activity-1",
+      "name": "Directus - Aggregate Activity",
+      "type": "n8n-nodes-directus.directus",
+      "typeVersion": 1,
+      "position": [650, 700],
+      "credentials": {
+        "directusApi": "directus-credentials-1"
+      }
+    },
+    {
+      "parameters": {
+        "name": "list_available_presets",
+        "description": "List all available presets to see what queries are available",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "collection": {
+              "type": "string",
+              "description": "Filter presets by collection (optional)"
+            }
+          }
+        }
+      },
+      "id": "tool-list-presets-1",
+      "name": "List Presets Tool",
+      "type": "n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1,
+      "position": [850, 500]
+    },
+    {
+      "parameters": {
+        "resource": "presets",
+        "operation": "getAll",
+        "filters": {
+          "collection": "={{ $json.collection }}"
+        }
+      },
+      "id": "directus-list-presets-1",
+      "name": "Directus - List Presets",
+      "type": "n8n-nodes-directus.directus",
+      "typeVersion": 1,
+      "position": [850, 700],
+      "credentials": {
+        "directusApi": "directus-credentials-1"
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [[
+        {
+          "node": "AI Agent",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "AI Agent": {
+      "ai_tool": [[
+        {
+          "node": "Query with Preset Tool",
+          "type": "ai_tool",
+          "index": 0
+        },
+        {
+          "node": "Query Activity Tool",
+          "type": "ai_tool",
+          "index": 0
+        },
+        {
+          "node": "Aggregate Activity Tool",
+          "type": "ai_tool",
+          "index": 0
+        },
+        {
+          "node": "List Presets Tool",
+          "type": "ai_tool",
+          "index": 0
+        }
+      ]]
+    },
+    "Query with Preset Tool": {
+      "main": [[
+        {
+          "node": "Directus - Apply Preset",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "Query Activity Tool": {
+      "main": [[
+        {
+          "node": "Directus - Query Activity",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "Aggregate Activity Tool": {
+      "main": [[
+        {
+          "node": "Directus - Aggregate Activity",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "List Presets Tool": {
+      "main": [[
+        {
+          "node": "Directus - List Presets",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": ["ai-agent", "directus", "data-analysis"],
+  "pinData": {},
+  "meta": {
+    "templateId": "directus-data-analysis-agent",
+    "description": "AI agent for analyzing Directus data using presets and activity logs"
+  }
+}

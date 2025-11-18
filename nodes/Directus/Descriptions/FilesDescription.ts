@@ -86,7 +86,7 @@ export const filesFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'Upload/create a new file',
+		description: 'Whether upload/create a new file',
 		required: true,
 	},
 	{
@@ -224,7 +224,7 @@ export const filesFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'Upload/create a new file',
+		description: 'Whether upload/create a new file',
 		required: true,
 	},
 	{
@@ -374,7 +374,7 @@ export const filesFields: INodeProperties[] = [
 		name: 'splitIntoItems',
 		type: 'boolean',
 		default: false,
-		description: 'Outputs each element of an array as own item',
+		description: 'Whether outputs each element of an array as own item',
 		required: true,
 		displayOptions: {
 			show: {
@@ -403,7 +403,7 @@ export const filesFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
+		description: 'Whether if the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{

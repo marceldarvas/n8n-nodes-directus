@@ -63,7 +63,7 @@ export const assetsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'Enable if corresponding file data should also be included along with the asset',
+		description: 'Whether enable if corresponding file data should also be included along with the asset',
 		required: true,
 	},
 	{
@@ -100,7 +100,7 @@ export const assetsFields: INodeProperties[] = [
 		},
 		placeholder: '',
 		default: false,
-		description: 'If the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
+		description: 'Whether if the query and/or body parameter should be set via the value-key pair UI or JSON/RAW',
 		required: true,
 	},
 	{
@@ -264,7 +264,7 @@ export const assetsFields: INodeProperties[] = [
 				type: 'boolean',
 				placeholder: '',
 				default: false,
-				description: 'Disable image up-scaling',
+				description: 'Whether disable image up-scaling',
 			},
 		],
 	},

@@ -1664,3 +1664,215 @@ export async function bulkDeleteUsers(
 		},
 	};
 }
+
+/**
+ * List user invitations with status filter
+ * Filters users by status (invited, active) to show pending/accepted invitations
+ */
+export async function listUserInvitations(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	filters: {
+		status?: string;
+		returnAll?: boolean;
+		limit?: number;
+	} = {},
+): Promise<any[]> {
+	const qs: IDataObject = {};
+	
+	// Build filter based on status
+	const filterConditions: any = {};
+	
+	if (filters.status === 'pending') {
+		filterConditions.status = { _eq: 'invited' };
+	} else if (filters.status === 'accepted') {
+		filterConditions.status = { _eq: 'active' };
+	}
+	// 'all' or undefined means no status filter
+	
+	if (Object.keys(filterConditions).length > 0) {
+		qs.filter = JSON.stringify(filterConditions);
+	}
+	
+	// Handle limit
+	if (filters.returnAll) {
+		qs.limit = -1;
+	} else {
+		qs.limit = filters.limit || 100;
+	}
+	
+	const response = await directusApiRequest.call(
+		this,
+		'GET',
+		'users',
+		{},
+		qs,
+	);
+	
+	return response.data || response;
+}
+
+/**
+ * Resend invitation to a user
+ * Uses POST /users/invite with the user's email
+ */
+export async function resendUserInvitation(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	userId: string,
+	options: {
+		emailSubject?: string;
+		emailMessage?: string;
+		inviteUrl?: string;
+	} = {},
+): Promise<any> {
+	// First get the user's email
+	const userResponse = await directusApiRequest.call(
+		this,
+		'GET',
+		`users/${userId}`,
+		{},
+		{},
+	);
+	
+	const user = userResponse.data || userResponse;
+	
+	if (!user || !user.email) {
+		throw new DirectusApiError(
+			`User with ID ${userId} not found or has no email`,
+			404,
+			[],
+			`users/${userId}`,
+		);
+	}
+	
+	// Prepare invitation body
+	const body: IDataObject = {
+		email: user.email,
+		role: user.role,
+	};
+	
+	// Add optional fields
+	if (options.emailSubject) {
+		body.emailSubject = options.emailSubject;
+	}
+	if (options.emailMessage) {
+		body.emailMessage = options.emailMessage;
+	}
+	if (options.inviteUrl) {
+		body.inviteUrl = options.inviteUrl;
+	}
+	
+	// Resend invitation
+	const response = await directusApiRequest.call(
+		this,
+		'POST',
+		'users/invite',
+		body,
+		{},
+	);
+	
+	return response.data || response;
+}
+
+/**
+ * Invite multiple users at once
+ * Supports bulk invitations with custom email templates
+ */
+export async function bulkInviteUsers(
+	this: IExecuteFunctions | IExecuteSingleFunctions,
+	invitations: Array<{ email: string; role: string; [key: string]: any }>,
+	options: {
+		emailSubject?: string;
+		emailMessage?: string;
+		inviteUrl?: string;
+		errorHandling?: 'stop' | 'continue';
+	} = {},
+): Promise<{ success: boolean; invited: any[]; failed: any[]; stats: any }> {
+	const invited: any[] = [];
+	const failed: any[] = [];
+	const errorHandling = options.errorHandling || 'stop';
+	
+	for (let i = 0; i < invitations.length; i++) {
+		const invitation = invitations[i];
+		
+		try {
+			// Handle role name resolution
+			let role = invitation.role;
+			if (role && typeof role === 'string' && !isUUID(role)) {
+				role = await getRoleIdByName.call(this, role);
+			}
+			
+			// Prepare invitation body
+			const body: IDataObject = {
+				email: invitation.email,
+				role: role,
+			};
+			
+			// Add custom fields from invitation object
+			Object.keys(invitation).forEach(key => {
+				if (key !== 'email' && key !== 'role') {
+					body[key] = invitation[key];
+				}
+			});
+			
+			// Add global options
+			if (options.emailSubject) {
+				body.emailSubject = options.emailSubject;
+			}
+			if (options.emailMessage) {
+				// Support variable substitution
+				let message = options.emailMessage;
+				message = message.replace(/\{\{email\}\}/g, invitation.email);
+				message = message.replace(/\{\{role\}\}/g, role);
+				if (invitation.first_name) {
+					message = message.replace(/\{\{first_name\}\}/g, invitation.first_name);
+				}
+				if (invitation.last_name) {
+					message = message.replace(/\{\{last_name\}\}/g, invitation.last_name);
+				}
+				body.emailMessage = message;
+			}
+			if (options.inviteUrl) {
+				body.inviteUrl = options.inviteUrl;
+			}
+			
+			// Send invitation
+			const response = await directusApiRequest.call(
+				this,
+				'POST',
+				'users/invite',
+				body,
+				{},
+			);
+			
+			const userData = response.data || response;
+			invited.push(userData);
+		} catch (error: any) {
+			const errorInfo = {
+				index: i,
+				email: invitation.email,
+				error: error.message || 'Unknown error',
+			};
+			failed.push(errorInfo);
+			
+			if (errorHandling === 'stop') {
+				throw new DirectusApiError(
+					`Bulk invitation failed at index ${i} (${invitation.email}): ${error.message}`,
+					error.statusCode || 500,
+					failed,
+					'users/invite',
+				);
+			}
+		}
+	}
+	
+	return {
+		success: failed.length === 0,
+		invited,
+		failed,
+		stats: {
+			total: invitations.length,
+			invited: invited.length,
+			failed: failed.length,
+		},
+	};
+}

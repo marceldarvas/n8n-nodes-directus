@@ -41,6 +41,9 @@ import {
 	bulkCreateUsers,
 	bulkUpdateUsers,
 	bulkDeleteUsers,
+	listUserInvitations,
+	resendUserInvitation,
+	bulkInviteUsers,
 } from "./GenericFunctions";
 
 import {
@@ -5902,6 +5905,108 @@ export class Directus implements INodeType {
 							responseData = response.data ?? {};
 						}
 						//////////////////////////////////
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "listInvitations") {
+					try {
+						const returnAll = (this.getNodeParameter("returnAll", i) as boolean) ?? false;
+						const statusFilter = (this.getNodeParameter("statusFilter", i) as string) || 'all';
+						const limit = returnAll ? undefined : (this.getNodeParameter("limit", i) as number) || 100;
+
+						const result = await listUserInvitations.call(this, {
+							status: statusFilter,
+							returnAll,
+							limit,
+						});
+
+						responseData = {
+							invitations: result,
+							count: result.length,
+							statusFilter,
+						};
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "resendInvitation") {
+					try {
+						const userId = this.getNodeParameter("userId", i) as string;
+
+						const result = await resendUserInvitation.call(this, userId, {});
+
+						responseData = {
+							success: true,
+							message: 'Invitation resent successfully',
+							user: result,
+						};
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "inviteMultiple") {
+					try {
+						const inputType = (this.getNodeParameter("inputType", i) as string) || 'json';
+						const additionalOptions = (this.getNodeParameter("additionalOptions", i) as IDataObject) || {};
+
+						let invitations: Array<{ email: string; role: string }> = [];
+
+						if (inputType === 'json') {
+							const emailsJson = this.getNodeParameter("emailsJson", i) as object | string;
+							if (typeof emailsJson === "string") {
+								invitations = JSON.parse(emailsJson);
+							} else {
+								invitations = JSON.parse(JSON.stringify(emailsJson));
+							}
+						} else {
+							// csv format
+							const emailsCsv = this.getNodeParameter("emailsCsv", i) as string;
+							const role = this.getNodeParameter("role", i) as string;
+							
+							const emails = emailsCsv.split(',').map(e => e.trim()).filter(e => e);
+							invitations = emails.map(email => ({ email, role }));
+						}
+
+						// Validate invitations array
+						if (!Array.isArray(invitations) || invitations.length === 0) {
+							throw new Error('Invitations must be a non-empty array');
+						}
+
+						// Bulk invite users with options
+						const result = await bulkInviteUsers.call(this, invitations, {
+							emailSubject: additionalOptions.emailSubject as string,
+							emailMessage: additionalOptions.emailMessage as string,
+							inviteUrl: additionalOptions.inviteUrl as string,
+							errorHandling: 'continue',
+						});
+
+						responseData = {
+							success: result.success,
+							operation: 'inviteMultiple',
+							inputType,
+							stats: result.stats,
+							invited: result.invited,
+							...(result.failed.length > 0 && { failed: result.failed }),
+						};
+
 						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {

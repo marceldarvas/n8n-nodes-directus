@@ -24,12 +24,15 @@
     "build": "tsc && gulp build:icons",
     "dev": "tsc --watch",
     "format": "prettier nodes credentials --write",
+    "format:check": "prettier nodes credentials --check",
     "lint": "eslint nodes credentials --ext .ts --fix",
+    "lint:check": "eslint nodes credentials --ext .ts",
     "test": "jest",
+    "test:ci": "jest --ci --coverage --maxWorkers=2",
     "test:integration": "jest --config jest.config.integration.js --testPathPattern=test/integration",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "prepublishOnly": "npm run build && npm run lint"
+    "prepublishOnly": "npm run build && npm run lint:check && npm test"
   },
   "files": [
     "dist"

@@ -4,6 +4,8 @@ Community node for integrating n8n with Directus CMS, now with full AI agent sup
 
 [![npm version](https://badge.fury.io/js/n8n-nodes-directus.svg)](https://badge.fury.io/js/n8n-nodes-directus)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/marceldarvas/n8n-nodes-directus/workflows/CI/badge.svg)](https://github.com/marceldarvas/n8n-nodes-directus/actions/workflows/ci.yml)
+[![Security Scan](https://github.com/marceldarvas/n8n-nodes-directus/workflows/Security%20Scan/badge.svg)](https://github.com/marceldarvas/n8n-nodes-directus/actions/workflows/security.yml)
 
 ## Features
 

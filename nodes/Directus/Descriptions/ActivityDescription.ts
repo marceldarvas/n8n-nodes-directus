@@ -17,6 +17,30 @@ export const activityOperations: INodeProperties[] = [
 		},
 		options: [
 			{
+				name: 'Aggregate by Collection',
+				value: 'aggregateByCollection',
+				description: 'Aggregate activity logs by collection to see usage statistics',
+				action: 'Aggregate activity by collection',
+			},
+			{
+				name: 'Aggregate by User',
+				value: 'aggregateByUser',
+				description: 'Generate user activity summaries with action counts',
+				action: 'Aggregate activity by user',
+			},
+			{
+				name: 'Aggregate Errors',
+				value: 'aggregateErrors',
+				description: 'Analyze error frequency by type and collection',
+				action: 'Aggregate errors',
+			},
+			{
+				name: 'Analyze Peak Usage',
+				value: 'analyzePeakUsage',
+				description: 'Identify peak usage times by hour and day of week',
+				action: 'Analyze peak usage times',
+			},
+			{
 				name: 'Create',
 				value: 'create',
 				description: 'Creates a new comment',
@@ -52,6 +76,162 @@ export const activityOperations: INodeProperties[] = [
 ];
 
 export const activityFields: INodeProperties[] = [
+	// Aggregation operation parameters
+	{
+		displayName: 'Date Range',
+		name: 'dateRange',
+		type: 'fixedCollection',
+		displayOptions: {
+			show: {
+				operation: [
+					'aggregateByUser',
+					'aggregateByCollection',
+					'aggregateErrors',
+					'analyzePeakUsage',
+				],
+				resource: [
+					'activity',
+				],
+			},
+		},
+		default: {},
+		placeholder: 'Add Date Range',
+		options: [
+			{
+				name: 'range',
+				displayName: 'Range',
+				values: [
+					{
+						displayName: 'From Date',
+						name: 'from',
+						type: 'dateTime',
+						default: '',
+						description: 'Start date for the analysis (ISO 8601 format)',
+					},
+					{
+						displayName: 'To Date',
+						name: 'to',
+						type: 'dateTime',
+						default: '',
+						description: 'End date for the analysis (ISO 8601 format)',
+					},
+				],
+			},
+		],
+	},
+	{
+		displayName: 'Export Format',
+		name: 'exportFormat',
+		type: 'options',
+		displayOptions: {
+			show: {
+				operation: [
+					'aggregateByUser',
+					'aggregateByCollection',
+					'aggregateErrors',
+					'analyzePeakUsage',
+				],
+				resource: [
+					'activity',
+				],
+			},
+		},
+		options: [
+			{
+				name: 'JSON',
+				value: 'json',
+			},
+			{
+				name: 'CSV',
+				value: 'csv',
+			},
+		],
+		default: 'json',
+		description: 'Format for the aggregation results',
+	},
+	{
+		displayName: 'Include User Details',
+		name: 'includeUserDetails',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				operation: [
+					'aggregateByUser',
+				],
+				resource: [
+					'activity',
+				],
+			},
+		},
+		default: true,
+		description: 'Whether to include user details (email, name) in the results',
+	},
+	{
+		displayName: 'Group By Action',
+		name: 'groupByAction',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				operation: [
+					'aggregateByUser',
+					'aggregateByCollection',
+				],
+				resource: [
+					'activity',
+				],
+			},
+		},
+		default: true,
+		description: 'Whether to break down statistics by action type (create, update, delete)',
+	},
+	{
+		displayName: 'Include Success Rate',
+		name: 'includeSuccessRate',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				operation: [
+					'aggregateErrors',
+				],
+				resource: [
+					'activity',
+				],
+			},
+		},
+		default: true,
+		description: 'Whether to include success vs error rate statistics',
+	},
+	{
+		displayName: 'Time Granularity',
+		name: 'timeGranularity',
+		type: 'options',
+		displayOptions: {
+			show: {
+				operation: [
+					'analyzePeakUsage',
+				],
+				resource: [
+					'activity',
+				],
+			},
+		},
+		options: [
+			{
+				name: 'Hour of Day',
+				value: 'hour',
+			},
+			{
+				name: 'Day of Week',
+				value: 'day',
+			},
+			{
+				name: 'Both',
+				value: 'both',
+			},
+		],
+		default: 'both',
+		description: 'How to analyze peak usage times',
+	},
 	{
 		displayName: 'ID',
 		name: 'id',

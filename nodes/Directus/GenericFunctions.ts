@@ -1876,3 +1876,458 @@ export async function bulkInviteUsers(
 		},
 	};
 }
+
+// ========================================
+// Activity Aggregation Functions
+// ========================================
+
+/**
+ * Aggregate activity logs by user
+ */
+export async function aggregateActivityByUser(
+	this: IExecuteFunctions,
+	dateRange?: { from?: string; to?: string },
+	includeUserDetails = true,
+	groupByAction = true,
+): Promise<any[]> {
+	const filter: IDataObject = {};
+
+	if (dateRange?.from || dateRange?.to) {
+		const timestampFilter: IDataObject = {};
+		if (dateRange.from) {
+			timestampFilter._gte = dateRange.from;
+		}
+		if (dateRange.to) {
+			timestampFilter._lte = dateRange.to;
+		}
+		filter.timestamp = timestampFilter;
+	}
+
+	// Fetch all activity logs
+	const response = await directusApiRequest.call(
+		this,
+		'GET',
+		'/activity',
+		{},
+		{
+			filter,
+			limit: -1,
+			fields: includeUserDetails ? ['user.id', 'user.email', 'user.first_name', 'user.last_name', 'action', 'collection', 'timestamp'] : ['user', 'action', 'collection', 'timestamp'],
+		},
+	);
+
+	const activities = response.data || response;
+
+	// Group by user
+	const userStats: Record<string, any> = {};
+
+	for (const activity of activities) {
+		const userId = activity.user?.id || activity.user || 'anonymous';
+
+		if (!userStats[userId]) {
+			userStats[userId] = {
+				user: userId,
+				totalActions: 0,
+				actions: {},
+			};
+
+			// Include user details if available
+			if (includeUserDetails && activity.user) {
+				userStats[userId].email = activity.user.email;
+				userStats[userId].firstName = activity.user.first_name;
+				userStats[userId].lastName = activity.user.last_name;
+			}
+		}
+
+		userStats[userId].totalActions++;
+
+		if (groupByAction && activity.action) {
+			const actionKey = activity.action;
+			if (!userStats[userId].actions[actionKey]) {
+				userStats[userId].actions[actionKey] = 0;
+			}
+			userStats[userId].actions[actionKey]++;
+		}
+	}
+
+	return Object.values(userStats);
+}
+
+/**
+ * Aggregate activity logs by collection
+ */
+export async function aggregateActivityByCollection(
+	this: IExecuteFunctions,
+	dateRange?: { from?: string; to?: string },
+	groupByAction = true,
+): Promise<any[]> {
+	const filter: IDataObject = {};
+
+	if (dateRange?.from || dateRange?.to) {
+		const timestampFilter: IDataObject = {};
+		if (dateRange.from) {
+			timestampFilter._gte = dateRange.from;
+		}
+		if (dateRange.to) {
+			timestampFilter._lte = dateRange.to;
+		}
+		filter.timestamp = timestampFilter;
+	}
+
+	// Fetch all activity logs
+	const response = await directusApiRequest.call(
+		this,
+		'GET',
+		'/activity',
+		{},
+		{
+			filter,
+			limit: -1,
+			fields: ['collection', 'action', 'timestamp'],
+		},
+	);
+
+	const activities = response.data || response;
+
+	// Group by collection
+	const collectionStats: Record<string, any> = {};
+
+	for (const activity of activities) {
+		const collection = activity.collection || 'unknown';
+
+		if (!collectionStats[collection]) {
+			collectionStats[collection] = {
+				collection,
+				totalActions: 0,
+				actions: {},
+			};
+		}
+
+		collectionStats[collection].totalActions++;
+
+		if (groupByAction && activity.action) {
+			const actionKey = activity.action;
+			if (!collectionStats[collection].actions[actionKey]) {
+				collectionStats[collection].actions[actionKey] = 0;
+			}
+			collectionStats[collection].actions[actionKey]++;
+		}
+	}
+
+	return Object.values(collectionStats);
+}
+
+/**
+ * Aggregate errors by type and collection
+ */
+export async function aggregateErrorsByType(
+	this: IExecuteFunctions,
+	dateRange?: { from?: string; to?: string },
+	includeSuccessRate = true,
+): Promise<any> {
+	const filter: IDataObject = {};
+
+	if (dateRange?.from || dateRange?.to) {
+		const timestampFilter: IDataObject = {};
+		if (dateRange.from) {
+			timestampFilter._gte = dateRange.from;
+		}
+		if (dateRange.to) {
+			timestampFilter._lte = dateRange.to;
+		}
+		filter.timestamp = timestampFilter;
+	}
+
+	// Fetch all activity logs
+	const response = await directusApiRequest.call(
+		this,
+		'GET',
+		'/activity',
+		{},
+		{
+			filter,
+			limit: -1,
+			fields: ['action', 'collection', 'comment', 'timestamp'],
+		},
+	);
+
+	const activities = response.data || response;
+
+	let totalActions = 0;
+	let totalErrors = 0;
+	const errorsByCollection: Record<string, any> = {};
+	const errorsByType: Record<string, number> = {};
+
+	for (const activity of activities) {
+		totalActions++;
+
+		// Identify errors (typically comment field contains error messages or action is 'comment' with error context)
+		const isError = activity.comment && (
+			activity.comment.toLowerCase().includes('error') ||
+			activity.comment.toLowerCase().includes('failed') ||
+			activity.comment.toLowerCase().includes('exception')
+		);
+
+		if (isError) {
+			totalErrors++;
+
+			const collection = activity.collection || 'unknown';
+
+			// Error by collection
+			if (!errorsByCollection[collection]) {
+				errorsByCollection[collection] = {
+					collection,
+					errorCount: 0,
+					errors: [],
+				};
+			}
+			errorsByCollection[collection].errorCount++;
+
+			// Try to extract error type from comment
+			const errorType = extractErrorType(activity.comment);
+			if (!errorsByType[errorType]) {
+				errorsByType[errorType] = 0;
+			}
+			errorsByType[errorType]++;
+
+			// Store sample error
+			if (errorsByCollection[collection].errors.length < 5) {
+				errorsByCollection[collection].errors.push({
+					timestamp: activity.timestamp,
+					message: activity.comment,
+				});
+			}
+		}
+	}
+
+	const result: any = {
+		summary: {
+			totalActions,
+			totalErrors,
+			errorRate: totalActions > 0 ? (totalErrors / totalActions * 100).toFixed(2) + '%' : '0%',
+		},
+		errorsByCollection: Object.values(errorsByCollection),
+		errorsByType: Object.entries(errorsByType).map(([type, count]) => ({
+			type,
+			count,
+		})),
+	};
+
+	if (includeSuccessRate) {
+		result.summary.successfulActions = totalActions - totalErrors;
+		result.summary.successRate = totalActions > 0 ? ((totalActions - totalErrors) / totalActions * 100).toFixed(2) + '%' : '100%';
+	}
+
+	return result;
+}
+
+/**
+ * Extract error type from error message
+ */
+function extractErrorType(message: string): string {
+	if (!message) return 'Unknown';
+
+	const lowerMessage = message.toLowerCase();
+
+	if (lowerMessage.includes('authentication') || lowerMessage.includes('auth')) return 'Authentication';
+	if (lowerMessage.includes('permission') || lowerMessage.includes('forbidden')) return 'Permission';
+	if (lowerMessage.includes('validation')) return 'Validation';
+	if (lowerMessage.includes('not found') || lowerMessage.includes('404')) return 'NotFound';
+	if (lowerMessage.includes('timeout')) return 'Timeout';
+	if (lowerMessage.includes('network')) return 'Network';
+	if (lowerMessage.includes('database') || lowerMessage.includes('sql')) return 'Database';
+
+	return 'General';
+}
+
+/**
+ * Analyze peak usage times
+ */
+export async function analyzePeakUsageTimes(
+	this: IExecuteFunctions,
+	dateRange?: { from?: string; to?: string },
+	granularity: 'hour' | 'day' | 'both' = 'both',
+): Promise<any> {
+	const filter: IDataObject = {};
+
+	if (dateRange?.from || dateRange?.to) {
+		const timestampFilter: IDataObject = {};
+		if (dateRange.from) {
+			timestampFilter._gte = dateRange.from;
+		}
+		if (dateRange.to) {
+			timestampFilter._lte = dateRange.to;
+		}
+		filter.timestamp = timestampFilter;
+	}
+
+	// Fetch all activity logs
+	const response = await directusApiRequest.call(
+		this,
+		'GET',
+		'/activity',
+		{},
+		{
+			filter,
+			limit: -1,
+			fields: ['timestamp'],
+		},
+	);
+
+	const activities = response.data || response;
+
+	const hourStats: Record<number, number> = {};
+	const dayStats: Record<number, number> = {};
+
+	for (const activity of activities) {
+		if (!activity.timestamp) continue;
+
+		const date = new Date(activity.timestamp);
+		const hour = date.getUTCHours();
+		const day = date.getUTCDay(); // 0 = Sunday, 6 = Saturday
+
+		if (granularity === 'hour' || granularity === 'both') {
+			if (!hourStats[hour]) {
+				hourStats[hour] = 0;
+			}
+			hourStats[hour]++;
+		}
+
+		if (granularity === 'day' || granularity === 'both') {
+			if (!dayStats[day]) {
+				dayStats[day] = 0;
+			}
+			dayStats[day]++;
+		}
+	}
+
+	const result: any = {
+		totalActivities: activities.length,
+	};
+
+	if (granularity === 'hour' || granularity === 'both') {
+		result.byHour = Object.entries(hourStats)
+			.map(([hour, count]) => ({
+				hour: parseInt(hour),
+				hourFormatted: `${hour.toString().padStart(2, '0')}:00 UTC`,
+				count,
+			}))
+			.sort((a, b) => b.count - a.count);
+
+		if (result.byHour.length > 0) {
+			result.peakHour = result.byHour[0];
+		}
+	}
+
+	if (granularity === 'day' || granularity === 'both') {
+		const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+		result.byDay = Object.entries(dayStats)
+			.map(([day, count]) => ({
+				day: parseInt(day),
+				dayName: dayNames[parseInt(day)],
+				count,
+			}))
+			.sort((a, b) => b.count - a.count);
+
+		if (result.byDay.length > 0) {
+			result.peakDay = result.byDay[0];
+		}
+	}
+
+	return result;
+}
+
+/**
+ * Convert aggregation results to CSV format
+ */
+export function convertToCSV(data: any, type: string): string {
+	if (!data) {
+		return '';
+	}
+
+	let headers: string[] = [];
+	let rows: string[][] = [];
+
+	switch (type) {
+		case 'user':
+		case 'collection':
+			// Handle array data
+			if (!Array.isArray(data) || data.length === 0) {
+				return '';
+			}
+
+			if (type === 'user') {
+				headers = ['User ID', 'Email', 'First Name', 'Last Name', 'Total Actions'];
+				if (data[0]?.actions) {
+					const actionKeys = Object.keys(data[0].actions);
+					headers.push(...actionKeys.map(k => k.charAt(0).toUpperCase() + k.slice(1)));
+				}
+
+				rows = data.map(item => {
+					const row = [
+						item.user || '',
+						item.email || '',
+						item.firstName || '',
+						item.lastName || '',
+						item.totalActions?.toString() || '0',
+					];
+					if (item.actions) {
+						Object.values(item.actions).forEach((count: any) => {
+							row.push(count?.toString() || '0');
+						});
+					}
+					return row;
+				});
+			} else {
+				headers = ['Collection', 'Total Actions'];
+				if (data[0]?.actions) {
+					const actionKeys = Object.keys(data[0].actions);
+					headers.push(...actionKeys.map(k => k.charAt(0).toUpperCase() + k.slice(1)));
+				}
+
+				rows = data.map(item => {
+					const row = [
+						item.collection || '',
+						item.totalActions?.toString() || '0',
+					];
+					if (item.actions) {
+						Object.values(item.actions).forEach((count: any) => {
+							row.push(count?.toString() || '0');
+						});
+					}
+					return row;
+				});
+			}
+			break;
+
+		case 'error':
+			// Handle complex error structure - data is not an array here
+			if (Array.isArray(data)) {
+				headers = ['Type', 'Count'];
+				rows = data.map(item => [item.type || '', item.count?.toString() || '0']);
+			} else if (data.summary) {
+				headers = ['Metric', 'Value'];
+				rows = Object.entries(data.summary).map(([key, value]) => [key, String(value)]);
+			}
+			break;
+
+		case 'peak':
+			// Handle peak usage structure - data is not an array here
+			if (data.byHour && Array.isArray(data.byHour)) {
+				headers = ['Hour', 'Count'];
+				rows = data.byHour.map((item: any) => [item.hourFormatted || '', item.count?.toString() || '0']);
+			} else if (data.byDay && Array.isArray(data.byDay)) {
+				headers = ['Day', 'Count'];
+				rows = data.byDay.map((item: any) => [item.dayName || '', item.count?.toString() || '0']);
+			}
+			break;
+	}
+
+	// Build CSV string
+	const csvRows = [headers.join(',')];
+	for (const row of rows) {
+		csvRows.push(row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(','));
+	}
+
+	return csvRows.join('\n');
+}

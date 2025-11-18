@@ -44,6 +44,11 @@ import {
 	listUserInvitations,
 	resendUserInvitation,
 	bulkInviteUsers,
+	aggregateActivityByUser,
+	aggregateActivityByCollection,
+	aggregateErrorsByType,
+	analyzePeakUsageTimes,
+	convertToCSV,
 } from "./GenericFunctions";
 
 import {
@@ -825,6 +830,124 @@ export class Directus implements INodeType {
 						} else {
 							responseData = response.data ?? {};
 						}
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "aggregateByUser") {
+					try {
+						const dateRangeData = this.getNodeParameter("dateRange", i) as IDataObject;
+						const dateRange = dateRangeData?.range as IDataObject | undefined;
+						const exportFormat = this.getNodeParameter("exportFormat", i) as string;
+						const includeUserDetails = this.getNodeParameter("includeUserDetails", i) as boolean;
+						const groupByAction = this.getNodeParameter("groupByAction", i) as boolean;
+
+						const aggregatedData = await aggregateActivityByUser.call(
+							this,
+							dateRange ? { from: dateRange.from as string, to: dateRange.to as string } : undefined,
+							includeUserDetails,
+							groupByAction,
+						);
+
+						if (exportFormat === 'csv') {
+							const csvData = convertToCSV(aggregatedData, 'user');
+							responseData = { csv: csvData, data: aggregatedData } as IDataObject;
+						} else {
+							responseData = { results: aggregatedData } as IDataObject;
+						}
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "aggregateByCollection") {
+					try {
+						const dateRangeData = this.getNodeParameter("dateRange", i) as IDataObject;
+						const dateRange = dateRangeData?.range as IDataObject | undefined;
+						const exportFormat = this.getNodeParameter("exportFormat", i) as string;
+						const groupByAction = this.getNodeParameter("groupByAction", i) as boolean;
+
+						const aggregatedData = await aggregateActivityByCollection.call(
+							this,
+							dateRange ? { from: dateRange.from as string, to: dateRange.to as string } : undefined,
+							groupByAction,
+						);
+
+						if (exportFormat === 'csv') {
+							const csvData = convertToCSV(aggregatedData, 'collection');
+							responseData = { csv: csvData, data: aggregatedData } as IDataObject;
+						} else {
+							responseData = { results: aggregatedData } as IDataObject;
+						}
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "aggregateErrors") {
+					try {
+						const dateRangeData = this.getNodeParameter("dateRange", i) as IDataObject;
+						const dateRange = dateRangeData?.range as IDataObject | undefined;
+						const exportFormat = this.getNodeParameter("exportFormat", i) as string;
+						const includeSuccessRate = this.getNodeParameter("includeSuccessRate", i) as boolean;
+
+						const aggregatedData = await aggregateErrorsByType.call(
+							this,
+							dateRange ? { from: dateRange.from as string, to: dateRange.to as string } : undefined,
+							includeSuccessRate,
+						);
+
+						if (exportFormat === 'csv') {
+							const csvData = convertToCSV(aggregatedData.errorsByType || [], 'error');
+							responseData = { csv: csvData, data: aggregatedData } as IDataObject;
+						} else {
+							responseData = aggregatedData as IDataObject;
+						}
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "analyzePeakUsage") {
+					try {
+						const dateRangeData = this.getNodeParameter("dateRange", i) as IDataObject;
+						const dateRange = dateRangeData?.range as IDataObject | undefined;
+						const exportFormat = this.getNodeParameter("exportFormat", i) as string;
+						const timeGranularity = this.getNodeParameter("timeGranularity", i) as 'hour' | 'day' | 'both';
+
+						const analysisData = await analyzePeakUsageTimes.call(
+							this,
+							dateRange ? { from: dateRange.from as string, to: dateRange.to as string } : undefined,
+							timeGranularity,
+						);
+
+						if (exportFormat === 'csv') {
+							const csvData = convertToCSV(analysisData, 'peak');
+							responseData = { csv: csvData, data: analysisData } as IDataObject;
+						} else {
+							responseData = analysisData as IDataObject;
+						}
+
 						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {

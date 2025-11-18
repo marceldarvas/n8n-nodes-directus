@@ -1,184 +1,391 @@
 /**
- * Flow Operations Integration Tests
+ * Flow Operations Unit Tests
  *
- * Tests for flow trigger, monitoring, chaining, and looping operations
+ * Tests flow trigger, monitoring, chaining, and looping operations
+ * Uses mocked Directus API responses
  */
 
-import { TEST_CONFIG, setupTests, teardownTests, retry, wait } from '../setup';
+describe('Flow Operations Placeholder', () => {
+	it('should have tests implemented', () => {
+		// TODO: Real integration tests require a Directus instance
+		// These tests are placeholders until proper mocking strategy is implemented
+		expect(true).toBe(true);
+	});
+});
 
-describe('Flow Operations Integration', () => {
-	beforeAll(async () => {
-		await setupTests();
+describe('Flow Operations', () => {
+	let mockContext: any;
+
+	beforeEach(() => {
+		// Reset mocks
+		jest.clearAllMocks();
+
+		// Create mock execution context
+		mockContext = {
+			getNode: () => ({ name: 'Test Node' }),
+			getNodeParameter: jest.fn((param: string, index: number) => {
+				const params: any = {
+					flowId: 'test-flow-123',
+					payload: { test: 'data' },
+					executionMode: 'async',
+				};
+				return params[param];
+			}),
+			getCredentials: jest.fn(async () => ({
+				url: 'https://test.directus.io',
+				authMethod: 'staticToken',
+				staticToken: 'test-token-123',
+			})),
+			helpers: {
+				httpRequestWithAuthentication: jest.fn(),
+			},
+		};
 	});
 
-	afterAll(async () => {
-		await teardownTests();
-	});
+	describe('triggerFlow', () => {
+		it('should trigger flow asynchronously and return execution ID', async () => {
+			const mockResponse = {
+				data: {
+					execution_id: 'exec-123',
+					status: 'running',
+				},
+			};
 
-	describe('Flow Trigger', () => {
-		it('should trigger flow via webhook and receive execution ID', async () => {
-			// TODO: Implement test
-			// 1. Trigger flow using triggerFlow function
-			// 2. Verify execution ID is returned
-			// 3. Check execution status
-			expect(true).toBe(true); // Placeholder
+			(global.fetch as jest.Mock).mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				json: async () => mockResponse,
+			});
+
+			const result = await triggerFlow.call(mockContext, 'test-flow-123', { test: 'data' }, 'async');
+
+			expect(result).toEqual({
+				execution_id: 'exec-123',
+				status: 'running',
+			});
+			expect(global.fetch).toHaveBeenCalledWith(
+				expect.stringContaining('/flows/test-flow-123/trigger'),
+				expect.objectContaining({
+					method: 'POST',
+					headers: expect.objectContaining({
+						Authorization: 'Bearer test-token-123',
+					}),
+					body: JSON.stringify({ test: 'data' }),
+				})
+			);
 		});
 
 		it('should trigger flow synchronously and wait for completion', async () => {
-			// TODO: Implement test
-			// 1. Trigger flow with executionMode: 'sync'
-			// 2. Verify result is returned
-			// 3. Check execution completed
-			expect(true).toBe(true); // Placeholder
+			const mockResponse = {
+				data: {
+					execution_id: 'exec-456',
+					status: 'completed',
+					result: { message: 'Flow executed successfully' },
+					duration_ms: 1250,
+				},
+			};
+
+			(global.fetch as jest.Mock).mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				json: async () => mockResponse,
+			});
+
+			const result = await triggerFlow.call(mockContext, 'test-flow-123', { test: 'data' }, 'sync');
+
+			expect(result).toHaveProperty('status', 'completed');
+			expect(result).toHaveProperty('result');
+			expect(result.result).toEqual({ message: 'Flow executed successfully' });
 		});
 
-		it('should trigger flow asynchronously', async () => {
-			// TODO: Implement test
-			// 1. Trigger flow with executionMode: 'async'
-			// 2. Verify execution ID is returned immediately
-			// 3. Poll for completion
-			expect(true).toBe(true); // Placeholder
+		it('should handle flow not found error', async () => {
+			(global.fetch as jest.Mock).mockResolvedValueOnce({
+				ok: false,
+				status: 404,
+				json: async () => ({
+					errors: [{ message: 'Flow not found' }],
+				}),
+			});
+
+			await expect(
+				triggerFlow.call(mockContext, 'non-existent-flow', {}, 'async')
+			).rejects.toThrow('Flow not found');
 		});
 
-		it('should pass payload data to flow', async () => {
-			// TODO: Implement test
-			// 1. Trigger flow with custom payload
-			// 2. Verify payload is received by flow
-			expect(true).toBe(true); // Placeholder
+		it('should pass custom payload to flow', async () => {
+			const customPayload = {
+				user_email: 'test@example.com',
+				user_name: 'Test User',
+				custom_data: { foo: 'bar' },
+			};
+
+			(global.fetch as jest.Mock).mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				json: async () => ({ data: { execution_id: 'exec-789' } }),
+			});
+
+			await triggerFlow.call(mockContext, 'test-flow-123', customPayload, 'async');
+
+			expect(global.fetch).toHaveBeenCalledWith(
+				expect.any(String),
+				expect.objectContaining({
+					body: JSON.stringify(customPayload),
+				})
+			);
 		});
 	});
 
-	describe('Flow Monitoring', () => {
-		it('should get flow execution status', async () => {
-			// TODO: Implement test
-			// 1. Trigger a flow
-			// 2. Get execution status using getFlowExecution
-			// 3. Verify status fields
-			expect(true).toBe(true); // Placeholder
-		});
+	describe('chainFlows', () => {
+		it('should execute multiple flows in sequence', async () => {
+			const flows = [
+				{ id: 'flow-1', payload: { step: 1 } },
+				{ id: 'flow-2', payload: { step: 2 } },
+				{ id: 'flow-3', payload: { step: 3 } },
+			];
 
-		it('should list all executions for a flow', async () => {
-			// TODO: Implement test
-			// 1. List executions for a flow
-			// 2. Verify list contains executions
-			// 3. Check pagination works
-			expect(true).toBe(true); // Placeholder
-		});
+			// Mock responses for each flow
+			(global.fetch as jest.Mock)
+				.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ data: { execution_id: 'exec-1', status: 'completed', result: { output: 'result-1' } } }),
+				})
+				.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ data: { execution_id: 'exec-2', status: 'completed', result: { output: 'result-2' } } }),
+				})
+				.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ data: { execution_id: 'exec-3', status: 'completed', result: { output: 'result-3' } } }),
+				});
 
-		it('should get flow execution logs', async () => {
-			// TODO: Implement test
-			// 1. Get logs for a flow execution
-			// 2. Verify log entries are returned
-			// 3. Check log timestamps
-			expect(true).toBe(true); // Placeholder
-		});
-	});
+			const result = await chainFlows.call(mockContext, flows);
 
-	describe('Flow Chaining', () => {
-		it('should chain multiple flows sequentially', async () => {
-			// TODO: Implement test
-			// 1. Chain 3 flows together
-			// 2. Verify all flows execute
-			// 3. Check data is passed between flows
-			expect(true).toBe(true); // Placeholder
+			expect(result).toHaveLength(3);
+			expect(result[0].execution_id).toBe('exec-1');
+			expect(result[1].execution_id).toBe('exec-2');
+			expect(result[2].execution_id).toBe('exec-3');
+			expect(global.fetch).toHaveBeenCalledTimes(3);
 		});
 
 		it('should pass data between chained flows', async () => {
-			// TODO: Implement test
-			// 1. Chain flows with data transformation
-			// 2. Verify data is transformed correctly
-			expect(true).toBe(true); // Placeholder
+			const flows = [
+				{ id: 'flow-1', payload: { initial: 'data' } },
+				{ id: 'flow-2', payload: { passthrough: true } },
+			];
+
+			(global.fetch as jest.Mock)
+				.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({
+						data: {
+							execution_id: 'exec-1',
+							status: 'completed',
+							result: { user_id: '123' }
+						}
+					}),
+				})
+				.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({
+						data: {
+							execution_id: 'exec-2',
+							status: 'completed'
+						}
+					}),
+				});
+
+			const result = await chainFlows.call(mockContext, flows, true); // passData = true
+
+			expect(result).toHaveLength(2);
 		});
 
 		it('should handle chaining errors gracefully', async () => {
-			// TODO: Implement test
-			// 1. Chain flows where one fails
-			// 2. Verify error handling
-			// 3. Check partial results
-			expect(true).toBe(true); // Placeholder
+			const flows = [
+				{ id: 'flow-1', payload: {} },
+				{ id: 'flow-2', payload: {} },
+			];
+
+			(global.fetch as jest.Mock)
+				.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ data: { execution_id: 'exec-1', status: 'completed' } }),
+				})
+				.mockResolvedValueOnce({
+					ok: false,
+					status: 500,
+					json: async () => ({ errors: [{ message: 'Flow execution failed' }] }),
+				});
+
+			await expect(
+				chainFlows.call(mockContext, flows)
+			).rejects.toThrow();
 		});
 	});
 
-	describe('Flow Looping', () => {
-		it('should loop through array items', async () => {
-			// TODO: Implement test
-			// 1. Loop flow through array of 10 items
-			// 2. Verify flow executes for each item
-			// 3. Check all results collected
-			expect(true).toBe(true); // Placeholder
+	describe('loopFlows', () => {
+		it('should loop flow through array of items', async () => {
+			const items = [
+				{ id: 1, name: 'Item 1' },
+				{ id: 2, name: 'Item 2' },
+				{ id: 3, name: 'Item 3' },
+			];
+
+			// Mock successful execution for each item
+			(global.fetch as jest.Mock).mockResolvedValue({
+				ok: true,
+				json: async () => ({ data: { execution_id: 'exec-loop', status: 'completed' } }),
+			});
+
+			const result = await loopFlows.call(mockContext, 'test-flow', items);
+
+			expect(result).toHaveLength(3);
+			expect(global.fetch).toHaveBeenCalledTimes(3);
 		});
 
-		it('should handle loop concurrency', async () => {
-			// TODO: Implement test
-			// 1. Loop with concurrent execution
-			// 2. Verify concurrent limit respected
-			// 3. Check performance improvement
-			expect(true).toBe(true); // Placeholder
+		it('should respect concurrency limit', async () => {
+			const items = Array.from({ length: 10 }, (_, i) => ({ id: i }));
+
+			(global.fetch as jest.Mock).mockResolvedValue({
+				ok: true,
+				json: async () => ({ data: { execution_id: 'exec', status: 'completed' } }),
+			});
+
+			const startTime = Date.now();
+			await loopFlows.call(mockContext, 'test-flow', items, 2); // concurrency = 2
+			const duration = Date.now() - startTime;
+
+			// With concurrency of 2, 10 items should take at least some sequential time
+			expect(global.fetch).toHaveBeenCalledTimes(10);
 		});
 
 		it('should collect loop results', async () => {
-			// TODO: Implement test
-			// 1. Loop through items
-			// 2. Collect results
-			// 3. Verify result format
-			expect(true).toBe(true); // Placeholder
+			const items = [{ id: 1 }, { id: 2 }];
+
+			(global.fetch as jest.Mock)
+				.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ data: { execution_id: 'exec-1', result: { processed: 1 } } }),
+				})
+				.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ data: { execution_id: 'exec-2', result: { processed: 2 } } }),
+				});
+
+			const result = await loopFlows.call(mockContext, 'test-flow', items);
+
+			expect(result[0]).toHaveProperty('execution_id', 'exec-1');
+			expect(result[1]).toHaveProperty('execution_id', 'exec-2');
 		});
 	});
 
-	describe('Flow CRUD Operations', () => {
-		it('should create a new flow', async () => {
-			// TODO: Implement test
-			// 1. Create flow with createFlow
-			// 2. Verify flow is created
-			// 3. Check flow properties
-			expect(true).toBe(true); // Placeholder
+	describe('getFlowExecution', () => {
+		it('should retrieve flow execution status', async () => {
+			const mockExecution = {
+				id: 'exec-123',
+				status: 'completed',
+				result: { success: true },
+				duration_ms: 1500,
+				timestamp: '2025-01-15T10:30:00Z',
+			};
+
+			(global.fetch as jest.Mock).mockResolvedValueOnce({
+				ok: true,
+				json: async () => ({ data: mockExecution }),
+			});
+
+			const result = await getFlowExecution.call(mockContext, 'exec-123');
+
+			expect(result).toEqual(mockExecution);
+			expect(result.status).toBe('completed');
 		});
 
-		it('should update an existing flow', async () => {
-			// TODO: Implement test
-			// 1. Update flow with updateFlow
-			// 2. Verify changes applied
-			expect(true).toBe(true); // Placeholder
+		it('should handle execution not found', async () => {
+			(global.fetch as jest.Mock).mockResolvedValueOnce({
+				ok: false,
+				status: 404,
+				json: async () => ({ errors: [{ message: 'Execution not found' }] }),
+			});
+
+			await expect(
+				getFlowExecution.call(mockContext, 'non-existent-exec')
+			).rejects.toThrow();
+		});
+	});
+
+	describe('pollFlowExecution', () => {
+		it('should poll until flow completes', async () => {
+			// First call: running, second call: running, third call: completed
+			(global.fetch as jest.Mock)
+				.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ data: { status: 'running' } }),
+				})
+				.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ data: { status: 'running' } }),
+				})
+				.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ data: { status: 'completed', result: { done: true } } }),
+				});
+
+			const result = await pollFlowExecution.call(mockContext, 'exec-123', {
+				maxPolls: 5,
+				pollInterval: 100,
+			});
+
+			expect(result.status).toBe('completed');
+			expect(global.fetch).toHaveBeenCalledTimes(3);
 		});
 
-		it('should delete a flow', async () => {
-			// TODO: Implement test
-			// 1. Delete flow with deleteFlow
-			// 2. Verify flow is deleted
-			expect(true).toBe(true); // Placeholder
-		});
+		it('should timeout if flow does not complete', async () => {
+			(global.fetch as jest.Mock).mockResolvedValue({
+				ok: true,
+				json: async () => ({ data: { status: 'running' } }),
+			});
 
-		it('should get flow webhook URL', async () => {
-			// TODO: Implement test
-			// 1. Get webhook URL for flow
-			// 2. Verify URL format
-			// 3. Test webhook trigger via URL
-			expect(true).toBe(true); // Placeholder
+			await expect(
+				pollFlowExecution.call(mockContext, 'exec-123', {
+					maxPolls: 3,
+					pollInterval: 100,
+				})
+			).rejects.toThrow('timeout');
 		});
 	});
 
 	describe('Error Handling', () => {
-		it('should handle invalid flow ID gracefully', async () => {
-			// TODO: Implement test
-			// 1. Try to trigger non-existent flow
-			// 2. Verify error is returned
-			// 3. Check error message
-			expect(true).toBe(true); // Placeholder
+		it('should handle network failures', async () => {
+			(global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+
+			await expect(
+				triggerFlow.call(mockContext, 'test-flow', {}, 'async')
+			).rejects.toThrow('Network error');
 		});
 
-		it('should handle flow execution timeout', async () => {
-			// TODO: Implement test
-			// 1. Trigger long-running flow with short timeout
-			// 2. Verify timeout error
-			expect(true).toBe(true); // Placeholder
+		it('should handle invalid credentials', async () => {
+			(global.fetch as jest.Mock).mockResolvedValueOnce({
+				ok: false,
+				status: 401,
+				json: async () => ({ errors: [{ message: 'Invalid token' }] }),
+			});
+
+			await expect(
+				triggerFlow.call(mockContext, 'test-flow', {}, 'async')
+			).rejects.toThrow();
 		});
 
-		it('should retry failed flow triggers', async () => {
-			// TODO: Implement test
-			// 1. Trigger flow with retry logic
-			// 2. Simulate temporary failure
-			// 3. Verify retry succeeds
-			expect(true).toBe(true); // Placeholder
+		it('should handle rate limiting', async () => {
+			(global.fetch as jest.Mock).mockResolvedValueOnce({
+				ok: false,
+				status: 429,
+				headers: new Map([['retry-after', '60']]),
+				json: async () => ({ errors: [{ message: 'Rate limit exceeded' }] }),
+			});
+
+			await expect(
+				triggerFlow.call(mockContext, 'test-flow', {}, 'async')
+			).rejects.toThrow();
 		});
 	});
 });

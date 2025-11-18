@@ -17,10 +17,22 @@ export const revisionsOperations: INodeProperties[] = [
 		},
 		options: [
 			{
+				name: 'Compare',
+				value: 'compare',
+				description: 'Compare two revisions and show field-by-field differences',
+				action: 'Compare two revisions',
+			},
+			{
 				name: 'Get',
 				value: 'get',
 				description: 'Retrieve a single revision by unique identifier',
 				action: 'Get a revisions',
+			},
+			{
+				name: 'Get Rollback Data',
+				value: 'getRollbackData',
+				description: 'Extract rollback data from a revision for reverting changes',
+				action: 'Get rollback data from revision',
 			},
 			{
 				name: 'List',
@@ -34,6 +46,130 @@ export const revisionsOperations: INodeProperties[] = [
 ];
 
 export const revisionsFields: INodeProperties[] = [
+	// Compare operation parameters
+	{
+		displayName: 'Revision ID 1',
+		name: 'revisionId1',
+		type: 'string',
+		displayOptions: {
+			show: {
+				resource: [
+					'revisions',
+				],
+				operation: [
+					'compare',
+				],
+			},
+		},
+		placeholder: '368',
+		default: '',
+		description: 'Primary key of the first revision to compare',
+		required: true,
+	},
+	{
+		displayName: 'Revision ID 2',
+		name: 'revisionId2',
+		type: 'string',
+		displayOptions: {
+			show: {
+				resource: [
+					'revisions',
+				],
+				operation: [
+					'compare',
+				],
+			},
+		},
+		placeholder: '369',
+		default: '',
+		description: 'Primary key of the second revision to compare',
+		required: true,
+	},
+	{
+		displayName: 'Output Format',
+		name: 'outputFormat',
+		type: 'options',
+		displayOptions: {
+			show: {
+				resource: [
+					'revisions',
+				],
+				operation: [
+					'compare',
+				],
+			},
+		},
+		options: [
+			{
+				name: 'JSON',
+				value: 'json',
+			},
+			{
+				name: 'HTML',
+				value: 'html',
+			},
+			{
+				name: 'Text',
+				value: 'text',
+			},
+		],
+		default: 'json',
+		description: 'Format for the comparison output',
+	},
+	{
+		displayName: 'Include Unchanged Fields',
+		name: 'includeUnchanged',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				resource: [
+					'revisions',
+				],
+				operation: [
+					'compare',
+				],
+			},
+		},
+		default: false,
+		description: 'Whether to include fields that have not changed in the comparison',
+	},
+	// Get Rollback Data operation parameters
+	{
+		displayName: 'Revision ID',
+		name: 'revisionId',
+		type: 'string',
+		displayOptions: {
+			show: {
+				resource: [
+					'revisions',
+				],
+				operation: [
+					'getRollbackData',
+				],
+			},
+		},
+		placeholder: '368',
+		default: '',
+		description: 'Primary key of the revision to extract rollback data from',
+		required: true,
+	},
+	{
+		displayName: 'Include Preview',
+		name: 'includePreview',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				resource: [
+					'revisions',
+				],
+				operation: [
+					'getRollbackData',
+				],
+			},
+		},
+		default: true,
+		description: 'Whether to include a preview of what the rollback will change',
+	},
 	{
 		displayName: 'Return All',
 		name: 'returnAll',

@@ -2331,3 +2331,341 @@ export function convertToCSV(data: any, type: string): string {
 
 	return csvRows.join('\n');
 }
+
+// ========================================
+// Revision Comparison Functions
+// ========================================
+
+/**
+ * Compare two revisions and return field-by-field differences
+ */
+export async function compareRevisions(
+	this: IExecuteFunctions,
+	revisionId1: string,
+	revisionId2: string,
+	includeUnchanged = false,
+): Promise<any> {
+	// Fetch both revisions in parallel
+	const [rev1Response, rev2Response] = await Promise.all([
+		directusApiRequest.call(this, 'GET', `/revisions/${revisionId1}`, {}, {}),
+		directusApiRequest.call(this, 'GET', `/revisions/${revisionId2}`, {}, {}),
+	]);
+
+	const rev1 = rev1Response.data || rev1Response;
+	const rev2 = rev2Response.data || rev2Response;
+
+	// Extract the data from each revision
+	const data1 = rev1.data || {};
+	const data2 = rev2.data || {};
+
+	// Generate field-by-field diff
+	const diff = generateFieldDiff(data1, data2, includeUnchanged);
+
+	return {
+		revision1: {
+			id: revisionId1,
+			timestamp: rev1.timestamp || rev1.created_on,
+			user: rev1.user || null,
+			collection: rev1.collection || null,
+			item: rev1.item || null,
+		},
+		revision2: {
+			id: revisionId2,
+			timestamp: rev2.timestamp || rev2.created_on,
+			user: rev2.user || null,
+			collection: rev2.collection || null,
+			item: rev2.item || null,
+		},
+		changes: diff.changes,
+		changedFields: diff.changedFields,
+		unchangedFields: diff.unchangedFields,
+		summary: {
+			totalFields: diff.totalFields,
+			changedCount: diff.changedFields.length,
+			unchangedCount: diff.unchangedFields.length,
+			addedCount: diff.changes.filter((c: any) => c.type === 'added').length,
+			removedCount: diff.changes.filter((c: any) => c.type === 'removed').length,
+			modifiedCount: diff.changes.filter((c: any) => c.type === 'modified').length,
+		},
+	};
+}
+
+/**
+ * Generate field-by-field diff between two objects
+ */
+function generateFieldDiff(obj1: any, obj2: any, includeUnchanged: boolean): any {
+	const changes: any[] = [];
+	const changedFields: string[] = [];
+	const unchangedFields: string[] = [];
+
+	// Get all unique field names from both objects
+	const allFields = new Set([
+		...Object.keys(obj1 || {}),
+		...Object.keys(obj2 || {}),
+	]);
+
+	for (const field of allFields) {
+		const value1 = obj1?.[field];
+		const value2 = obj2?.[field];
+
+		// Determine if values are different
+		const isDifferent = !areValuesEqual(value1, value2);
+
+		if (isDifferent) {
+			changedFields.push(field);
+
+			// Determine change type
+			let changeType = 'modified';
+			if (value1 === undefined || value1 === null) {
+				changeType = 'added';
+			} else if (value2 === undefined || value2 === null) {
+				changeType = 'removed';
+			}
+
+			changes.push({
+				field,
+				type: changeType,
+				oldValue: value1,
+				newValue: value2,
+				oldType: typeof value1,
+				newType: typeof value2,
+			});
+		} else {
+			unchangedFields.push(field);
+
+			if (includeUnchanged) {
+				changes.push({
+					field,
+					type: 'unchanged',
+					value: value1,
+					valueType: typeof value1,
+				});
+			}
+		}
+	}
+
+	return {
+		changes,
+		changedFields,
+		unchangedFields,
+		totalFields: allFields.size,
+	};
+}
+
+/**
+ * Check if two values are equal (deep comparison for objects/arrays)
+ */
+function areValuesEqual(val1: any, val2: any): boolean {
+	// Handle null/undefined
+	if (val1 === val2) return true;
+	if (val1 == null || val2 == null) return false;
+
+	// Handle primitives
+	if (typeof val1 !== 'object' || typeof val2 !== 'object') {
+		return val1 === val2;
+	}
+
+	// Handle arrays
+	if (Array.isArray(val1) && Array.isArray(val2)) {
+		if (val1.length !== val2.length) return false;
+		for (let i = 0; i < val1.length; i++) {
+			if (!areValuesEqual(val1[i], val2[i])) return false;
+		}
+		return true;
+	}
+
+	// Handle objects
+	const keys1 = Object.keys(val1);
+	const keys2 = Object.keys(val2);
+
+	if (keys1.length !== keys2.length) return false;
+
+	for (const key of keys1) {
+		if (!keys2.includes(key)) return false;
+		if (!areValuesEqual(val1[key], val2[key])) return false;
+	}
+
+	return true;
+}
+
+/**
+ * Format revision diff as HTML
+ */
+export function formatDiffAsHTML(diff: any): string {
+	let html = '<div class="revision-diff">';
+	html += '<style>';
+	html += '.revision-diff { font-family: Arial, sans-serif; padding: 20px; }';
+	html += '.diff-header { background: #f0f0f0; padding: 10px; margin-bottom: 20px; border-radius: 5px; }';
+	html += '.diff-summary { margin: 15px 0; padding: 10px; background: #e8f4f8; border-radius: 5px; }';
+	html += '.change-item { margin: 10px 0; padding: 10px; border-left: 3px solid #ccc; }';
+	html += '.change-added { border-color: #4caf50; background: #f1f8f4; }';
+	html += '.change-removed { border-color: #f44336; background: #ffebee; }';
+	html += '.change-modified { border-color: #ff9800; background: #fff3e0; }';
+	html += '.change-unchanged { border-color: #9e9e9e; background: #fafafa; }';
+	html += '.field-name { font-weight: bold; color: #333; }';
+	html += '.value-old { color: #d32f2f; text-decoration: line-through; }';
+	html += '.value-new { color: #388e3c; }';
+	html += '</style>';
+
+	// Header with revision info
+	html += '<div class="diff-header">';
+	html += `<h3>Revision Comparison</h3>`;
+	html += `<p>Revision ${diff.revision1.id} ➜ Revision ${diff.revision2.id}</p>`;
+	html += `<p>Collection: ${diff.revision1.collection || 'N/A'} | Item: ${diff.revision1.item || 'N/A'}</p>`;
+	html += '</div>';
+
+	// Summary
+	html += '<div class="diff-summary">';
+	html += '<h4>Summary</h4>';
+	html += `<p>Total Fields: ${diff.summary.totalFields}</p>`;
+	html += `<p>Changed: ${diff.summary.changedCount} | Unchanged: ${diff.summary.unchangedCount}</p>`;
+	html += `<p>Added: ${diff.summary.addedCount} | Removed: ${diff.summary.removedCount} | Modified: ${diff.summary.modifiedCount}</p>`;
+	html += '</div>';
+
+	// Changes
+	html += '<div class="diff-changes">';
+	html += '<h4>Changes</h4>';
+	for (const change of diff.changes) {
+		const changeClass = `change-${change.type}`;
+		html += `<div class="change-item ${changeClass}">`;
+		html += `<span class="field-name">${change.field}</span> `;
+
+		if (change.type === 'added') {
+			html += `<span class="value-new">+ ${formatValueForHTML(change.newValue)}</span>`;
+		} else if (change.type === 'removed') {
+			html += `<span class="value-old">- ${formatValueForHTML(change.oldValue)}</span>`;
+		} else if (change.type === 'modified') {
+			html += `<span class="value-old">${formatValueForHTML(change.oldValue)}</span> `;
+			html += `<span>➜</span> `;
+			html += `<span class="value-new">${formatValueForHTML(change.newValue)}</span>`;
+		} else {
+			html += `<span>${formatValueForHTML(change.value)}</span>`;
+		}
+
+		html += '</div>';
+	}
+	html += '</div>';
+
+	html += '</div>';
+	return html;
+}
+
+/**
+ * Format revision diff as plain text
+ */
+export function formatDiffAsText(diff: any): string {
+	let text = 'REVISION COMPARISON\n';
+	text += '===================\n\n';
+	text += `Revision ${diff.revision1.id} → Revision ${diff.revision2.id}\n`;
+	text += `Collection: ${diff.revision1.collection || 'N/A'} | Item: ${diff.revision1.item || 'N/A'}\n\n`;
+
+	text += 'SUMMARY\n';
+	text += '-------\n';
+	text += `Total Fields: ${diff.summary.totalFields}\n`;
+	text += `Changed: ${diff.summary.changedCount} | Unchanged: ${diff.summary.unchangedCount}\n`;
+	text += `Added: ${diff.summary.addedCount} | Removed: ${diff.summary.removedCount} | Modified: ${diff.summary.modifiedCount}\n\n`;
+
+	text += 'CHANGES\n';
+	text += '-------\n';
+	for (const change of diff.changes) {
+		if (change.type === 'added') {
+			text += `+ ${change.field}: ${formatValueForText(change.newValue)}\n`;
+		} else if (change.type === 'removed') {
+			text += `- ${change.field}: ${formatValueForText(change.oldValue)}\n`;
+		} else if (change.type === 'modified') {
+			text += `~ ${change.field}: ${formatValueForText(change.oldValue)} → ${formatValueForText(change.newValue)}\n`;
+		} else {
+			text += `  ${change.field}: ${formatValueForText(change.value)}\n`;
+		}
+	}
+
+	return text;
+}
+
+/**
+ * Format value for HTML display
+ */
+function formatValueForHTML(value: any): string {
+	if (value === null) return '<em>null</em>';
+	if (value === undefined) return '<em>undefined</em>';
+	if (typeof value === 'object') {
+		return `<pre>${JSON.stringify(value, null, 2)}</pre>`;
+	}
+	return String(value);
+}
+
+/**
+ * Format value for text display
+ */
+function formatValueForText(value: any): string {
+	if (value === null) return 'null';
+	if (value === undefined) return 'undefined';
+	if (typeof value === 'object') {
+		return JSON.stringify(value);
+	}
+	return String(value);
+}
+
+/**
+ * Extract rollback data from a revision
+ */
+export async function getRollbackData(
+	this: IExecuteFunctions,
+	revisionId: string,
+	includePreview = true,
+): Promise<any> {
+	// Fetch the revision
+	const revisionResponse = await directusApiRequest.call(
+		this,
+		'GET',
+		`/revisions/${revisionId}`,
+		{},
+		{},
+	);
+
+	const revision = revisionResponse.data || revisionResponse;
+
+	// Extract rollback payload (the data from the revision)
+	const rollbackPayload = revision.data || {};
+
+	const result: any = {
+		revisionId,
+		collection: revision.collection || null,
+		item: revision.item || null,
+		timestamp: revision.timestamp || revision.created_on,
+		user: revision.user || null,
+		rollbackPayload,
+	};
+
+	// If preview is requested, fetch current item and show what will change
+	if (includePreview && revision.collection && revision.item) {
+		try {
+			const currentItemResponse = await directusApiRequest.call(
+				this,
+				'GET',
+				`/items/${revision.collection}/${revision.item}`,
+				{},
+				{},
+			);
+
+			const currentItem = currentItemResponse.data || currentItemResponse;
+
+			// Generate diff between current state and rollback state
+			const preview = generateFieldDiff(currentItem, rollbackPayload, false);
+
+			result.preview = {
+				currentState: currentItem,
+				rollbackState: rollbackPayload,
+				changes: preview.changes,
+				fieldsToChange: preview.changedFields,
+				summary: `${preview.changedFields.length} field(s) will be changed`,
+			};
+		} catch (error: any) {
+			result.preview = {
+				error: `Could not fetch current item: ${error.message}`,
+			};
+		}
+	}
+
+	return result;
+}

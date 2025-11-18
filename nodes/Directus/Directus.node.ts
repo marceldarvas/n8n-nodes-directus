@@ -49,6 +49,10 @@ import {
 	aggregateErrorsByType,
 	analyzePeakUsageTimes,
 	convertToCSV,
+	compareRevisions,
+	formatDiffAsHTML,
+	formatDiffAsText,
+	getRollbackData,
 } from "./GenericFunctions";
 
 import {
@@ -4762,6 +4766,67 @@ export class Directus implements INodeType {
 								returnItems.push({ json: responseData });
 							}
 						}
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "compare") {
+					try {
+						const revisionId1 = this.getNodeParameter("revisionId1", i) as string;
+						const revisionId2 = this.getNodeParameter("revisionId2", i) as string;
+						const outputFormat = this.getNodeParameter("outputFormat", i) as string;
+						const includeUnchanged = this.getNodeParameter("includeUnchanged", i) as boolean;
+
+						const comparisonResult = await compareRevisions.call(
+							this,
+							revisionId1,
+							revisionId2,
+							includeUnchanged,
+						);
+
+						if (outputFormat === 'html') {
+							const htmlOutput = formatDiffAsHTML(comparisonResult);
+							responseData = {
+								...comparisonResult,
+								htmlOutput,
+							} as IDataObject;
+						} else if (outputFormat === 'text') {
+							const textOutput = formatDiffAsText(comparisonResult);
+							responseData = {
+								...comparisonResult,
+								textOutput,
+							} as IDataObject;
+						} else {
+							responseData = comparisonResult as IDataObject;
+						}
+
+						returnItems.push({ json: responseData });
+					} catch (error) {
+						if (this.continueOnFail()) {
+							returnItems.push({ json: { error: error.message } });
+							continue;
+						}
+						throw error;
+					}
+				}
+				if (operation == "getRollbackData") {
+					try {
+						const revisionId = this.getNodeParameter("revisionId", i) as string;
+						const includePreview = this.getNodeParameter("includePreview", i) as boolean;
+
+						const rollbackData = await getRollbackData.call(
+							this,
+							revisionId,
+							includePreview,
+						);
+
+						responseData = rollbackData as IDataObject;
+
+						returnItems.push({ json: responseData });
 					} catch (error) {
 						if (this.continueOnFail()) {
 							returnItems.push({ json: { error: error.message } });
